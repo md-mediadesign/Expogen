@@ -1,0 +1,1750 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expogen – Exposé Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&family=Ubuntu:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════
+   BASE
+══════════════════════════════════════════════════════ */
+:root{
+  --navy:#07091a;--navy2:#0e1230;--navy3:#161b3a;
+  --gold:#c9a84c;--gold2:#e8c97a;
+  --cream:#f5f0e8;--text:#e8e4dc;--muted:#7a8099;
+  --border:rgba(201,168,76,0.18);--radius:12px;
+  --shadow:0 8px 40px rgba(0,0,0,0.5);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--navy);color:var(--text);font-family:'Roboto',sans-serif;font-weight:300;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  background-image:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(201,168,76,.08) 0%,transparent 70%),
+    repeating-linear-gradient(0deg,transparent,transparent 80px,rgba(255,255,255,.012) 80px,rgba(255,255,255,.012) 81px),
+    repeating-linear-gradient(90deg,transparent,transparent 80px,rgba(255,255,255,.012) 80px,rgba(255,255,255,.012) 81px);}
+
+/* ── Header ── */
+header{width:100%;max-width:1180px;margin:0 auto;padding:2rem 2.5rem 0;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Ubuntu',sans-serif;font-size:1.9rem;font-weight:700;letter-spacing:.15em;color:var(--gold2)}
+.logo span{color:var(--text);opacity:.4;font-style:italic;font-size:.9rem;letter-spacing:.05em;margin-left:8px;font-weight:300}
+.btn-header-reset{background:transparent;border:1px solid rgba(224,85,85,.3);border-radius:20px;color:rgba(224,85,85,.7);font-family:'Roboto',sans-serif;font-size:.72rem;font-weight:500;letter-spacing:.06em;padding:.35rem 1rem;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:.4rem}
+.btn-header-reset:hover{border-color:#e05555;color:#e05555;background:rgba(224,85,85,.08)}
+
+/* ── Main Layout ── */
+.main-layout{width:100%;max-width:1180px;margin:2rem auto 0;padding:0 2.5rem;display:flex;gap:2.5rem;align-items:flex-start}
+.card-col{flex:1;min-width:0;padding-bottom:4rem}
+
+/* ── Stepper rechts ── */
+.stepper-col{width:180px;flex-shrink:0;position:sticky;top:2rem;padding-top:.5rem}
+.stepper-label{font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:1.2rem;font-family:'Roboto',sans-serif}
+.steps-row{display:flex;flex-direction:column;gap:0}
+.step-dot{display:flex;flex-direction:row;align-items:center;gap:.65rem}
+.dot-circle{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--muted);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:500;color:var(--muted);transition:all .4s;background:var(--navy2);flex-shrink:0;cursor:pointer}
+.dot-circle:hover{border-color:var(--gold);color:var(--gold)}
+.step-dot.active .dot-circle{border-color:var(--gold);background:var(--gold);color:var(--navy);box-shadow:0 0 16px rgba(201,168,76,.4)}
+.step-dot.done .dot-circle{border-color:var(--gold);background:transparent;color:var(--gold)}
+.dot-label{font-size:.75rem;color:var(--muted);transition:color .4s;font-family:'Roboto',sans-serif;cursor:pointer;flex:1;min-width:0}
+.dot-label:hover{color:var(--text)}
+.step-dot.active .dot-label{color:var(--gold2);font-weight:500}
+.step-dot.done .dot-label{color:var(--gold);opacity:.7}
+.step-line{width:1.5px;height:26px;background:var(--border);margin-left:12px;transition:background .4s}
+.step-line.done{background:rgba(201,168,76,.4)}
+/* Optional step toggle */
+.step-toggle{width:18px;height:18px;border-radius:4px;border:1px solid rgba(201,168,76,.2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.6rem;color:rgba(120,130,160,.5);transition:all .2s;flex-shrink:0;line-height:1}
+.step-toggle:hover{border-color:#e05555;color:#e05555;background:rgba(224,85,85,.08)}
+/* Disabled step */
+.step-dot.step-off .dot-circle{border-color:rgba(120,130,160,.2)!important;background:transparent!important;color:rgba(120,130,160,.3)!important;box-shadow:none!important;cursor:default}
+.step-dot.step-off .dot-label{color:rgba(120,130,160,.3)!important;text-decoration:line-through;cursor:default}
+.step-dot.step-off .step-toggle{border-color:rgba(120,130,160,.2);color:rgba(120,130,160,.4)}
+.step-dot.step-off .step-toggle:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.08)}
+.step-line.step-off{background:rgba(120,130,160,.1)!important}
+@media(max-width:800px){.main-layout{flex-direction:column-reverse;padding:0 1.2rem}.stepper-col{width:100%;position:static}.steps-row{flex-direction:row;flex-wrap:wrap;gap:.5rem}.step-line{display:none}.dot-label{display:none}.step-toggle{display:none}}
+
+/* ── Card ── */
+.card-wrap{width:100%}
+.step-card{background:var(--navy2);border:1px solid var(--border);border-radius:20px;padding:3rem;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.step-card::before{content:'';position:absolute;top:-1px;left:20%;right:20%;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.5}
+.step-content{display:none}
+.step-content.active{display:block;animation:fadeSlide .35s ease both}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.step-num{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:.4rem;font-family:'Roboto',sans-serif}
+.step-title{font-family:'Ubuntu',sans-serif;font-size:2.3rem;font-weight:700;color:var(--cream);line-height:1.1;margin-bottom:.4rem}
+.step-desc{color:var(--muted);font-size:.85rem;margin-bottom:2rem;line-height:1.6}
+
+/* ── Form ── */
+label{display:block;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.45rem;font-weight:500;font-family:'Roboto',sans-serif}
+input[type=text],input[type=email],input[type=tel],textarea{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(201,168,76,.2);border-radius:8px;padding:.8rem 1rem;color:var(--text);font-family:'Roboto',sans-serif;font-size:.93rem;font-weight:300;outline:none;transition:border-color .3s,box-shadow .3s,background .3s;margin-bottom:1.3rem;resize:vertical}
+input:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.1);background:rgba(255,255,255,.07)}
+input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+@media(max-width:600px){.field-row{grid-template-columns:1fr}}
+.field-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.45rem;gap:.5rem;flex-wrap:wrap}
+.field-header label{margin-bottom:0;flex:1}
+.field-header-btns{display:flex;align-items:center;gap:.4rem;flex-shrink:0}
+.btn-upload-text{background:transparent;border:1px solid rgba(201,168,76,.25);border-radius:20px;color:var(--muted);font-family:'Roboto',sans-serif;font-size:.7rem;font-weight:500;padding:.3rem .9rem;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:.4rem;white-space:nowrap}
+.btn-upload-text:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.06)}
+.btn-ai{background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05));border:1px solid rgba(201,168,76,.35);border-radius:20px;color:var(--gold);font-family:'Roboto',sans-serif;font-size:.7rem;font-weight:500;padding:.3rem 1rem;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:.35rem;white-space:nowrap}
+.btn-ai:hover{background:rgba(201,168,76,.22);border-color:var(--gold);box-shadow:0 2px 14px rgba(201,168,76,.2);transform:translateY(-1px)}
+.error-msg{color:#e07070;font-size:.78rem;margin-top:-1rem;margin-bottom:1rem;display:none}
+.error-msg.show{display:block}
+
+/* ── Größe Cards ── */
+.groesse-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:.8rem}
+@media(max-width:640px){.groesse-grid{grid-template-columns:1fr}}
+.groesse-card{background:rgba(255,255,255,.03);border:1.5px solid rgba(201,168,76,.15);border-radius:var(--radius);padding:1.5rem;cursor:pointer;transition:all .3s;display:flex;flex-direction:column;gap:.5rem}
+.groesse-card:hover{border-color:rgba(201,168,76,.4);background:rgba(201,168,76,.05)}
+.groesse-card.selected{border-color:var(--gold);background:rgba(201,168,76,.09);box-shadow:0 0 20px rgba(201,168,76,.12)}
+.groesse-badge{font-family:'Ubuntu',sans-serif;font-size:2rem;font-weight:700;color:var(--gold2)}
+.groesse-name{font-family:'Ubuntu',sans-serif;font-size:1.1rem;font-weight:700;color:var(--cream)}
+.groesse-pages{font-size:.72rem;color:var(--gold);opacity:.7;font-weight:500}
+.groesse-desc{font-size:.78rem;color:var(--muted);line-height:1.4}
+.groesse-steps{font-size:.68rem;color:rgba(201,168,76,.5);margin-top:.3rem}
+
+/* ── Typ Cards ── */
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:.8rem}
+.type-card{background:rgba(255,255,255,.03);border:1.5px solid rgba(201,168,76,.15);border-radius:var(--radius);padding:1.4rem 1.5rem;cursor:pointer;transition:all .3s;display:flex;flex-direction:column;gap:.4rem}
+.type-card:hover{border-color:rgba(201,168,76,.4);background:rgba(201,168,76,.05)}
+.type-card.selected{border-color:var(--gold);background:rgba(201,168,76,.09);box-shadow:0 0 20px rgba(201,168,76,.12)}
+.type-icon{font-size:1.7rem}
+.type-name{font-family:'Ubuntu',sans-serif;font-size:1.1rem;font-weight:700;color:var(--cream)}
+.type-desc{font-size:.76rem;color:var(--muted);line-height:1.4}
+
+/* ── Color Pair Cards ── */
+.color-pair-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:1rem}
+.color-pair-card{border:2px solid var(--border);border-radius:12px;padding:1rem;cursor:pointer;transition:border-color .25s,background .25s;text-align:center}
+.color-pair-card:hover{border-color:var(--gold)}
+.color-pair-card.selected{border-color:var(--gold);background:rgba(201,168,76,.07)}
+.cp-swatch{display:flex;height:40px;border-radius:6px;overflow:hidden;margin-bottom:.75rem}
+.cp-swatch-accent,.cp-swatch-secondary{flex:1}
+.cp-name{font-size:.85rem;font-weight:600;color:var(--cream);margin-bottom:.2rem}
+.cp-desc{font-size:.72rem;color:var(--muted)}
+
+/* ── Logo Upload ── */
+.logo-upload-area{border:2px dashed rgba(201,168,76,.25);border-radius:var(--radius);padding:1.8rem;text-align:center;cursor:pointer;transition:all .3s;background:rgba(255,255,255,.02);margin-bottom:1.3rem;display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap}
+.logo-upload-area:hover{border-color:var(--gold);background:rgba(201,168,76,.04)}
+.logo-preview{max-height:60px;max-width:200px;object-fit:contain}
+.logo-placeholder{color:var(--muted);font-size:.88rem}
+
+/* ── Structured fields ── */
+.fields-section{margin-bottom:1.5rem}
+.fields-section-title{font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:1rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)}
+
+/* ── Photo upload ── */
+.photo-upload-area{border:2px dashed rgba(201,168,76,.25);border-radius:var(--radius);padding:2.5rem 2rem;text-align:center;margin-bottom:1.2rem;cursor:pointer;transition:all .3s;background:rgba(255,255,255,.02)}
+.photo-upload-area:hover{border-color:var(--gold);background:rgba(201,168,76,.04)}
+.photo-upload-area.dragover{border-color:var(--gold2);background:rgba(201,168,76,.08)}
+.upload-icon{font-size:2.5rem;margin-bottom:.8rem;opacity:.5}
+.upload-text{color:var(--muted);font-size:.88rem;margin-bottom:1rem}
+.upload-btns{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+.btn-photo{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);border-radius:8px;color:var(--gold);font-family:'Roboto',sans-serif;font-size:.8rem;font-weight:500;padding:.6rem 1.4rem;cursor:pointer;transition:all .25s}
+.btn-photo:hover{background:rgba(201,168,76,.18);border-color:var(--gold)}
+.photo-count{font-size:.75rem;color:var(--muted);margin-bottom:.8rem;text-align:center}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.8rem;margin-bottom:1rem}
+.photo-thumb{position:relative;border-radius:8px;overflow:hidden;aspect-ratio:4/3;border:1px solid rgba(201,168,76,.15)}
+.photo-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-thumb .del-photo{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.7);border:none;color:#fff;font-size:.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
+.photo-thumb:hover .del-photo{opacity:1}
+
+/* ── Highlights / Einheiten ── */
+.list-items{display:flex;flex-direction:column;gap:.65rem;margin-bottom:.9rem}
+.list-item{display:flex;align-items:center;gap:.7rem}
+.list-item input{margin-bottom:0;flex:1}
+.btn-remove{width:30px;height:30px;border-radius:50%;border:1px solid rgba(201,168,76,.2);background:transparent;color:var(--muted);cursor:pointer;font-size:.95rem;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.btn-remove:hover{border-color:#e05555;color:#e05555;background:rgba(224,85,85,.08)}
+.btn-add{background:transparent;border:1px dashed rgba(201,168,76,.3);border-radius:8px;color:var(--gold);padding:.65rem 1.2rem;cursor:pointer;font-family:'Roboto',sans-serif;font-size:.83rem;font-weight:500;transition:all .25s;display:flex;align-items:center;gap:.5rem;width:100%;justify-content:center}
+.btn-add:hover{background:rgba(201,168,76,.07);border-style:solid}
+
+/* ── Einheiten Table ── */
+.einheiten-table-wrap{overflow-x:auto;margin-bottom:.9rem}
+.einheiten-table{width:100%;border-collapse:collapse}
+.einheiten-table th{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);padding:.5rem .7rem;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+.einheiten-table td{padding:.4rem .4rem}
+.einheiten-table td input{margin-bottom:0;padding:.5rem .7rem;font-size:.82rem}
+.einheiten-table .del-col{width:40px;text-align:center}
+
+/* ── Nav ── */
+.nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:2.2rem;padding-top:1.8rem;border-top:1px solid var(--border)}
+.btn{padding:.8rem 1.8rem;border-radius:8px;font-family:'Roboto',sans-serif;font-size:.85rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .25s;border:none}
+.btn-back{background:transparent;border:1px solid rgba(201,168,76,.25);color:var(--muted)}
+.btn-back:hover{border-color:var(--gold);color:var(--gold)}
+.btn-next{background:var(--gold);color:var(--navy);font-weight:700;box-shadow:0 4px 20px rgba(201,168,76,.25)}
+.btn-next:hover{background:var(--gold2);box-shadow:0 6px 28px rgba(201,168,76,.4);transform:translateY(-1px)}
+.btn-step-reset{background:transparent;border:none;color:var(--muted);font-family:'Roboto',sans-serif;font-size:.75rem;padding:.4rem .8rem;cursor:pointer;transition:color .2s;display:flex;align-items:center;gap:.35rem;border-radius:6px;border:1px solid transparent}
+.btn-step-reset:hover{color:#e05555;border-color:rgba(224,85,85,.2);background:rgba(224,85,85,.05)}
+
+/* ── Template Toggle ── */
+.tmpl-toggle{display:flex;gap:.7rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.tmpl-btn{background:rgba(255,255,255,.03);border:1.5px solid rgba(201,168,76,.2);border-radius:8px;color:var(--muted);font-family:'Roboto',sans-serif;font-size:.8rem;font-weight:500;padding:.6rem 1.3rem;cursor:pointer;transition:all .25s}
+.tmpl-btn:hover{border-color:rgba(201,168,76,.5);color:var(--text)}
+.tmpl-btn.active{border-color:var(--gold);color:var(--gold2);background:rgba(201,168,76,.08);box-shadow:0 0 14px rgba(201,168,76,.12)}
+
+/* ══════════════════════════════════════════════════════
+   EXPOSÉ PREVIEW — Weißes Drucklayout
+══════════════════════════════════════════════════════ */
+#preview-output{font-family:'Roboto',sans-serif;color:#1a1a2e;max-width:820px;margin:0 auto}
+.expo-page{background:#fff;width:100%;position:relative;overflow:hidden;margin-bottom:2.5rem;box-shadow:0 4px 30px rgba(0,0,0,.25)}
+
+/* Cover */
+.expo-cover{display:flex;flex-direction:column;min-height:1060px}
+.expo-cover-header{height:80px;flex-shrink:0;padding:0 2.5rem;display:flex;align-items:center;justify-content:flex-end;border-bottom:1px solid #e0e0e0;overflow:hidden}
+.expo-cover-logo-block{display:flex;align-items:center;justify-content:flex-end;height:100%;max-width:220px;overflow:hidden}
+.expo-cover-logo-img{max-height:52px;max-width:200px;width:auto;height:auto;object-fit:contain;display:block}
+.expo-cover-logo-text{font-family:'Ubuntu',sans-serif;font-size:1.1rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#1a1a2e;line-height:1}
+.expo-cover-logo-line{width:100%;height:1.5px;background:#1a1a2e;margin-top:5px}
+.expo-cover-hero{flex:1;overflow:hidden;min-height:550px}
+.expo-cover-hero img{width:100%;height:100%;object-fit:cover;display:block;min-height:550px}
+.expo-cover-hero-placeholder{width:100%;min-height:550px;background:linear-gradient(135deg,#1a2033 0%,#0d1117 100%);display:flex;align-items:center;justify-content:center}
+.expo-cover-hero-placeholder span{color:rgba(255,255,255,.2);font-size:1rem;letter-spacing:.1em;text-transform:uppercase}
+.expo-cover-bottom{padding:2rem 2.5rem 2.5rem;text-align:center;border-top:3px solid #1a1a2e}
+.expo-cover-title{font-family:'Ubuntu',sans-serif;font-size:1.7rem;font-weight:700;color:#1a1a2e;line-height:1.2;margin-bottom:.3rem}
+.expo-cover-adresse{font-size:1.1rem;color:#444;margin-bottom:.25rem}
+.expo-cover-preis{font-size:.9rem;color:#888}
+
+/* Inner pages */
+.expo-inner{padding:0}
+.expo-page-header{height:52px;flex-shrink:0;padding:0 2.8rem;display:flex;justify-content:flex-end;align-items:center;border-bottom:1px solid #e0e0e0;overflow:hidden}
+.expo-page-header-logo{font-family:'Ubuntu',sans-serif;font-size:.75rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#1a1a2e;display:flex;align-items:center}
+.expo-page-header-logo img{max-height:28px;max-width:120px;width:auto;height:auto;object-fit:contain;display:block}
+.expo-page-content{padding:2.2rem 2.8rem 2.5rem}
+.expo-page-badge{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:#888;margin-bottom:.4rem}
+.expo-page-title{font-family:'Ubuntu',sans-serif;font-size:1.7rem;font-weight:700;color:#1a1a2e;text-transform:uppercase;letter-spacing:.04em;padding-bottom:.8rem;border-bottom:2px solid #1a1a2e;margin-bottom:1.8rem}
+
+/* Data tables */
+.expo-data-section{margin-bottom:1.8rem}
+.expo-data-heading{font-family:'Ubuntu',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#1a1a2e;margin-bottom:.7rem}
+.expo-data-table{width:100%;border-collapse:collapse}
+.expo-data-table tr{border-bottom:1px solid #e5e7eb}
+.expo-data-table td{padding:.42rem 0;font-size:.88rem;vertical-align:top}
+.expo-data-table td:first-child{color:#888;width:48%;padding-right:.8rem}
+.expo-data-table td:last-child{color:#1a1a2e;font-weight:500}
+
+/* Two-column layout */
+.expo-two-col{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem}
+.expo-two-col-wide{display:grid;grid-template-columns:3fr 2fr;gap:2.5rem}
+
+/* Body text */
+.expo-body{font-size:.9rem;line-height:1.85;color:#333;white-space:pre-wrap}
+.expo-body-plain{font-size:.9rem;line-height:1.85;color:#333}
+.expo-body-plain p{margin-bottom:.9rem}
+
+/* Highlights list */
+.expo-list{list-style:none;margin:1rem 0}
+.expo-list li{display:flex;align-items:flex-start;gap:.7rem;font-size:.88rem;color:#333;padding:.4rem 0;border-bottom:1px solid #f0f0f0}
+.expo-list li:last-child{border-bottom:none}
+.expo-list li::before{content:'—';color:#1a1a2e;font-weight:700;flex-shrink:0}
+
+/* Photos page */
+.expo-photo-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px}
+.expo-photo-grid img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+.expo-photo-grid img:first-child{grid-column:1/-1;aspect-ratio:16/7}
+.expo-photo-grid-2col{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:3px}
+.expo-photo-grid-2col img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+
+/* Einheiten table */
+.expo-units{width:100%;border-collapse:collapse;font-size:.88rem}
+.expo-units thead tr{background:#1a1a2e;color:#fff}
+.expo-units thead th{padding:.65rem 1rem;text-align:left;font-weight:600;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase}
+.expo-units tbody tr{border-bottom:1px solid #e5e7eb}
+.expo-units tbody tr:nth-child(even){background:#f9fafb}
+.expo-units tbody td{padding:.55rem 1rem;color:#333}
+
+/* Investment */
+.expo-invest-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+.expo-invest-item{background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:1rem 1.2rem;border-left:3px solid #1a1a2e}
+.expo-invest-label{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:#9ca3af;font-weight:700;margin-bottom:.3rem}
+.expo-invest-value{font-size:1rem;font-weight:700;color:#1a1a2e}
+
+/* Contact */
+.expo-contact{display:grid;grid-template-columns:1fr 1fr;gap:.5rem 2rem;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:1.2rem 1.5rem;margin-top:1rem}
+.expo-contact-item strong{display:block;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:#9ca3af;font-weight:700;margin-bottom:.2rem}
+.expo-contact-item span{font-size:.9rem;color:#1a1a2e}
+
+/* Sidebar photo on data page */
+.expo-sidebar-img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:4px}
+
+/* ══════════════════════════════════════════════════════
+   MODALS
+══════════════════════════════════════════════════════ */
+.confirm-overlay,.ai-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(5px);z-index:2000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.confirm-overlay.open,.ai-modal-overlay.open{opacity:1;pointer-events:all}
+.confirm-modal,.ai-modal{background:var(--navy2);border:1px solid var(--border);border-radius:16px;padding:2rem 2.2rem;max-width:420px;width:90%;box-shadow:0 24px 80px rgba(0,0,0,.7);transform:scale(.95);transition:transform .25s}
+.confirm-overlay.open .confirm-modal,.ai-modal-overlay.open .ai-modal{transform:scale(1)}
+.confirm-modal-icon{font-size:2rem;margin-bottom:.8rem;text-align:center}
+.confirm-modal-title,.ai-modal-title{font-family:'Ubuntu',sans-serif;font-size:1.2rem;font-weight:700;color:var(--cream);margin-bottom:.5rem;text-align:center}
+.ai-modal-title{text-align:left;margin-bottom:.3rem}
+.confirm-modal-desc,.ai-modal-desc{font-size:.84rem;color:var(--muted);line-height:1.6;text-align:center;margin-bottom:1.5rem}
+.ai-modal-desc{text-align:left;margin-bottom:1.2rem}
+.confirm-modal-actions,.ai-modal-actions{display:flex;gap:.7rem;justify-content:center}
+.ai-modal-actions{justify-content:flex-end}
+.btn-confirm-cancel,.btn-ai-cancel{background:transparent;border:1px solid rgba(255,255,255,.12);border-radius:8px;color:var(--muted);font-family:'Roboto',sans-serif;font-size:.83rem;font-weight:500;padding:.65rem 1.4rem;cursor:pointer;transition:all .2s;min-width:100px}
+.btn-confirm-cancel:hover,.btn-ai-cancel:hover{border-color:rgba(255,255,255,.3);color:var(--text)}
+.btn-confirm-ok{border:none;border-radius:8px;font-family:'Roboto',sans-serif;font-size:.83rem;font-weight:700;padding:.65rem 1.4rem;cursor:pointer;transition:all .25s;min-width:100px;background:#c0392b;color:#fff}
+.btn-confirm-ok:hover{background:#e74c3c;box-shadow:0 4px 16px rgba(224,85,85,.35)}
+.btn-confirm-ok.warn{background:rgba(201,168,76,.15);color:var(--gold);border:1px solid rgba(201,168,76,.35)}
+.btn-confirm-ok.warn:hover{background:rgba(201,168,76,.25)}
+.ai-modal-prompt{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(201,168,76,.2);border-radius:8px;padding:.75rem 1rem;color:var(--text);font-family:'Roboto',sans-serif;font-size:.88rem;outline:none;resize:vertical;margin-bottom:1.2rem;min-height:70px;transition:border-color .3s}
+.ai-modal-prompt:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.1)}
+.btn-ai-generate{background:var(--gold);border:none;border-radius:8px;color:var(--navy);font-family:'Roboto',sans-serif;font-size:.8rem;font-weight:700;padding:.6rem 1.4rem;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:.5rem}
+.btn-ai-generate:hover{background:var(--gold2);box-shadow:0 4px 18px rgba(201,168,76,.35)}
+
+/* ══════════════════════════════════════════════════════
+   PRINT
+══════════════════════════════════════════════════════ */
+@media print{
+  /* Farben & Hintergründe erzwingen */
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
+
+  body{background:#fff!important;margin:0!important;padding:0!important}
+
+  /* Alle UI-Elemente ausblenden */
+  header,
+  .stepper-col,
+  .nav-row,
+  .btn-step-reset,
+  .btn-header-reset,
+  .confirm-overlay,
+  .ai-modal-overlay,
+  .preview-actions,
+  .tmpl-toggle,
+  .step-num,
+  .step-title,
+  .step-desc{display:none!important}
+
+  /* Layout-Wrapper zurücksetzen */
+  .main-layout{display:block!important;padding:0!important;margin:0!important;max-width:none!important}
+  .card-col{padding:0!important}
+  .card-wrap{padding:0!important}
+
+  /* Step-Card: Styling entfernen, NICHT verstecken */
+  .step-card{background:transparent!important;border:none!important;box-shadow:none!important;padding:0!important;border-radius:0!important;overflow:visible!important}
+  .step-card::before{display:none!important}
+
+  /* Alle Schritte ausblenden – nur Vorschau (Step 15) zeigen */
+  .step-content{display:none!important}
+  .step-content[data-step="15"]{display:block!important}
+
+  /* Preview-Output */
+  #preview-output{max-width:none!important;margin:0!important}
+
+  /* Jede Seite = exakt DIN A4 */
+  .expo-page{
+    page-break-after:always!important;
+    break-after:page!important;
+    margin:0!important;
+    box-shadow:none!important;
+    width:210mm!important;
+    height:297mm!important;
+    overflow:hidden!important;
+    position:relative!important;
+  }
+  .expo-page:last-child{page-break-after:auto!important;break-after:auto!important}
+
+  /* Cover: Hero-Bild auf volle verbleibende Höhe strecken */
+  .expo-cover{height:297mm!important}
+  .expo-cover-hero{flex:1!important;min-height:0!important}
+  .expo-cover-hero img{height:100%!important;min-height:0!important}
+
+  @page{size:A4 portrait;margin:0}
+}
+
+/* ── Voice Entry Button ─────────────────────────── */
+.voice-entry-wrap {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(201,168,76,.18);
+}
+.btn-voice-entry {
+  background: #2a2a5e;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: .75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background .2s;
+}
+.btn-voice-entry:hover { background: #1a1a4e; }
+.voice-entry-hint {
+  font-size: .8rem;
+  color: var(--muted);
+  margin-top: .5rem;
+}
+
+/* ── Voice Modal ────────────────────────────────── */
+.voice-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.65);
+  z-index: 1100;
+  align-items: center;
+  justify-content: center;
+}
+.voice-modal-overlay.open { display: flex; }
+.voice-modal {
+  background: var(--navy2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.75rem;
+  width: min(580px, 95vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: .9rem;
+}
+.voice-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.voice-modal-title { font-size: 1.15rem; font-weight: 700; color: var(--cream); }
+.voice-modal-close {
+  background: none; border: none;
+  font-size: 1.2rem; cursor: pointer; color: var(--muted);
+}
+.voice-status {
+  font-size: .85rem;
+  color: var(--muted);
+  min-height: 1.2em;
+}
+.voice-status.recording { color: #e05555; font-weight: 600; }
+
+/* Waveform animation */
+.voice-wave {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  opacity: 0;
+  transition: opacity .3s;
+}
+.voice-wave.active { opacity: 1; }
+.voice-wave span {
+  display: block;
+  width: 5px;
+  background: #e05555;
+  border-radius: 3px;
+  animation: wave 1s ease-in-out infinite;
+}
+.voice-wave span:nth-child(1){ height:8px;  animation-delay:0s;    }
+.voice-wave span:nth-child(2){ height:20px; animation-delay:.15s;  }
+.voice-wave span:nth-child(3){ height:28px; animation-delay:.3s;   }
+.voice-wave span:nth-child(4){ height:18px; animation-delay:.45s;  }
+.voice-wave span:nth-child(5){ height:10px; animation-delay:.6s;   }
+@keyframes wave {
+  0%,100% { transform: scaleY(1); }
+  50%      { transform: scaleY(1.8); }
+}
+
+.voice-transcript-label { font-size: .78rem; color: var(--muted); font-weight: 600; }
+.voice-transcript {
+  width: 100%;
+  border: 1px solid rgba(201,168,76,.2);
+  border-radius: 8px;
+  padding: .7rem;
+  font-size: .88rem;
+  resize: vertical;
+  box-sizing: border-box;
+  line-height: 1.5;
+  background: rgba(255,255,255,.04);
+  color: var(--text);
+  font-family: 'Roboto', sans-serif;
+}
+.voice-transcript:focus { border-color: var(--gold); outline: none; }
+.voice-controls {
+  display: flex;
+  gap: .75rem;
+}
+.btn-voice-record {
+  flex: 1;
+  padding: .7rem;
+  border-radius: 8px;
+  border: 2px solid #e05555;
+  background: transparent;
+  color: #e05555;
+  font-weight: 600;
+  font-size: .9rem;
+  cursor: pointer;
+  transition: all .2s;
+  font-family: 'Roboto', sans-serif;
+}
+.btn-voice-record.recording {
+  background: #e05555;
+  color: #fff;
+}
+.btn-voice-generate {
+  flex: 1;
+  padding: .7rem;
+  border-radius: 8px;
+  border: none;
+  background: var(--gold);
+  color: var(--navy);
+  font-weight: 600;
+  font-size: .9rem;
+  cursor: pointer;
+  transition: background .2s;
+  font-family: 'Roboto', sans-serif;
+}
+.btn-voice-generate:disabled { background: var(--muted); cursor: not-allowed; opacity: .5; }
+.btn-voice-generate:not(:disabled):hover { background: var(--gold2); }
+.voice-hint { font-size: .78rem; color: var(--muted); line-height: 1.5; }
+.voice-no-support {
+  background: rgba(201,168,76,.08);
+  border: 1px solid rgba(201,168,76,.2);
+  border-radius: 8px;
+  padding: .7rem;
+  font-size: .85rem;
+  color: var(--gold2);
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">EXPOGEN <span>Exposé Generator</span></div>
+  <button class="btn-header-reset" onclick="openConfirmAll()">↺ Alles zurücksetzen</button>
+</header>
+
+<div class="main-layout">
+  <div class="card-col">
+  <div class="card-wrap">
+  <div class="step-card">
+
+    <!-- Step 1: Größe -->
+    <div class="step-content" data-step="1">
+      <div class="step-num" id="stepNum1"></div>
+      <div class="step-title">Exposé-Größe</div>
+      <div class="step-desc">Wählen Sie den Umfang – je nach Objekt und Verwendungszweck.</div>
+      <div class="voice-entry-wrap">
+        <button class="btn-voice-entry" onclick="openVoiceModal()">
+          🎙 Objekt per Sprache aufnehmen
+        </button>
+        <p class="voice-entry-hint">Gehen Sie durch die Immobilie und beschreiben Sie, was Sie sehen – die KI erstellt das komplette Exposé.</p>
+      </div>
+      <div class="groesse-grid">
+        <div class="groesse-card" data-size="S" onclick="selectGroesse(this)">
+          <div class="groesse-badge">S</div>
+          <div class="groesse-name">Kompakt</div>
+          <div class="groesse-pages">1 – 2 Seiten</div>
+          <div class="groesse-desc">Einfache Objekte, Mietwohnungen, schnelle Vermarktung</div>
+          <div class="groesse-steps">Titel · Fotos · Daten · Kontakt</div>
+        </div>
+        <div class="groesse-card" data-size="M" onclick="selectGroesse(this)">
+          <div class="groesse-badge">M</div>
+          <div class="groesse-name">Standard</div>
+          <div class="groesse-pages">3 – 5 Seiten</div>
+          <div class="groesse-desc">Kaufobjekte, Eigentumswohnungen, Häuser</div>
+          <div class="groesse-steps">+ Beschreibung · Highlights · Lage</div>
+        </div>
+        <div class="groesse-card" data-size="L" onclick="selectGroesse(this)">
+          <div class="groesse-badge">L</div>
+          <div class="groesse-name">Premium</div>
+          <div class="groesse-pages">6 – 10 Seiten</div>
+          <div class="groesse-desc">Neubauprojekte, Exklusivobjekte, Kapitalanlagen</div>
+          <div class="groesse-steps">+ Standort · Ausstattung · Einheiten · Investment</div>
+        </div>
+      </div>
+      <p class="error-msg" id="err-groesse">Bitte wählen Sie eine Größe aus.</p>
+    </div>
+
+    <!-- Step 2: Typ -->
+    <div class="step-content" data-step="2">
+      <div class="step-num" id="stepNum2"></div>
+      <div class="step-title">Exposé-Typ</div>
+      <div class="step-desc">Wählen Sie die Art des Objekts.</div>
+      <div class="type-grid">
+        <div class="type-card" data-type="Eigentumswohnung" onclick="selectType(this)"><div class="type-icon">🏢</div><div class="type-name">Eigentumswohnung</div><div class="type-desc">ETW, Penthouse, Apartment</div></div>
+        <div class="type-card" data-type="Haus" onclick="selectType(this)"><div class="type-icon">🏡</div><div class="type-name">Haus / Villa</div><div class="type-desc">EFH, DHH, Reihenhaus, Villa</div></div>
+        <div class="type-card" data-type="Neubau-Projekt" onclick="selectType(this)"><div class="type-icon">🏗</div><div class="type-name">Neubau-Projekt</div><div class="type-desc">MFH, Projektentwicklung, Kapitalanlage</div></div>
+        <div class="type-card" data-type="Gewerbe" onclick="selectType(this)"><div class="type-icon">🏛</div><div class="type-name">Gewerbe</div><div class="type-desc">Büro, Einzelhandel, Halle</div></div>
+        <div class="type-card" data-type="Grundstück" onclick="selectType(this)"><div class="type-icon">📐</div><div class="type-name">Grundstück</div><div class="type-desc">Bauland, Investitionsgrundstück</div></div>
+        <div class="type-card" data-type="Sonstiges" onclick="selectType(this)"><div class="type-icon">✦</div><div class="type-name">Sonstiges</div><div class="type-desc">Individuelles Exposé</div></div>
+      </div>
+      <p class="error-msg" id="err-type">Bitte wählen Sie einen Typ aus.</p>
+    </div>
+
+    <!-- Step 3: Branding -->
+    <div class="step-content" data-step="3">
+      <div class="step-num" id="stepNum3"></div>
+      <div class="step-title">Firmen-Branding</div>
+      <div class="step-desc">Ihr Name und Logo erscheinen auf jedem Exposé-Deckblatt.</div>
+      <label>Firmenname / Makler</label>
+      <input type="text" id="f-brandFirma" placeholder="z. B. Boldr Immobilien GmbH">
+      <label>Logo</label>
+      <div class="logo-upload-area" id="logoDropArea" onclick="document.getElementById('logoInput').click()">
+        <img id="logoPreviewImg" class="logo-preview" style="display:none">
+        <div class="logo-placeholder" id="logoPlaceholder">📁 Logo hochladen (PNG, JPG, SVG)</div>
+      </div>
+      <input type="file" id="logoInput" accept="image/*" style="display:none" onchange="handleLogoUpload(this)">
+    </div>
+
+    <!-- Step 4: Titel & Adresse -->
+    <div class="step-content" data-step="4">
+      <div class="step-num" id="stepNum4"></div>
+      <div class="step-title">Objekt & Preis</div>
+      <div class="step-desc">Titel, Adresse und Preis erscheinen auf dem Deckblatt.</div>
+      <div class="field-header"><label>Titel *</label><div class="field-header-btns"><button class="btn-ai" onclick="openAiModal('f-titel','Exposé-Titel')">✦ KI</button></div></div>
+      <input type="text" id="f-titel" placeholder="z. B. Mittelring 13 – Leipzig">
+      <p class="error-msg" id="err-titel">Bitte geben Sie einen Titel ein.</p>
+      <div class="field-header"><label>Untertitel</label><div class="field-header-btns"><button class="btn-ai" onclick="openAiModal('f-untertitel','Untertitel')">✦ KI</button></div></div>
+      <input type="text" id="f-untertitel" placeholder="z. B. Neubau-Projekt · KfW 40 QNG · 11 Wohneinheiten">
+      <div class="field-row">
+        <div><label>Adresse *</label><input type="text" id="f-adresse" placeholder="Straße, PLZ Ort"><p class="error-msg" id="err-adresse">Bitte geben Sie eine Adresse ein.</p></div>
+        <div><label>Kaufpreis / Startpreis</label><input type="text" id="f-preis" placeholder="z. B. Ab 189.000 €"></div>
+      </div>
+      <label>Preisdetail</label>
+      <input type="text" id="f-preisDetail" placeholder="z. B. 3,57 % inkl. MwSt. Käuferprovision">
+    </div>
+
+    <!-- Step 5: Fotos -->
+    <div class="step-content" data-step="5">
+      <div class="step-num" id="stepNum5"></div>
+      <div class="step-title">Fotos & Visualisierungen</div>
+      <div class="step-desc">Das erste Bild wird als Deckblatt-Hauptbild verwendet. Bis zu 10 Bilder.</div>
+      <div class="photo-count" id="photoCount">0 / 10 Fotos</div>
+      <div class="photo-grid" id="photoGrid"></div>
+      <div class="photo-upload-area" id="dropZone">
+        <div class="upload-icon">📷</div>
+        <div class="upload-text">Fotos / Visualisierungen hier hineinziehen oder auswählen</div>
+        <div class="upload-btns">
+          <button class="btn-photo" onclick="document.getElementById('fileUpload').click()">📁 Dateien auswählen</button>
+          <button class="btn-photo" onclick="document.getElementById('cameraInput').click()">📸 Kamera</button>
+        </div>
+      </div>
+      <input type="file" id="fileUpload" accept="image/*" multiple style="display:none" onchange="handlePhotoFiles(this.files)">
+      <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoFiles(this.files)">
+    </div>
+
+    <!-- Step 6: Objektdaten -->
+    <div class="step-content" data-step="6">
+      <div class="step-num" id="stepNum6"></div>
+      <div class="step-title">Objektdaten</div>
+      <div class="step-desc">Strukturierte Kerndaten für die Datentabelle im Exposé.</div>
+      <div class="fields-section">
+        <div class="fields-section-title">Grunddaten</div>
+        <div class="field-row"><div><label>Baujahr</label><input type="text" id="f-baujahr" placeholder="z. B. 2026 (Neubau)"></div><div><label>Zustand</label><input type="text" id="f-zustand" placeholder="z. B. Neubau, Erstbezug, Gehoben"></div></div>
+        <div class="field-row"><div><label>Verfügbarkeit</label><input type="text" id="f-verfuegbar" placeholder="z. B. Voraussichtlich Q4 2026"></div><div><label>Hausgeld / Nebenkosten</label><input type="text" id="f-hausgeld" placeholder="z. B. 280 €/Monat"></div></div>
+        <div class="field-row"><div><label>Denkmalschutz</label><input type="text" id="f-denkmal" placeholder="Nein"></div><div><label>Einheiten / Wohnungen</label><input type="text" id="f-einheitenAnz" placeholder="z. B. 11 Wohneinheiten"></div></div>
+      </div>
+      <div class="fields-section">
+        <div class="fields-section-title">Fläche & Aufteilung</div>
+        <div class="field-row"><div><label>Wohnfläche (Einheit)</label><input type="text" id="f-wohnflaeche" placeholder="z. B. 36 – 78 m²"></div><div><label>Gesamtfläche</label><input type="text" id="f-gesamtflaeche" placeholder="z. B. 621,36 m²"></div></div>
+        <div class="field-row"><div><label>Zimmer</label><input type="text" id="f-zimmer" placeholder="z. B. 1 – 3-Zimmer-Wohnungen"></div><div><label>Stellplätze</label><input type="text" id="f-stellplaetze" placeholder="z. B. Tiefgarage vorhanden"></div></div>
+      </div>
+      <div class="fields-section">
+        <div class="fields-section-title">Heizung & Energie</div>
+        <div class="field-row"><div><label>Energiestandard</label><input type="text" id="f-energiestandard" placeholder="z. B. KfW 40 QNG"></div><div><label>Heizung</label><input type="text" id="f-heizung" placeholder="z. B. Wärmepumpe"></div></div>
+        <div class="field-row"><div><label>Heizungsart</label><input type="text" id="f-heizungsart" placeholder="z. B. Fußbodenheizung"></div><div><label>Energieausweis</label><input type="text" id="f-energieausweis" placeholder="z. B. Liegt vor / Wird beigestellt"></div></div>
+      </div>
+      <div class="fields-section">
+        <div class="fields-section-title">Kaufpreis</div>
+        <div class="field-row"><div><label>Käuferprovision</label><input type="text" id="f-kaeuferp" placeholder="z. B. 3,57 % inkl. MwSt."></div><div><label>Weitere Kosten</label><input type="text" id="f-weitereKosten" placeholder="z. B. Notarkosten, Grunderwerbssteuer"></div></div>
+      </div>
+    </div>
+
+    <!-- Step 7: Beschreibung -->
+    <div class="step-content" data-step="7">
+      <div class="step-num" id="stepNum7"></div>
+      <div class="step-title">Beschreibung</div>
+      <div class="step-desc">Haupttext und Highlights des Objekts.</div>
+      <div class="field-header"><label>Hauptbeschreibung *</label><div class="field-header-btns"><button class="btn-ai" onclick="openAiModal('f-beschreibung','Objektbeschreibung')">✦ KI</button></div></div>
+      <textarea id="f-beschreibung" rows="8" placeholder="Ausführliche Beschreibung des Objekts …"></textarea>
+      <p class="error-msg" id="err-beschr">Bitte geben Sie eine Beschreibung ein.</p>
+      <label>Highlights (Stichpunkte)</label>
+      <div class="list-items" id="highlightList"></div>
+      <button class="btn-add" onclick="addHighlight()">+ Highlight hinzufügen</button>
+    </div>
+
+    <!-- Step 8: Lage [M+L] -->
+    <div class="step-content" data-step="8">
+      <div class="step-num" id="stepNum8"></div>
+      <div class="step-title">Lage & Stadtteil</div>
+      <div class="step-desc">Beschreibung der Mikrolage und des Stadtteils.</div>
+      <div class="field-header"><label>Lagetext</label><div class="field-header-btns"><button class="btn-ai" onclick="openAiModal('f-lage','Lagebeschreibung')">✦ KI</button></div></div>
+      <textarea id="f-lage" rows="10" placeholder="Lage, Stadtteil, Infrastruktur, Verkehrsanbindung …"></textarea>
+    </div>
+
+    <!-- Step 9: Stadtbeschreibung [L] -->
+    <div class="step-content" data-step="9">
+      <div class="step-num" id="stepNum9"></div>
+      <div class="step-title">Standort & Stadt</div>
+      <div class="step-desc">Allgemeine Stadtbeschreibung für Investoren und Käufer von außerhalb.</div>
+      <div class="field-header"><label>Stadtbeschreibung</label><div class="field-header-btns"><button class="btn-ai" onclick="openAiModal('f-stadtbeschr','Stadtbeschreibung')">✦ KI</button></div></div>
+      <textarea id="f-stadtbeschr" rows="10" placeholder="Wirtschaft, Infrastruktur, Kultur, Wachstum …"></textarea>
+    </div>
+
+    <!-- Step 10: Ausstattung [L] -->
+    <div class="step-content" data-step="10">
+      <div class="step-num" id="stepNum10"></div>
+      <div class="step-title">Ausstattung</div>
+      <div class="step-desc">Baubeschreibung und Ausstattungsmerkmale.</div>
+      <div class="field-header"><label>Ausstattungstext</label><div class="field-header-btns"><button class="btn-ai" onclick="openAiModal('f-ausstattung','Ausstattungsbeschreibung')">✦ KI</button></div></div>
+      <textarea id="f-ausstattung" rows="8" placeholder="Bodenbeläge, Sanitär, Heizung, Fenster, Besonderheiten …"></textarea>
+      <label>Ausstattungs-Highlights</label>
+      <div class="list-items" id="ausstattungList"></div>
+      <button class="btn-add" onclick="addAusstattung()">+ Merkmal hinzufügen</button>
+    </div>
+
+    <!-- Step 11: Einheiten [L, Neubau-Projekt] -->
+    <div class="step-content" data-step="11">
+      <div class="step-num" id="stepNum11"></div>
+      <div class="step-title">Wohnungstypen</div>
+      <div class="step-desc">Übersicht der verfügbaren Einheiten mit Fläche und Preis.</div>
+      <div class="einheiten-table-wrap">
+        <table class="einheiten-table">
+          <thead><tr>
+            <th>Typ</th><th>Anzahl</th><th>Wohnfläche</th><th>Preis</th><th>Besonderheit</th><th class="del-col"></th>
+          </tr></thead>
+          <tbody id="einheitenBody"></tbody>
+        </table>
+      </div>
+      <button class="btn-add" onclick="addEinheit()">+ Einheit hinzufügen</button>
+    </div>
+
+    <!-- Step 12: Investment [L] -->
+    <div class="step-content" data-step="12">
+      <div class="step-num" id="stepNum12"></div>
+      <div class="step-title">Investment-Case</div>
+      <div class="step-desc">Steuerliche Vorteile und Rendite-Argumente für Kapitalanleger.</div>
+      <div class="field-header"><label>Investment-Text</label><div class="field-header-btns"><button class="btn-ai" onclick="openAiModal('f-investment','Investment-Beschreibung')">✦ KI</button></div></div>
+      <textarea id="f-investment" rows="5" placeholder="Überblick über steuerliche Vorteile, Renditeerwartung …"></textarea>
+      <label>Investment-Highlights</label>
+      <div class="list-items" id="investList"></div>
+      <button class="btn-add" onclick="addInvest()">+ Vorteil hinzufügen</button>
+    </div>
+
+    <!-- Step 13: Kontakt -->
+    <div class="step-content" data-step="13">
+      <div class="step-num" id="stepNum13"></div>
+      <div class="step-title">Kontaktdaten</div>
+      <div class="step-desc">Angaben zur Kontaktperson – erscheinen auf der letzten Exposé-Seite.</div>
+      <div class="field-row">
+        <div><label>Name *</label><input type="text" id="f-name" placeholder="Vor- und Nachname"><p class="error-msg" id="err-name">Bitte geben Sie einen Namen ein.</p></div>
+        <div><label>Telefon</label><input type="tel" id="f-tel" placeholder="+49 …"></div>
+      </div>
+      <div class="field-row">
+        <div><label>E-Mail</label><input type="email" id="f-email" placeholder="email@beispiel.de"></div>
+        <div><label>Firma</label><input type="text" id="f-firma" placeholder="Firmenname"></div>
+      </div>
+      <label>Adresse (Kontakt)</label>
+      <input type="text" id="f-kontaktAdresse" placeholder="Straße, PLZ Stadt">
+    </div>
+
+    <!-- Step 14: Farbschema -->
+    <div class="step-content" data-step="14">
+      <div class="step-num" id="stepNum14"></div>
+      <div class="step-title">Farbschema</div>
+      <div class="step-desc">Wählen Sie ein Farbpaar – passend zu Ihrer Immobilie. Alle Kombinationen sind druckoptimiert.</div>
+      <div class="color-pair-grid" id="colorPairGrid">
+        <div class="color-pair-card" data-pair="1" onclick="selectColorPair(this)">
+          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#0f1d40"></div><div class="cp-swatch-secondary" style="background:#c4a43c"></div></div>
+          <div class="cp-name">Navy &amp; Gold</div>
+          <div class="cp-desc">Zeitloser Luxus</div>
+        </div>
+        <div class="color-pair-card" data-pair="2" onclick="selectColorPair(this)">
+          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#b25450"></div><div class="cp-swatch-secondary" style="background:#c5b98a"></div></div>
+          <div class="cp-name">Terrakotta &amp; Sand</div>
+          <div class="cp-desc">Warm &amp; Editorial</div>
+        </div>
+        <div class="color-pair-card" data-pair="3" onclick="selectColorPair(this)">
+          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#2a4a35"></div><div class="cp-swatch-secondary" style="background:#e8dcc0"></div></div>
+          <div class="cp-name">Waldgrün &amp; Creme</div>
+          <div class="cp-desc">Natur &amp; Prestige</div>
+        </div>
+        <div class="color-pair-card" data-pair="4" onclick="selectColorPair(this)">
+          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#2f2f2f"></div><div class="cp-swatch-secondary" style="background:#c9a97a"></div></div>
+          <div class="cp-name">Anthrazit &amp; Champagner</div>
+          <div class="cp-desc">Modern Urban</div>
+        </div>
+        <div class="color-pair-card" data-pair="5" onclick="selectColorPair(this)">
+          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#6e2535"></div><div class="cp-swatch-secondary" style="background:#ede5d5"></div></div>
+          <div class="cp-name">Bordeaux &amp; Elfenbein</div>
+          <div class="cp-desc">Eleganz &amp; Klassik</div>
+        </div>
+      </div>
+      <p class="error-msg" id="err-colorPair">Bitte wählen Sie ein Farbschema.</p>
+    </div>
+
+    <!-- Step 15: Vorschau -->
+    <div class="step-content" data-step="15">
+      <div class="step-num">Vorschau & Export</div>
+      <div class="step-title">Ihr Exposé</div>
+      <div class="step-desc">Wählen Sie eine Vorlage und überprüfen Sie das Exposé – dann als PDF drucken.</div>
+      <div class="tmpl-toggle">
+        <button class="tmpl-btn active" id="tmplBtnA" onclick="selectTemplate('A')">Template A – Klassisch</button>
+        <button class="tmpl-btn" id="tmplBtnB" onclick="selectTemplate('B')">Template B – Editorial</button>
+      </div>
+      <div id="preview-output"></div>
+      <div class="preview-actions" style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.5rem">
+        <button class="btn btn-next" onclick="window.print()" style="background:var(--gold)">⎙ Als PDF drucken / speichern</button>
+        <button class="btn btn-back" onclick="openConfirmAll()">↺ Von vorne beginnen</button>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <div class="nav-row">
+      <button class="btn btn-back" id="btnBack" onclick="goBack()">← Zurück</button>
+      <button class="btn-step-reset" id="btnStepReset" onclick="openConfirmStep()">↺ Seite leeren</button>
+      <button class="btn btn-next" id="btnNext" onclick="goNext()">Weiter →</button>
+    </div>
+
+  </div>
+  </div>
+  </div>
+
+  <!-- Stepper rechts -->
+  <div class="stepper-col">
+    <div class="stepper-label">Fortschritt</div>
+    <div class="steps-row" id="stepsRow"></div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="confirm-overlay" id="confirmOverlay" onclick="closeConfirmOnBg(event)">
+  <div class="confirm-modal">
+    <div class="confirm-modal-icon" id="confirmIcon">⚠️</div>
+    <div class="confirm-modal-title" id="confirmTitle">Zurücksetzen?</div>
+    <div class="confirm-modal-desc" id="confirmDesc"></div>
+    <div class="confirm-modal-actions">
+      <button class="btn-confirm-cancel" onclick="closeConfirm()">Abbrechen</button>
+      <button class="btn-confirm-ok" id="confirmOkBtn" onclick="confirmOk()">Löschen</button>
+    </div>
+  </div>
+</div>
+
+<!-- AI Modal -->
+<div class="ai-modal-overlay" id="aiModalOverlay" onclick="closeAiModalOnBg(event)">
+  <div class="ai-modal">
+    <div class="ai-modal-title">✦ Von KI generieren lassen</div>
+    <div class="ai-modal-desc" id="aiModalDesc">Beschreiben Sie Ihr Objekt kurz.</div>
+    <textarea class="ai-modal-prompt" id="aiModalPrompt" rows="3" placeholder="z. B. Neubau KfW 40, 11 Wohnungen, Leipzig, Kapitalanlage …"></textarea>
+    <div class="ai-modal-actions">
+      <button class="btn-ai-cancel" onclick="closeAiModal()">Abbrechen</button>
+      <button class="btn-ai-generate" id="aiModalBtn" onclick="runAiGenerate()">✦ Generieren</button>
+    </div>
+  </div>
+</div>
+
+<div class="voice-modal-overlay" id="voiceModalOverlay">
+  <div class="voice-modal">
+    <div class="voice-modal-header">
+      <div class="voice-modal-title">🎙 Objekt aufnehmen</div>
+      <button class="voice-modal-close" onclick="closeVoiceModal()">✕</button>
+    </div>
+
+    <!-- Status + Waveform -->
+    <div class="voice-status" id="voiceStatus">Bereit – drücken Sie „Aufnahme starten"</div>
+    <div class="voice-wave" id="voiceWave">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <!-- Live-Transkript -->
+    <div class="voice-transcript-label">Transkript (bearbeitbar):</div>
+    <textarea class="voice-transcript" id="voiceTranscriptEl" rows="8"
+      placeholder="Das gesprochene Wort erscheint hier in Echtzeit …"></textarea>
+
+    <!-- Buttons -->
+    <div class="voice-controls">
+      <button class="btn-voice-record" id="voiceBtnRecord" onclick="toggleRecording()">
+        ● Aufnahme starten
+      </button>
+      <button class="btn-voice-generate" id="voiceBtnGenerate" onclick="processVoiceTranscript()" disabled>
+        ✦ Exposé erstellen
+      </button>
+    </div>
+
+    <div class="voice-hint" id="voiceHint">
+      Tipp: Nennen Sie Adresse, Preis, Baujahr, Zimmer, Ausstattung, Lage und alles Besondere am Objekt.
+    </div>
+
+    <!-- Browser-Warnung -->
+    <div class="voice-no-support" id="voiceNoSupport" style="display:none">
+      ⚠️ Ihr Browser unterstützt keine Spracherkennung. Bitte Chrome oder Edge verwenden.
+    </div>
+  </div>
+</div>
+
+<script src="template-a.js"></script>
+<script src="template-b.js"></script>
+<script>
+// ══════════════════════════════════════════════════════
+// STEP DEFINITIONS
+// ══════════════════════════════════════════════════════
+const ALL_STEP_DEFS = [
+  {id:1, label:'Größe',        minSize:'S'},
+  {id:2, label:'Typ',          minSize:'S'},
+  {id:3, label:'Branding',     minSize:'S'},
+  {id:4, label:'Objekt',       minSize:'S'},
+  {id:5, label:'Fotos',        minSize:'S'},
+  {id:6, label:'Daten',        minSize:'S'},
+  {id:7, label:'Beschreibung', minSize:'S'},
+  {id:8, label:'Lage',         minSize:'M', optional:true},
+  {id:9, label:'Standort',     minSize:'L', optional:true},
+  {id:10,label:'Ausstattung',  minSize:'L', optional:true},
+  {id:11,label:'Einheiten',    minSize:'L', optional:true},
+  {id:12,label:'Investment',   minSize:'L', optional:true},
+  {id:13,label:'Kontakt',      minSize:'S'},
+  {id:14,label:'Farben',       minSize:'S'},
+  {id:15,label:'Vorschau',     minSize:'S'},
+];
+const COLOR_PAIRS = [
+  { id:1, name:'Navy & Gold',            accent:'#0f1d40', secondary:'#c4a43c' },
+  { id:2, name:'Terrakotta & Sand',      accent:'#b25450', secondary:'#c5b98a' },
+  { id:3, name:'Waldgrün & Creme',       accent:'#2a4a35', secondary:'#e8dcc0' },
+  { id:4, name:'Anthrazit & Champagner', accent:'#2f2f2f', secondary:'#c9a97a' },
+  { id:5, name:'Bordeaux & Elfenbein',   accent:'#6e2535', secondary:'#ede5d5' },
+];
+const SIZE_ORDER = ['S','M','L'];
+
+// All steps matching current size/type (ignores disabled)
+function getAllEligibleStepIds() {
+  const size = data.size || 'L';
+  const si = SIZE_ORDER.indexOf(size);
+  let steps = ALL_STEP_DEFS.filter(s => SIZE_ORDER.indexOf(s.minSize) <= si).map(s => s.id);
+  if (data.type !== 'Neubau-Projekt') steps = steps.filter(id => id !== 11);
+  return steps;
+}
+
+// Active steps = eligible minus disabled
+function getActiveStepIds() {
+  const disabled = data.disabledSteps || [];
+  return getAllEligibleStepIds().filter(id => !disabled.includes(id));
+}
+
+function isStepEnabled(id) {
+  return !(data.disabledSteps || []).includes(id);
+}
+
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+let current = 1;
+let data = {};
+let photos = [];
+let confirmCallback = null;
+let aiTargetField = null;
+let aiTargetContext = null;
+let recognition = null;
+let isRecording = false;
+let voiceTranscript = '';
+
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+function init() {
+  loadFromStorage();
+  buildStepper();
+  initHighlights();
+  initAusstattungList();
+  initEinheiten();
+  initInvestList();
+  setupDragDrop();
+  showStep(current);
+  updateNav();
+}
+
+// ══════════════════════════════════════════════════════
+// STEPPER
+// ══════════════════════════════════════════════════════
+function buildStepper() {
+  const row = document.getElementById('stepsRow');
+  row.innerHTML = '';
+  const eligible = getAllEligibleStepIds();
+  const disabled = data.disabledSteps || [];
+  let activeNum = 0;
+  eligible.forEach((id, i) => {
+    const def = ALL_STEP_DEFS.find(s => s.id === id);
+    const isOff = disabled.includes(id);
+    if (!isOff) activeNum++;
+    const num = isOff ? '–' : activeNum;
+    const dot = document.createElement('div');
+    dot.className = 'step-dot' + (isOff ? ' step-off' : '');
+    dot.id = `dot-${id}`;
+    const nav = isOff ? '' : `onclick="navigateToStep(${id})"`;
+    const toggle = def.optional
+      ? `<button class="step-toggle" title="${isOff?'Seite einblenden':'Seite ausblenden'}" onclick="toggleStep(${id},event)">${isOff?'+':'×'}</button>`
+      : '';
+    dot.innerHTML = `<div class="dot-circle" ${nav}>${num}</div><div class="dot-label" ${nav}>${def.label}</div>${toggle}`;
+    row.appendChild(dot);
+    if (i < eligible.length - 1) {
+      const line = document.createElement('div');
+      line.className = 'step-line' + (isOff ? ' step-off' : '');
+      line.id = `line-${id}`;
+      row.appendChild(line);
+    }
+  });
+  updateStepNums();
+}
+
+function updateStepNums() {
+  const active = getActiveStepIds();
+  const total = active.length - 1;
+  active.forEach((id, i) => {
+    const el = document.getElementById(`stepNum${id}`);
+    if (el) {
+      if (id === 15) el.textContent = 'Vorschau & Export';
+      else el.textContent = `Schritt ${i+1} von ${total}`;
+    }
+  });
+}
+
+function updateStepper() {
+  const eligible = getAllEligibleStepIds();
+  const active = getActiveStepIds();
+  const disabled = data.disabledSteps || [];
+  const curIdx = active.indexOf(current);
+  eligible.forEach((id) => {
+    const dot = document.getElementById(`dot-${id}`);
+    if (!dot) return;
+    const isOff = disabled.includes(id);
+    dot.classList.remove('active','done');
+    if (!isOff) {
+      if (id === current) dot.classList.add('active');
+      else if (active.indexOf(id) < curIdx) dot.classList.add('done');
+    }
+    const line = document.getElementById(`line-${id}`);
+    if (line) line.classList.toggle('done', !isOff && active.indexOf(id) < curIdx);
+  });
+}
+
+function navigateToStep(id) {
+  if (!(data.disabledSteps||[]).includes(id)) {
+    collectStep(current);
+    saveToStorage();
+    current = id;
+    showStep(current);
+    updateNav();
+  }
+}
+
+function toggleStep(id, e) {
+  e.stopPropagation();
+  const disabled = data.disabledSteps || [];
+  const idx = disabled.indexOf(id);
+  if (idx === -1) {
+    disabled.push(id);
+    // if currently on this step, move to next available
+    if (current === id) {
+      const active = getActiveStepIds().filter(s => s !== id);
+      current = active[active.length - 2] || 1; // go to last before Vorschau
+    }
+  } else {
+    disabled.splice(idx, 1);
+  }
+  data.disabledSteps = disabled;
+  saveToStorage();
+  buildStepper();
+  showStep(current);
+  updateNav();
+}
+
+// ══════════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════════
+function showStep(id) {
+  document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+  const el = document.querySelector(`.step-content[data-step="${id}"]`);
+  if (el) el.classList.add('active');
+  updateStepper();
+  if (id === 15) buildPreview();
+}
+
+function updateNav() {
+  const active = getActiveStepIds();
+  const idx = active.indexOf(current);
+  document.getElementById('btnBack').style.visibility = idx === 0 ? 'hidden' : 'visible';
+  const btn = document.getElementById('btnNext');
+  const sr = document.getElementById('btnStepReset');
+  if (current === 15) {
+    btn.style.display = 'none';
+    if (sr) sr.style.display = 'none';
+  } else {
+    btn.style.display = '';
+    btn.textContent = (idx === active.length - 2) ? 'Vorschau →' : 'Weiter →';
+    if (sr) sr.style.display = '';
+  }
+}
+
+function goNext() {
+  if (!validateStep(current)) return;
+  collectStep(current);
+  saveToStorage();
+  const active = getActiveStepIds();
+  const idx = active.indexOf(current);
+  if (idx < active.length - 1) {
+    current = active[idx + 1];
+    showStep(current); updateNav();
+  }
+}
+
+function goBack() {
+  const active = getActiveStepIds();
+  const idx = active.indexOf(current);
+  if (idx > 0) { current = active[idx - 1]; showStep(current); updateNav(); }
+}
+
+// ══════════════════════════════════════════════════════
+// VALIDATION
+// ══════════════════════════════════════════════════════
+function validateStep(id) {
+  clearErrors();
+  if (id === 1 && !data.size)           { show('err-groesse');  return false; }
+  if (id === 2 && !data.type)           { show('err-type');     return false; }
+  if (id === 4 && !val('f-titel'))      { show('err-titel');    return false; }
+  if (id === 4 && !val('f-adresse'))    { show('err-adresse');  return false; }
+  if (id === 7 && !val('f-beschreibung')) { show('err-beschr'); return false; }
+  if (id === 13 && !val('f-name'))      { show('err-name');     return false; }
+  if (id === 14 && !data.colorPair)    { show('err-colorPair'); return false; }
+  return true;
+}
+function clearErrors(){ document.querySelectorAll('.error-msg').forEach(e=>e.classList.remove('show')); }
+function show(id){ const e=document.getElementById(id); if(e) e.classList.add('show'); }
+function val(id){ const e=document.getElementById(id); return e?e.value.trim():''; }
+
+// ══════════════════════════════════════════════════════
+// COLLECT
+// ══════════════════════════════════════════════════════
+function collectStep(id) {
+  if (id===3){ data.brandFirma=val('f-brandFirma'); }
+  if (id===4){ data.titel=val('f-titel'); data.untertitel=val('f-untertitel'); data.adresse=val('f-adresse'); data.preis=val('f-preis'); data.preisDetail=val('f-preisDetail'); }
+  if (id===6){ ['baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','stellplaetze','energiestandard','heizung','heizungsart','energieausweis','kaeuferp','weitereKosten'].forEach(k=>{ data[k]=val('f-'+k); }); }
+  if (id===7){ data.beschreibung=val('f-beschreibung'); data.highlights=[...document.querySelectorAll('.hl-input')].map(i=>i.value.trim()).filter(Boolean); }
+  if (id===8){ data.lage=val('f-lage'); }
+  if (id===9){ data.stadtbeschr=val('f-stadtbeschr'); }
+  if (id===10){ data.ausstattung=val('f-ausstattung'); data.ausstattungList=[...document.querySelectorAll('.aus-input')].map(i=>i.value.trim()).filter(Boolean); }
+  if (id===11){ collectEinheiten(); }
+  if (id===12){ data.investment=val('f-investment'); data.investHighlights=[...document.querySelectorAll('.inv-input')].map(i=>i.value.trim()).filter(Boolean); }
+  if (id===13){ data.name=val('f-name'); data.tel=val('f-tel'); data.email=val('f-email'); data.firma=val('f-firma'); data.kontaktAdresse=val('f-kontaktAdresse'); }
+}
+
+function collectEinheiten() {
+  const rows = document.querySelectorAll('#einheitenBody tr');
+  data.einheiten = [...rows].map(r => ({
+    typ: r.querySelector('.ei-typ').value.trim(),
+    anzahl: r.querySelector('.ei-anz').value.trim(),
+    flaeche: r.querySelector('.ei-fl').value.trim(),
+    preis: r.querySelector('.ei-pr').value.trim(),
+    besonderheit: r.querySelector('.ei-bs').value.trim(),
+  })).filter(e => e.typ || e.flaeche);
+}
+
+// ══════════════════════════════════════════════════════
+// SELECTIONS
+// ══════════════════════════════════════════════════════
+function selectGroesse(card) {
+  document.querySelectorAll('.groesse-card').forEach(c=>c.classList.remove('selected'));
+  card.classList.add('selected');
+  data.size = card.dataset.size;
+  buildStepper(); clearErrors();
+}
+
+function selectType(card) {
+  document.querySelectorAll('.type-card').forEach(c=>c.classList.remove('selected'));
+  card.classList.add('selected');
+  data.type = card.dataset.type;
+  buildStepper(); clearErrors();
+}
+
+function selectColorPair(card) {
+  document.querySelectorAll('.color-pair-card').forEach(c=>c.classList.remove('selected'));
+  card.classList.add('selected');
+  data.colorPair = parseInt(card.dataset.pair);
+  clearErrors();
+}
+
+function getColorPair() {
+  const id = data.colorPair || 2;
+  return COLOR_PAIRS.find(p=>p.id===id) || COLOR_PAIRS[1];
+}
+
+function resetColorPairSelection() {
+  document.querySelectorAll('.color-pair-card').forEach(c=>c.classList.remove('selected'));
+}
+
+// ══════════════════════════════════════════════════════
+// LOGO
+// ══════════════════════════════════════════════════════
+function handleLogoUpload(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    data.brandLogoSrc = e.target.result;
+    const img = document.getElementById('logoPreviewImg');
+    img.src = e.target.result; img.style.display = 'block';
+    document.getElementById('logoPlaceholder').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+// ══════════════════════════════════════════════════════
+// PHOTOS
+// ══════════════════════════════════════════════════════
+function setupDragDrop() {
+  const zone = document.getElementById('dropZone');
+  zone.addEventListener('dragover', e=>{e.preventDefault();zone.classList.add('dragover');});
+  zone.addEventListener('dragleave', ()=>zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e=>{e.preventDefault();zone.classList.remove('dragover');handlePhotoFiles(e.dataTransfer.files);});
+}
+
+function handlePhotoFiles(files) {
+  const arr = Array.from(files).slice(0, 10 - photos.length);
+  arr.forEach(file=>{
+    if (!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = e => { photos.push(e.target.result); renderPhotoGrid(); };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderPhotoGrid() {
+  const grid = document.getElementById('photoGrid');
+  grid.innerHTML = '';
+  photos.forEach((src,i)=>{
+    const wrap = document.createElement('div');
+    wrap.className = 'photo-thumb';
+    wrap.innerHTML = `<img src="${src}" alt="Foto ${i+1}"><button class="del-photo" onclick="removePhoto(${i})">×</button>`;
+    grid.appendChild(wrap);
+  });
+  document.getElementById('photoCount').textContent = `${photos.length} / 10 Fotos`;
+  document.getElementById('dropZone').style.display = photos.length >= 10 ? 'none' : '';
+}
+
+function removePhoto(idx) { photos.splice(idx,1); renderPhotoGrid(); }
+
+// ══════════════════════════════════════════════════════
+// DYNAMIC LISTS
+// ══════════════════════════════════════════════════════
+function initHighlights() {
+  if (!document.getElementById('highlightList').children.length) {
+    addHighlight(); addHighlight(); addHighlight();
+  }
+}
+function addHighlight(v='') {
+  const list = document.getElementById('highlightList');
+  const uid = 'hl-'+Date.now()+Math.random().toString(36).slice(2,5);
+  const item = document.createElement('div'); item.className='list-item';
+  item.innerHTML=`<input type="text" class="hl-input" id="${uid}" placeholder="Highlight …" value="${escHtml(v)}">
+    <button class="btn-ai" style="padding:.28rem .75rem;font-size:.68rem" onclick="openAiModal('${uid}','Highlight')">✦</button>
+    <button class="btn-remove" onclick="this.parentElement.remove()">×</button>`;
+  list.appendChild(item);
+}
+
+function initAusstattungList() {
+  if (!document.getElementById('ausstattungList').children.length) {
+    addAusstattung(); addAusstattung();
+  }
+}
+function addAusstattung(v='') {
+  const list = document.getElementById('ausstattungList');
+  const item = document.createElement('div'); item.className='list-item';
+  item.innerHTML=`<input type="text" class="aus-input" placeholder="Ausstattungsmerkmal …" value="${escHtml(v)}">
+    <button class="btn-remove" onclick="this.parentElement.remove()">×</button>`;
+  list.appendChild(item);
+}
+
+function initInvestList() {
+  if (!document.getElementById('investList').children.length) {
+    addInvest(); addInvest();
+  }
+}
+function addInvest(v='') {
+  const list = document.getElementById('investList');
+  const item = document.createElement('div'); item.className='list-item';
+  item.innerHTML=`<input type="text" class="inv-input" placeholder="Investment-Vorteil …" value="${escHtml(v)}">
+    <button class="btn-remove" onclick="this.parentElement.remove()">×</button>`;
+  list.appendChild(item);
+}
+
+function initEinheiten() {
+  if (!document.getElementById('einheitenBody').children.length) {
+    addEinheit('1-Zimmer-Wohnung','','','','');
+    addEinheit('2-Zimmer-Wohnung','','','','');
+  }
+}
+function addEinheit(typ='',anz='',fl='',pr='',bs='') {
+  const body = document.getElementById('einheitenBody');
+  const tr = document.createElement('tr');
+  tr.innerHTML=`<td><input type="text" class="ei-typ" placeholder="Typ" value="${escHtml(typ)}"></td>
+    <td><input type="text" class="ei-anz" placeholder="Anzahl" value="${escHtml(anz)}"></td>
+    <td><input type="text" class="ei-fl" placeholder="Fläche" value="${escHtml(fl)}"></td>
+    <td><input type="text" class="ei-pr" placeholder="Preis" value="${escHtml(pr)}"></td>
+    <td><input type="text" class="ei-bs" placeholder="Besonderheit" value="${escHtml(bs)}"></td>
+    <td class="del-col"><button class="btn-remove" onclick="this.closest('tr').remove()">×</button></td>`;
+  body.appendChild(tr);
+}
+
+// ══════════════════════════════════════════════════════
+// CONFIRM MODAL
+// ══════════════════════════════════════════════════════
+function openConfirm(icon,title,desc,fn,warn) {
+  confirmCallback=fn;
+  document.getElementById('confirmIcon').textContent=icon;
+  document.getElementById('confirmTitle').textContent=title;
+  document.getElementById('confirmDesc').textContent=desc;
+  const ok=document.getElementById('confirmOkBtn');
+  ok.className=warn?'btn-confirm-ok warn':'btn-confirm-ok';
+  ok.textContent=warn?'Leeren':'Alles löschen';
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+function closeConfirm(){ document.getElementById('confirmOverlay').classList.remove('open'); confirmCallback=null; }
+function closeConfirmOnBg(e){ if(e.target===document.getElementById('confirmOverlay')) closeConfirm(); }
+function confirmOk(){ if(confirmCallback) confirmCallback(); closeConfirm(); }
+
+function openConfirmAll() {
+  openConfirm('⚠️','Alles zurücksetzen?','Alle Eingaben aus allen Schritten werden gelöscht.',doResetAll,false);
+}
+function openConfirmStep() {
+  if (current===15) return;
+  const label = ALL_STEP_DEFS.find(s=>s.id===current)?.label || `Schritt ${current}`;
+  openConfirm('↺',`„${label}" leeren?`,`Nur die Eingaben dieses Schritts werden gelöscht.`,resetCurrentStep,true);
+}
+
+function doResetAll() {
+  localStorage.removeItem('expogen_data'); localStorage.removeItem('expogen_step');
+  data={}; photos=[]; current=1;
+  document.querySelectorAll('input:not([type=file]),textarea').forEach(el=>el.value='');
+  document.querySelectorAll('.groesse-card,.type-card,.color-pair-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('highlightList').innerHTML='';
+  document.getElementById('ausstattungList').innerHTML='';
+  document.getElementById('einheitenBody').innerHTML='';
+  document.getElementById('investList').innerHTML='';
+  document.getElementById('photoGrid').innerHTML='';
+  document.getElementById('photoCount').textContent='0 / 10 Fotos';
+  document.getElementById('dropZone').style.display='';
+  document.getElementById('logoPreviewImg').style.display='none';
+  document.getElementById('logoPlaceholder').style.display='';
+  initHighlights(); initAusstattungList(); initEinheiten(); initInvestList();
+  buildStepper(); showStep(1); updateNav();
+}
+
+const STEP_RESET_MAP = {1:'Größe',2:'Typ',3:'Branding',4:'Objekt',5:'Fotos',6:'Daten',7:'Beschreibung',8:'Lage',9:'Standort',10:'Ausstattung',11:'Einheiten',12:'Investment',13:'Kontakt'};
+function resetCurrentStep() {
+  switch(current) {
+    case 1: delete data.size; document.querySelectorAll('.groesse-card').forEach(c=>c.classList.remove('selected')); buildStepper(); break;
+    case 2: delete data.type; document.querySelectorAll('.type-card').forEach(c=>c.classList.remove('selected')); buildStepper(); break;
+    case 3: setVal('f-brandFirma',''); data.brandFirma=''; data.brandLogoSrc=null; document.getElementById('logoPreviewImg').style.display='none'; document.getElementById('logoPlaceholder').style.display=''; break;
+    case 4: ['f-titel','f-untertitel','f-adresse','f-preis','f-preisDetail'].forEach(id=>setVal(id,'')); break;
+    case 5: photos=[]; renderPhotoGrid(); break;
+    case 6: ['baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','stellplaetze','energiestandard','heizung','heizungsart','energieausweis','kaeuferp','weitereKosten'].forEach(k=>{setVal('f-'+k,''); delete data[k];}); break;
+    case 7: setVal('f-beschreibung',''); document.getElementById('highlightList').innerHTML=''; data.highlights=[]; initHighlights(); break;
+    case 8: setVal('f-lage',''); delete data.lage; break;
+    case 9: setVal('f-stadtbeschr',''); delete data.stadtbeschr; break;
+    case 10: setVal('f-ausstattung',''); document.getElementById('ausstattungList').innerHTML=''; data.ausstattungList=[]; initAusstattungList(); break;
+    case 11: document.getElementById('einheitenBody').innerHTML=''; data.einheiten=[]; initEinheiten(); break;
+    case 12: setVal('f-investment',''); document.getElementById('investList').innerHTML=''; data.investHighlights=[]; initInvestList(); break;
+    case 13: ['f-name','f-tel','f-email','f-firma','f-kontaktAdresse'].forEach(id=>setVal(id,'')); break;
+    case 14: delete data.colorPair; resetColorPairSelection(); break;
+  }
+  clearErrors(); saveToStorage();
+}
+
+// ══════════════════════════════════════════════════════
+// AI MODAL
+// ══════════════════════════════════════════════════════
+function openAiModal(fieldId, context) {
+  aiTargetField = fieldId;
+  aiTargetContext = context;
+  document.getElementById('aiModalDesc').textContent = `Beschreiben Sie Ihr Objekt – die KI erstellt: ${context}.`;
+  document.getElementById('aiModalPrompt').value = '';
+  document.getElementById('aiModalOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('aiModalPrompt').focus(), 100);
+}
+function closeAiModal() {
+  document.getElementById('aiModalOverlay').classList.remove('open');
+  aiTargetField = null;
+  aiTargetContext = null;
+}
+function closeAiModalOnBg(e) { if (e.target === document.getElementById('aiModalOverlay')) closeAiModal(); }
+async function runAiGenerate() {
+  const prompt = document.getElementById('aiModalPrompt').value.trim();
+  if (!prompt) return;
+  const btn = document.getElementById('aiModalBtn');
+  btn.textContent = '⟳ …';
+  btn.disabled = true;
+
+  const systemPrompt = 'Du bist ein professioneller Immobilienmarketing-Texter. Schreibe ausschließlich auf Deutsch. Erstelle überzeugenden, professionellen Text für ein deutsches Immobilien-Exposé. Schreibe direkt den Text ohne Überschriften oder Erklärungen.';
+  const userMsg = `Erstelle für ein Immobilien-Exposé: ${aiTargetContext}.\n\nObjekt-Info vom Nutzer: ${prompt}`;
+
+  try {
+    const res = await fetch('https://text.pollinations.ai/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user',   content: userMsg }
+        ],
+        model: 'openai',
+        seed: Math.floor(Math.random() * 9999)
+      })
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = await res.text();
+    const f = document.getElementById(aiTargetField);
+    if (f) f.value = text.trim();
+    closeAiModal();
+  } catch (err) {
+    alert('KI-Generierung fehlgeschlagen: ' + err.message + '\n\nBitte Internetverbindung prüfen.');
+  } finally {
+    btn.textContent = '✦ Generieren';
+    btn.disabled = false;
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// STORAGE
+// ══════════════════════════════════════════════════════
+function saveToStorage() {
+  try { localStorage.setItem('expogen_data',JSON.stringify(data)); localStorage.setItem('expogen_step',current); } catch(e){}
+}
+function loadFromStorage() {
+  try {
+    const d=localStorage.getItem('expogen_data');
+    const s=localStorage.getItem('expogen_step');
+    if(d) {
+      data=JSON.parse(d);
+      if(data.size){ const c=document.querySelector(`.groesse-card[data-size="${data.size}"]`); if(c) c.classList.add('selected'); }
+      if(data.type){ const c=document.querySelector(`.type-card[data-type="${data.type}"]`); if(c) c.classList.add('selected'); }
+      if(data.colorPair){ const c=document.querySelector(`.color-pair-card[data-pair="${data.colorPair}"]`); if(c) c.classList.add('selected'); }
+      const fields=['brandFirma','titel','untertitel','adresse','preis','preisDetail','baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','stellplaetze','energiestandard','heizung','heizungsart','energieausweis','kaeuferp','weitereKosten','beschreibung','lage','stadtbeschr','ausstattung','investment','name','tel','email','firma','kontaktAdresse'];
+      fields.forEach(k=>{ if(data[k]) setVal('f-'+k, data[k]); });
+      if(data.highlights?.length){ document.getElementById('highlightList').innerHTML=''; data.highlights.forEach(h=>addHighlight(h)); }
+      if(data.ausstattungList?.length){ document.getElementById('ausstattungList').innerHTML=''; data.ausstattungList.forEach(a=>addAusstattung(a)); }
+      if(data.investHighlights?.length){ document.getElementById('investList').innerHTML=''; data.investHighlights.forEach(v=>addInvest(v)); }
+      if(data.einheiten?.length){ document.getElementById('einheitenBody').innerHTML=''; data.einheiten.forEach(e=>addEinheit(e.typ,e.anzahl,e.flaeche,e.preis,e.besonderheit)); }
+      if(data.brandLogoSrc){ const img=document.getElementById('logoPreviewImg'); img.src=data.brandLogoSrc; img.style.display='block'; document.getElementById('logoPlaceholder').style.display='none'; }
+    }
+    if(s) current=parseInt(s)||1;
+  } catch(e){}
+}
+function setVal(id,v){ const el=document.getElementById(id); if(el) el.value=v; }
+
+// ══════════════════════════════════════════════════════
+// PREVIEW BUILDER — Dispatcher
+// ══════════════════════════════════════════════════════
+function selectTemplate(tmpl) {
+  data.template = tmpl;
+  saveToStorage();
+  document.querySelectorAll('.tmpl-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('tmplBtn'+tmpl);
+  if (btn) btn.classList.add('active');
+  buildPreview();
+}
+
+function buildPreview() {
+  collectStep(13);
+  const tmpl = data.template || 'A';
+  document.querySelectorAll('.tmpl-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('tmplBtn'+tmpl);
+  if (btn) btn.classList.add('active');
+  if (tmpl === 'B' && typeof buildPreviewB === 'function') buildPreviewB();
+  else buildPreviewA();
+}
+
+// ══════════════════════════════════════════════════════
+// DEMO DATA (Leipzig Mittelring 13)
+// ══════════════════════════════════════════════════════
+function loadDemo() {
+  const BASE = 'file:///Users/marcodelicati/ORANGEImmobilienAG%20Dropbox/Firmengruppen/200%20Boldr/00%20Boldr/01%20Kunden/SDH%20-%20K20240821%20-%20Immobilien/Leipzig%20Mittelring%2013/Daten%20von%20SDH/Visualisierungen/';
+  photos = [
+    BASE+'Au%C3%9Fenvisu%201.png',
+    BASE+'Au%C3%9Fenvisu%202.png',
+    BASE+'Innenvisu%20K%C3%BCche%20Wohnen.png',
+    BASE+'Innenvisu%20Schlafen.png',
+    BASE+'Innenvisu%20Bad.png',
+    BASE+'Innenvisu%20Arbeiten.png',
+    BASE+'Innenvisu%20Flur.png',
+    BASE+'Visu%20Balkon.png',
+  ];
+  renderPhotoGrid();
+
+  const d = {
+    size:'L', type:'Neubau-Projekt', brandFirma:'Boldr Immobilien',
+    titel:'Mittelring 13 – Leipzig', untertitel:'Neubau · KfW 40 QNG · 11 Wohneinheiten · Kapitalanlage',
+    adresse:'Mittelring 13, 04315 Leipzig', preis:'Ab 189.000 €', preisDetail:'zzgl. 3,57 % Käuferprovision inkl. MwSt.',
+    baujahr:'2026 (Neubau)', zustand:'Neubau / Erstbezug', verfuegbar:'Voraussichtlich Q4 2026',
+    hausgeld:'Auf Anfrage', denkmal:'Nein', einheitenAnz:'11 Wohneinheiten',
+    wohnflaeche:'36,21 – 77,60 m² (je Einheit)', gesamtflaeche:'621,36 m²',
+    zimmer:'1 bis 3-Zimmer-Wohnungen', stellplaetze:'Tiefgarage vorhanden',
+    energiestandard:'KfW 40 QNG', heizung:'Wärmepumpe', heizungsart:'Fußbodenheizung (Einzelraumregelung)',
+    energieausweis:'Wird beigestellt', kaeuferp:'3,57 % inkl. MwSt. aus dem Kaufpreis',
+    weitereKosten:'Notar, Grunderwerbsteuer, ggf. Grundbuch',
+    beschreibung:`Neubau in serieller Modulbauweise mit höchsten Energiestandards – das Mehrfamilienhaus am Mittelring 13 in Leipzig vereint moderne Wohnqualität mit attraktiven Investitionsmöglichkeiten.
+
+Das Gebäude entsteht nach dem KfW-40-QNG-Standard und bietet 11 Wohneinheiten von 1 bis 3 Zimmern. Alle Wohnungen verfügen über einen Balkon und einen eigenen Kellerabstellraum. Die Wohnungen im Erdgeschoss sind barrierefrei ausgeführt.
+
+Als Kapitalanlage profitieren Investoren von der 5 % degressiven Abschreibung für Neubauten sowie der 5 % Sonderabschreibung für den KfW-40-QNG-Standard.`,
+    highlights:['Neubau in serieller Modulbauweise','KfW 40 QNG Energiestandard','Alle Wohnungen mit Balkon und Kellerabstellraum','Wohnungen im EG barrierefrei','5 % degressive AfA + 5 % Sonderabschreibung','Wärmepumpe mit Fußbodenheizung','Photovoltaikanlage auf dem Dach','Parkett, bodengleiche Dusche, Rollläden'],
+    lage:`Die Liegenschaft am Mittelring 13 befindet sich im nordöstlichen Leipziger Stadtgebiet, im Übergangsbereich der Stadtteile Sellerhausen und Schönefeld-Abtnaundorf. Diese Lage zählt zu den innerstadtnahen Entwicklungsräumen Leipzigs und profitiert in besonderem Maße von der anhaltend positiven Stadt- und Wirtschaftsentwicklung.
+
+Der Stadtteil ist geprägt von einer gewachsenen gründerzeitlichen Wohnstruktur, ergänzt durch kontinuierlich sanierte Bestandsimmobilien und punktuelle Neubauprojekte. Die Mikrolage am Mittelring zeichnet sich durch ihre sehr gute infrastrukturelle Anbindung aus – Straßenbahn- und Busverbindungen befinden sich in fußläufiger Entfernung.
+
+Einkaufsmöglichkeiten für den täglichen Bedarf, medizinische Versorgung, Schulen und Kindertagesstätten befinden sich im direkten Umfeld.`,
+    stadtbeschr:`Leipzig zählt heute zu den wachstumsstärksten Städten Deutschlands. Historisch als bedeutende Handels- und Messestadt gewachsen, verbindet die Stadt wirtschaftliche Tradition mit zukunftsorientierter Entwicklung.
+
+Mit den Produktionsstandorten von Porsche und BMW hat sich Leipzig als moderner Automobilstandort etabliert. Die Branchen Logistik, Life Sciences, IT und Kreativwirtschaft prägen das wirtschaftliche Profil der Stadt.
+
+Leipzig gehört seit Jahren zu den Städten mit kontinuierlichem Bevölkerungswachstum. Für Investoren bietet Leipzig ein ausgewogenes Verhältnis von Wachstumspotenzial und Marktstabilität.`,
+    ausstattung:`Das Gebäude wird als energieeffizientes Wohnhaus im KfW-40-QNG-Standard in serieller industrieller Modulbauweise errichtet. Die Modulbauweise gewährleistet eine hohe Ausführungsqualität und kurze Bauzeiten.
+
+Die Beheizung erfolgt über eine effiziente Wärmepumpe mit Fußbodenheizung und Einzelraumregelung. Eine Photovoltaikanlage auf dem Dach wird in das energetische Gesamtkonzept integriert.
+
+In allen Wohn- und Aufenthaltsräumen wird Parkett verlegt. Bäder erhalten hochwertige Feinsteinzeugfliesen. Bäder und WCs werden mit Sanitärobjekten namhafter Hersteller (z. B. Geberit) ausgestattet, inkl. bodengleicher Dusche. Alle Fenster erhalten Rollläden.`,
+    ausstattungList:['Serielle Modulbauweise / Neubau 2026','KfW 40 QNG Energiestandard','Wärmepumpe + Fußbodenheizung mit Einzelraumregelung','Photovoltaikanlage','Parkett in allen Wohnräumen','Bodengleiche Dusche','Rollläden an allen Fenstern','Hochwertige Sanitärobjekte (Geberit o. ä.)','Barrierefrei im Erdgeschoss','Kellerabstellraum je Wohnung'],
+    einheiten:[
+      {typ:'1-Zimmer-Wohnung',anzahl:'3',flaeche:'36,21 – 43,18 m²',preis:'Ab 189.000 €',besonderheit:'EG barrierefrei verfügbar'},
+      {typ:'2-Zimmer-Wohnung',anzahl:'5',flaeche:'52,80 – 65,40 m²',preis:'Ab 249.000 €',besonderheit:''},
+      {typ:'3-Zimmer-Wohnung',anzahl:'3',flaeche:'70,20 – 77,60 m²',preis:'Ab 329.000 €',besonderheit:''},
+    ],
+    investment:`Diese Kapitalanlage überzeugt durch außergewöhnliche steuerliche Vorteile und ein attraktives Renditeprofil. Der KfW-40-QNG-Standard eröffnet Investoren einzigartige Abschreibungsmöglichkeiten, die die Netto-Investitionskosten erheblich reduzieren.
+
+Der Wohnungsmarkt Leipzig zeigt kontinuierliches Wachstum bei moderatem Preisniveau – ideale Voraussetzungen für langfristige Wertsteigerung und stabile Mieteinnahmen.`,
+    investHighlights:['5 % degressive Abschreibung für Neubauten (§ 7 EStG)','5 % Sonderabschreibung für KfW-40-QNG-Standard (§ 7b EStG)','KfW-Förderung möglich','Starker Wohnungsmarkt Leipzig – anhaltende Nachfrage','Nachhaltige Wertsteigerung durch Stadtentwicklung','Serielle Bauweise = kalkulierbare Qualität und Kosten'],
+    name:'Ihr Ansprechpartner', tel:'+49 89 / 000 000 00', email:'info@boldr.de', firma:'Boldr Immobilien GmbH', kontaktAdresse:'Musterstraße 1, 80333 München',
+  };
+
+  data = d;
+  const gc = document.querySelector(`.groesse-card[data-size="L"]`); if(gc) gc.classList.add('selected');
+  const tc = document.querySelector(`.type-card[data-type="Neubau-Projekt"]`); if(tc) tc.classList.add('selected');
+  const fields=['brandFirma','titel','untertitel','adresse','preis','preisDetail','baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','stellplaetze','energiestandard','heizung','heizungsart','energieausweis','kaeuferp','weitereKosten','beschreibung','lage','stadtbeschr','ausstattung','investment','name','tel','email','firma','kontaktAdresse'];
+  fields.forEach(k=>{ if(d[k]) setVal('f-'+k,d[k]); });
+  document.getElementById('highlightList').innerHTML=''; d.highlights.forEach(h=>addHighlight(h));
+  document.getElementById('ausstattungList').innerHTML=''; d.ausstattungList.forEach(a=>addAusstattung(a));
+  document.getElementById('investList').innerHTML=''; d.investHighlights.forEach(v=>addInvest(v));
+  document.getElementById('einheitenBody').innerHTML=''; d.einheiten.forEach(e=>addEinheit(e.typ,e.anzahl,e.flaeche,e.preis,e.besonderheit));
+  buildStepper();
+
+  // Jump to preview
+  current = 14; showStep(14); updateNav();
+  saveToStorage();
+}
+
+// ══════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════
+function escHtml(s) {
+  if(!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+init();
+// Auto-load demo data
+loadDemo();
+
+// ══════════════════════════════════════════════════════
+// VOICE RECORDING
+// ══════════════════════════════════════════════════════
+
+function openVoiceModal() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const overlay = document.getElementById('voiceModalOverlay');
+  overlay.classList.add('open');
+  if (!SpeechRecognition) {
+    document.getElementById('voiceNoSupport').style.display = 'block';
+    document.getElementById('voiceBtnRecord').disabled = true;
+    return;
+  }
+  // Reset state
+  voiceTranscript = '';
+  document.getElementById('voiceTranscriptEl').value = '';
+  document.getElementById('voiceStatus').textContent = 'Bereit – drücken Sie „Aufnahme starten"';
+  document.getElementById('voiceStatus').className = 'voice-status';
+  document.getElementById('voiceWave').className = 'voice-wave';
+  document.getElementById('voiceBtnRecord').textContent = '● Aufnahme starten';
+  document.getElementById('voiceBtnRecord').className = 'btn-voice-record';
+  document.getElementById('voiceBtnGenerate').disabled = true;
+  isRecording = false;
+}
+
+function closeVoiceModal() {
+  stopRecognition();
+  document.getElementById('voiceModalOverlay').classList.remove('open');
+}
+
+function toggleRecording() {
+  if (isRecording) {
+    stopRecognition();
+    document.getElementById('voiceBtnRecord').textContent = '● Aufnahme fortsetzen';
+    document.getElementById('voiceBtnRecord').className = 'btn-voice-record';
+    document.getElementById('voiceStatus').textContent = 'Pausiert – Transkript oben bearbeitbar';
+    document.getElementById('voiceStatus').className = 'voice-status';
+    document.getElementById('voiceWave').className = 'voice-wave';
+    isRecording = false;
+  } else {
+    startRecognition();
+  }
+}
+
+function startRecognition() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.lang = 'de-DE';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+
+  recognition.onstart = () => {
+    isRecording = true;
+    document.getElementById('voiceBtnRecord').textContent = '■ Aufnahme stoppen';
+    document.getElementById('voiceBtnRecord').className = 'btn-voice-record recording';
+    document.getElementById('voiceStatus').textContent = '● Aufnahme läuft …';
+    document.getElementById('voiceStatus').className = 'voice-status recording';
+    document.getElementById('voiceWave').className = 'voice-wave active';
+  };
+
+  recognition.onresult = (event) => {
+    const el = document.getElementById('voiceTranscriptEl');
+    let interim = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      if (event.results[i].isFinal) {
+        voiceTranscript += event.results[i][0].transcript + ' ';
+      } else {
+        interim += event.results[i][0].transcript;
+      }
+    }
+    el.value = voiceTranscript + interim;
+    el.scrollTop = el.scrollHeight;
+    document.getElementById('voiceBtnGenerate').disabled = (voiceTranscript.trim() === '' && interim.trim() === '');
+  };
+
+  recognition.onerror = (event) => {
+    if (event.error === 'no-speech') return;
+    document.getElementById('voiceStatus').textContent = 'Fehler: ' + event.error;
+    isRecording = false;
+    stopRecognition();
+  };
+
+  recognition.onend = () => {
+    if (isRecording) recognition.start();
+  };
+
+  recognition.start();
+}
+
+function stopRecognition() {
+  if (recognition) {
+    isRecording = false;
+    recognition.stop();
+    recognition = null;
+  }
+}
+
+async function processVoiceTranscript() {
+  const transcript = document.getElementById('voiceTranscriptEl').value.trim();
+  if (!transcript) return;
+
+  stopRecognition();
+  const btn = document.getElementById('voiceBtnGenerate');
+  const origText = btn.textContent;
+  btn.textContent = '⟳ KI analysiert …';
+  btn.disabled = true;
+  document.getElementById('voiceStatus').textContent = 'KI generiert das Exposé …';
+
+  const systemPrompt = `Du bist ein Assistent für Immobilien-Exposés. Analysiere den folgenden Sprach-Transkript eines Maklers und extrahiere alle verfügbaren Informationen. Antworte NUR mit einem validen JSON-Objekt – keine Erklärungen, kein Markdown, nur JSON. Felder die nicht erwähnt wurden bleiben leer ("").`;
+
+  const schema = `{
+  "type": "Typ wählen aus: Neubau-Projekt, Bestandsimmobilie, Eigentumswohnung, Einfamilienhaus, Mehrfamilienhaus, Gewerbe, Grundstück",
+  "size": "S, M oder L (S=wenige Infos, L=viele Details)",
+  "titel": "prägnanter Exposé-Titel",
+  "untertitel": "kurzer Untertitel",
+  "adresse": "vollständige Adresse",
+  "preis": "Kaufpreis als Zahl oder Text",
+  "preisDetail": "z.B. zzgl. Kaufnebenkosten",
+  "baujahr": "Baujahr",
+  "zustand": "z.B. Neubau, modernisiert, sanierungsbedürftig",
+  "verfuegbar": "Verfügbarkeit / Bezugstermin",
+  "wohnflaeche": "Wohnfläche in m²",
+  "gesamtflaeche": "Gesamtfläche in m²",
+  "zimmer": "Zimmeranzahl",
+  "einheitenAnz": "Anzahl Wohneinheiten (bei Mehrfamilienhäusern)",
+  "stellplaetze": "Anzahl Stellplätze",
+  "energiestandard": "z.B. KfW 40, KfW 55, A+",
+  "heizung": "Heizungsart",
+  "heizungsart": "z.B. Fußbodenheizung, Heizkörper",
+  "energieausweis": "z.B. Bedarfsausweis, 45 kWh/m²a",
+  "hausgeld": "monatliches Hausgeld",
+  "denkmal": "Denkmalschutz ja/nein/leer",
+  "kaeuferp": "Käuferprovision",
+  "weitereKosten": "weitere Kosten",
+  "beschreibung": "ausführliche Objektbeschreibung (3-5 Sätze)",
+  "highlights": ["Highlight 1", "Highlight 2", "Highlight 3"],
+  "lage": "Lagebeschreibung (2-3 Sätze)",
+  "stadtbeschr": "Stadtbeschreibung (2-3 Sätze)",
+  "ausstattung": "Ausstattungsbeschreibung (2-3 Sätze)",
+  "ausstattungList": ["Ausstattungsmerkmal 1", "Ausstattungsmerkmal 2"],
+  "investment": "Investment-Beschreibung (2-3 Sätze)",
+  "investHighlights": ["Investment-Vorteil 1", "Investment-Vorteil 2"]
+}`;
+
+  const userMsg = `Transkript des Maklers:\n"${transcript}"\n\nFülle dieses JSON-Schema mit den extrahierten Informationen. Generiere für leere Felder sinnvolle Texte auf Basis des Kontexts:\n${schema}`;
+
+  try {
+    const res = await fetch('https://text.pollinations.ai/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user',   content: userMsg }
+        ],
+        model: 'openai',
+        seed: Math.floor(Math.random() * 9999)
+      })
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    let raw = await res.text();
+    raw = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+    const parsed = JSON.parse(raw);
+    applyVoiceData(parsed);
+    closeVoiceModal();
+  } catch (err) {
+    alert('Fehler bei der KI-Analyse: ' + err.message + '\n\nBitte Internetverbindung prüfen oder Transkript kürzen.');
+    btn.textContent = origText;
+    btn.disabled = false;
+    document.getElementById('voiceStatus').textContent = 'Fehler – bitte erneut versuchen';
+  }
+}
+
+function applyVoiceData(d) {
+  if (d.size && ['S','M','L'].includes(d.size)) data.size = d.size;
+  else data.size = 'L';
+
+  if (d.type) data.type = d.type;
+
+  const fields = ['titel','untertitel','adresse','preis','preisDetail',
+    'baujahr','zustand','verfuegbar','wohnflaeche','gesamtflaeche',
+    'zimmer','einheitenAnz','stellplaetze','energiestandard','heizung',
+    'heizungsart','energieausweis','hausgeld','denkmal','kaeuferp',
+    'weitereKosten','beschreibung','lage','stadtbeschr','ausstattung','investment'];
+
+  fields.forEach(key => {
+    if (d[key]) {
+      data[key] = d[key];
+      setVal('f-'+key, d[key]);
+    }
+  });
+
+  if (Array.isArray(d.highlights) && d.highlights.length) {
+    data.highlights = d.highlights;
+    const list = document.getElementById('highlightList');
+    if (list) { list.innerHTML = ''; d.highlights.forEach(v => addHighlight(v)); }
+  }
+  if (Array.isArray(d.ausstattungList) && d.ausstattungList.length) {
+    data.ausstattungList = d.ausstattungList;
+    const list = document.getElementById('ausstattungList');
+    if (list) { list.innerHTML = ''; d.ausstattungList.forEach(v => addAusstattung(v)); }
+  }
+  if (Array.isArray(d.investHighlights) && d.investHighlights.length) {
+    data.investHighlights = d.investHighlights;
+    const list = document.getElementById('investList');
+    if (list) { list.innerHTML = ''; d.investHighlights.forEach(v => addInvest(v)); }
+  }
+
+  saveToStorage();
+  navigateToStep(14);
+}
+</script>
+</body>
+</html>
