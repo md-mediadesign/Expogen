@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="wall-a" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f2ede6"/>
+      <stop offset="100%" stop-color="#e6e1da"/>
+    </linearGradient>
+    <linearGradient id="floor-a" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c4b090"/>
+      <stop offset="100%" stop-color="#b09878"/>
+    </linearGradient>
+    <linearGradient id="desk-top" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d8d0c0"/>
+      <stop offset="100%" stop-color="#c8c0b0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="800" fill="url(#wall-a)"/>
+
+  <!-- Floor -->
+  <rect x="0" y="560" width="1200" height="240" fill="url(#floor-a)"/>
+  <line x1="0" y1="600" x2="1200" y2="600" stroke="#907850" stroke-width="1" opacity="0.3"/>
+  <line x1="0" y1="640" x2="1200" y2="640" stroke="#907850" stroke-width="1" opacity="0.3"/>
+  <line x1="0" y1="680" x2="1200" y2="680" stroke="#907850" stroke-width="1" opacity="0.3"/>
+  <line x1="0" y1="720" x2="1200" y2="720" stroke="#907850" stroke-width="1" opacity="0.3"/>
+  <line x1="0" y1="760" x2="1200" y2="760" stroke="#907850" stroke-width="1" opacity="0.3"/>
+  <line x1="200" y1="560" x2="200" y2="800" stroke="#907850" stroke-width="1" opacity="0.2"/>
+  <line x1="400" y1="560" x2="400" y2="800" stroke="#907850" stroke-width="1" opacity="0.2"/>
+  <line x1="600" y1="560" x2="600" y2="800" stroke="#907850" stroke-width="1" opacity="0.2"/>
+  <line x1="800" y1="560" x2="800" y2="800" stroke="#907850" stroke-width="1" opacity="0.2"/>
+  <line x1="1000" y1="560" x2="1000" y2="800" stroke="#907850" stroke-width="1" opacity="0.2"/>
+
+  <!-- Window right with daylight -->
+  <rect x="820" y="50" width="330" height="490" fill="#d8eaf8" opacity="0.8"/>
+  <rect x="820" y="50" width="330" height="490" fill="none" stroke="#d0ccc4" stroke-width="8"/>
+  <line x1="985" y1="50" x2="985" y2="540" stroke="#d0ccc4" stroke-width="6"/>
+  <line x1="820" y1="295" x2="1150" y2="295" stroke="#d0ccc4" stroke-width="6"/>
+  <rect x="810" y="538" width="350" height="18" fill="#c8c4bc"/>
+  <polygon points="820,540 1150,540 1200,660 700,660" fill="#e8f0f5" opacity="0.12"/>
+
+  <!-- Bookshelf (left wall) -->
+  <rect x="0" y="60" width="160" height="520" fill="#2a2018"/>
+  <!-- Shelf boards -->
+  <rect x="0" y="60" width="160" height="12" fill="#3a3028"/>
+  <rect x="0" y="170" width="160" height="12" fill="#3a3028"/>
+  <rect x="0" y="280" width="160" height="12" fill="#3a3028"/>
+  <rect x="0" y="390" width="160" height="12" fill="#3a3028"/>
+  <rect x="0" y="500" width="160" height="12" fill="#3a3028"/>
+  <rect x="0" y="570" width="160" height="12" fill="#3a3028"/>
+  <!-- Books row 1 -->
+  <rect x="8" y="72" width="15" height="94" fill="#3a6080"/>
+  <rect x="25" y="78" width="12" height="88" fill="#804040"/>
+  <rect x="39" y="72" width="18" height="94" fill="#405030"/>
+  <rect x="59" y="76" width="14" height="90" fill="#704020"/>
+  <rect x="75" y="72" width="16" height="94" fill="#203050"/>
+  <rect x="93" y="78" width="13" height="88" fill="#504040"/>
+  <rect x="108" y="72" width="17" height="94" fill="#304050"/>
+  <rect x="127" y="76" width="14" height="90" fill="#602030"/>
+  <rect x="143" y="72" width="15" height="94" fill="#3a5040"/>
+  <!-- Books row 2 -->
+  <rect x="8" y="182" width="14" height="93" fill="#403050"/>
+  <rect x="24" y="186" width="16" height="89" fill="#80601a"/>
+  <rect x="42" y="182" width="12" height="93" fill="#30506a"/>
+  <rect x="56" y="184" width="18" height="91" fill="#5a3020"/>
+  <rect x="76" y="182" width="13" height="93" fill="#204048"/>
+  <rect x="91" y="186" width="15" height="89" fill="#602840"/>
+  <rect x="108" y="182" width="17" height="93" fill="#3a5038"/>
+  <rect x="127" y="184" width="14" height="91" fill="#484038"/>
+  <rect x="143" y="182" width="15" height="93" fill="#503828"/>
+  <!-- Books row 3 -->
+  <rect x="8" y="292" width="18" height="92" fill="#2a4870"/>
+  <rect x="28" y="296" width="14" height="88" fill="#603a18"/>
+  <rect x="44" y="292" width="16" height="92" fill="#3a4828"/>
+  <rect x="62" y="294" width="12" height="90" fill="#503040"/>
+  <rect x="76" y="292" width="17" height="92" fill="#205050"/>
+  <rect x="95" y="296" width="15" height="88" fill="#704030"/>
+  <rect x="112" y="292" width="14" height="92" fill="#304868"/>
+  <rect x="128" y="294" width="16" height="90" fill="#483820"/>
+  <rect x="146" y="292" width="12" height="92" fill="#3a3060"/>
+  <!-- Books row 4 -->
+  <rect x="8" y="402" width="15" height="92" fill="#284060"/>
+  <rect x="25" y="406" width="18" height="88" fill="#503818"/>
+  <rect x="45" y="402" width="13" height="92" fill="#384a24"/>
+  <rect x="60" y="404" width="16" height="90" fill="#482838"/>
+  <rect x="78" y="402" width="12" height="92" fill="#185850"/>
+  <rect x="92" y="406" width="17" height="88" fill="#783020"/>
+  <rect x="111" y="402" width="14" height="92" fill="#28386a"/>
+  <rect x="127" y="404" width="16" height="90" fill="#403020"/>
+  <rect x="145" y="402" width="13" height="92" fill="#304060"/>
+
+  <!-- Desk -->
+  <rect x="160" y="430" width="600" height="28" fill="url(#desk-top)" rx="3"/>
+  <!-- Desk legs -->
+  <rect x="168" y="458" width="16" height="120" fill="#3a3028" rx="2"/>
+  <rect x="740" y="458" width="16" height="120" fill="#3a3028" rx="2"/>
+
+  <!-- Monitor -->
+  <rect x="390" y="250" width="220" height="170" fill="#1a1a2a" rx="4"/>
+  <rect x="398" y="258" width="204" height="154" fill="#2a2a3a"/>
+  <!-- Screen glow (code-like) -->
+  <rect x="410" y="270" width="90" height="8" fill="#4a9060" opacity="0.7" rx="2"/>
+  <rect x="410" y="284" width="140" height="6" fill="#9a7040" opacity="0.6" rx="2"/>
+  <rect x="420" y="295" width="110" height="6" fill="#4a7098" opacity="0.7" rx="2"/>
+  <rect x="420" y="306" width="80" height="6" fill="#4a9060" opacity="0.6" rx="2"/>
+  <rect x="410" y="317" width="130" height="6" fill="#9a9040" opacity="0.6" rx="2"/>
+  <rect x="410" y="328" width="100" height="6" fill="#6a4898" opacity="0.6" rx="2"/>
+  <rect x="420" y="339" width="75" height="6" fill="#4a9060" opacity="0.5" rx="2"/>
+  <rect x="410" y="350" width="120" height="6" fill="#9a7040" opacity="0.5" rx="2"/>
+  <rect x="410" y="361" width="95" height="6" fill="#4a7098" opacity="0.5" rx="2"/>
+  <rect x="420" y="372" width="110" height="6" fill="#9a9040" opacity="0.5" rx="2"/>
+  <!-- Monitor stand -->
+  <rect x="488" y="420" width="24" height="14" fill="#2a2a2a" rx="2"/>
+  <rect x="465" y="434" width="70" height="6" fill="#2a2a2a" rx="2"/>
+
+  <!-- Keyboard -->
+  <rect x="370" y="445" width="200" height="12" fill="#3a3a3a" rx="4"/>
+  <!-- Mouse -->
+  <ellipse cx="610" cy="447" rx="22" ry="14" fill="#3a3a3a"/>
+
+  <!-- Desk lamp -->
+  <rect x="700" y="350" width="6" height="82" fill="#888"/>
+  <rect x="660" y="310" width="50" height="44" fill="#888" rx="4"/>
+  <ellipse cx="685" cy="354" rx="30" ry="10" fill="#f5f0a0" opacity="0.4"/>
+
+  <!-- Coffee cup on desk -->
+  <ellipse cx="250" cy="432" rx="20" ry="8" fill="#c8c0b0"/>
+  <rect x="230" y="400" width="40" height="34" fill="#d8d0c0" rx="4"/>
+  <rect x="270" y="412" width="12" height="10" fill="none" stroke="#c8c0b0" stroke-width="3" rx="3"/>
+  <!-- Steam -->
+  <path d="M245 396 Q248 385 245 375" stroke="#c8c8c8" stroke-width="2" fill="none" opacity="0.5"/>
+  <path d="M255 394 Q258 383 255 373" stroke="#c8c8c8" stroke-width="2" fill="none" opacity="0.5"/>
+
+  <!-- Plant in corner -->
+  <rect x="1120" y="510" width="60" height="50" fill="#6a5840" rx="4"/>
+  <ellipse cx="1150" cy="508" rx="50" ry="20" fill="#5a7840"/>
+  <ellipse cx="1130" cy="480" rx="35" ry="45" fill="#6a9050"/>
+  <ellipse cx="1170" cy="475" rx="30" ry="50" fill="#5a8040"/>
+  <ellipse cx="1150" cy="460" rx="28" ry="42" fill="#7aa060"/>
+
+  <!-- Label overlay -->
+  <rect x="0" y="720" width="1200" height="80" fill="#1a1a2e" opacity="0.78"/>
+  <text x="60" y="762" font-family="Arial, sans-serif" font-size="22" fill="#e8dcc0" font-weight="700">Arbeitszimmer / Home-Office</text>
+  <text x="60" y="786" font-family="Arial, sans-serif" font-size="14" fill="#c4a43c">Parkett · Großes Fenster · Ruhige Ausrichtung</text>
+</svg>
