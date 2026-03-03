@@ -35,8 +35,8 @@ header{width:100%;max-width:1180px;margin:0 auto;padding:2rem 2.5rem 0;display:f
 .main-layout{width:100%;max-width:1180px;margin:2rem auto 0;padding:0 2.5rem;display:flex;gap:2.5rem;align-items:flex-start}
 .card-col{flex:1;min-width:0;padding-bottom:4rem}
 
-/* ── Stepper rechts ── */
-.stepper-col{width:180px;flex-shrink:0;position:sticky;top:2rem;padding-top:.5rem}
+/* ── Stepper links ── */
+.stepper-col{width:180px;flex-shrink:0;position:sticky;top:2rem;padding-top:.5rem;order:-1}
 .stepper-label{font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:1.2rem;font-family:'Roboto',sans-serif}
 .steps-row{display:flex;flex-direction:column;gap:0}
 .step-dot{display:flex;flex-direction:row;align-items:center;gap:.65rem}
@@ -59,7 +59,38 @@ header{width:100%;max-width:1180px;margin:0 auto;padding:2rem 2.5rem 0;display:f
 .step-dot.step-off .step-toggle{border-color:rgba(120,130,160,.2);color:rgba(120,130,160,.4)}
 .step-dot.step-off .step-toggle:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.08)}
 .step-line.step-off{background:rgba(120,130,160,.1)!important}
-@media(max-width:800px){.main-layout{flex-direction:column-reverse;padding:0 1.2rem}.stepper-col{width:100%;position:static}.steps-row{flex-direction:row;flex-wrap:wrap;gap:.5rem}.step-line{display:none}.dot-label{display:none}.step-toggle{display:none}}
+@media(min-width:601px) and (max-width:800px){.main-layout{flex-direction:column-reverse;padding:0 1.2rem}.stepper-col{width:100%;position:static}.steps-row{flex-direction:row;flex-wrap:wrap;gap:.5rem}.step-line{display:none}.dot-label{display:none}.step-toggle{display:none}}
+
+/* ── Drawer-Close-Header (Desktop: ausgeblendet) ── */
+.drawer-close-btn{display:none}
+.drawer-close-x{display:none}
+
+/* ── Burger Button (mobile) ── */
+.burger-btn{display:none}
+@media(max-width:600px){
+  .burger-btn{display:flex;align-items:center;gap:.5rem;position:fixed;bottom:1.2rem;left:1.2rem;z-index:600;background:var(--gold);color:var(--navy);border:none;border-radius:50px;padding:.65rem 1.1rem;font-family:'Roboto',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.04em;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.4);transition:background .2s,transform .15s}
+  .burger-btn:active{transform:scale(.95)}
+  .burger-btn-icon{font-size:1.1rem;line-height:1}
+  .burger-btn-label{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* Overlay-Backdrop */
+  .stepper-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:590;backdrop-filter:blur(3px)}
+  .stepper-backdrop.open{display:block}
+  /* .stepper-col wird zum Drawer */
+  .stepper-col{position:fixed!important;top:0;left:0;bottom:0;width:min(280px,85vw);z-index:595;background:var(--navy2);border-right:1px solid var(--border);padding:2rem 1.5rem 5rem;overflow-y:auto;transform:translateX(-100%);transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:8px 0 40px rgba(0,0,0,.5)}
+  .stepper-col.open{transform:translateX(0)}
+  /* Drawer-Header mit Schließen-Button */
+  .drawer-close-btn{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+  .drawer-close-btn span{font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  .drawer-close-x{display:flex;background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;padding:.2rem .4rem;border-radius:4px;transition:color .2s}
+  .drawer-close-x:hover{color:var(--cream)}
+  /* Labels + Toggles im Drawer wieder einblenden */
+  .dot-label{display:block!important}
+  .step-toggle{display:flex!important}
+  .step-line{display:block!important}
+  .steps-row{flex-direction:column!important;gap:0!important}
+  /* Stepper-Col aus normalem Flow nehmen */
+  .main-layout{flex-direction:column!important}
+}
 
 /* ── Card ── */
 .card-wrap{width:100%}
@@ -796,8 +827,11 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
   </div>
 
   <!-- Stepper rechts -->
-  <div class="stepper-col">
-    <div class="stepper-label">Fortschritt</div>
+  <div class="stepper-col" id="stepperCol">
+    <div class="drawer-close-btn">
+      <span>Fortschritt</span>
+      <button class="drawer-close-x" onclick="closeStepperDrawer()">✕</button>
+    </div>
     <div class="steps-row" id="stepsRow"></div>
   </div>
 </div>
@@ -977,6 +1011,7 @@ function buildStepper() {
     }
   });
   updateStepNums();
+  updateBurgerLabel();
 }
 
 function updateStepNums() {
@@ -1017,6 +1052,7 @@ function navigateToStep(id) {
     current = id;
     showStep(current);
     updateNav();
+    closeStepperDrawer();
   }
 }
 
@@ -1050,6 +1086,7 @@ function showStep(id) {
   if (el) el.classList.add('active');
   updateStepper();
   if (id === 15) buildPreview();
+  updateBurgerLabel();
 }
 
 function updateNav() {
@@ -1445,7 +1482,7 @@ function buildPreview() {
 }
 
 // ══════════════════════════════════════════════════════
-// DEMO DATA (Leipzig Mittelring 13)
+// DEMO DATA (Düsseldorf Ackerstraße 12)
 // ══════════════════════════════════════════════════════
 function loadDemo() {
   photos = [
@@ -1462,47 +1499,47 @@ function loadDemo() {
 
   const d = {
     size:'L', type:'Neubau-Projekt', brandFirma:'Boldr Immobilien',
-    titel:'Mittelring 13 – Leipzig', untertitel:'Neubau · KfW 40 QNG · 11 Wohneinheiten · Kapitalanlage',
-    adresse:'Mittelring 13, 04315 Leipzig', preis:'Ab 189.000 €', preisDetail:'zzgl. 3,57 % Käuferprovision inkl. MwSt.',
-    baujahr:'2026 (Neubau)', zustand:'Neubau / Erstbezug', verfuegbar:'Voraussichtlich Q4 2026',
-    hausgeld:'Auf Anfrage', denkmal:'Nein', einheitenAnz:'11 Wohneinheiten',
-    wohnflaeche:'36,21 – 77,60 m² (je Einheit)', gesamtflaeche:'621,36 m²',
+    titel:'Ackerstraße 12 – Düsseldorf', untertitel:'Neubau · KfW 40 · 9 Wohneinheiten · Kapitalanlage',
+    adresse:'Ackerstraße 12, 40233 Düsseldorf-Flingern', preis:'Ab 319.000 €', preisDetail:'zzgl. 2,38 % Käuferprovision inkl. MwSt.',
+    baujahr:'2026 (Neubau)', zustand:'Neubau / Erstbezug', verfuegbar:'Voraussichtlich Q2 2027',
+    hausgeld:'Auf Anfrage', denkmal:'Nein', einheitenAnz:'9 Wohneinheiten',
+    wohnflaeche:'42,50 – 89,30 m² (je Einheit)', gesamtflaeche:'578,20 m²',
     zimmer:'1 bis 3-Zimmer-Wohnungen', stellplaetze:'Tiefgarage vorhanden',
-    energiestandard:'KfW 40 QNG', heizung:'Wärmepumpe', heizungsart:'Fußbodenheizung (Einzelraumregelung)',
-    energieausweis:'Wird beigestellt', kaeuferp:'3,57 % inkl. MwSt. aus dem Kaufpreis',
+    energiestandard:'KfW 40', heizung:'Wärmepumpe', heizungsart:'Fußbodenheizung (Einzelraumregelung)',
+    energieausweis:'Wird beigestellt', kaeuferp:'2,38 % inkl. MwSt. aus dem Kaufpreis',
     weitereKosten:'Notar, Grunderwerbsteuer, ggf. Grundbuch',
-    beschreibung:`Neubau in serieller Modulbauweise mit höchsten Energiestandards – das Mehrfamilienhaus am Mittelring 13 in Leipzig vereint moderne Wohnqualität mit attraktiven Investitionsmöglichkeiten.
+    beschreibung:`Exklusiver Neubau in begehrter Lage von Düsseldorf-Flingern – das Mehrfamilienhaus Ackerstraße 12 verbindet urbane Wohnqualität mit attraktivem Renditepotenzial.
 
-Das Gebäude entsteht nach dem KfW-40-QNG-Standard und bietet 11 Wohneinheiten von 1 bis 3 Zimmern. Alle Wohnungen verfügen über einen Balkon und einen eigenen Kellerabstellraum. Die Wohnungen im Erdgeschoss sind barrierefrei ausgeführt.
+Das Gebäude wird im KfW-40-Standard errichtet und bietet 9 Wohneinheiten von 1 bis 3 Zimmern. Alle Wohnungen verfügen über einen Balkon oder eine Terrasse sowie einen eigenen Kellerabstellraum. Die Erdgeschosswohnungen sind barrierefrei gestaltet.
 
-Als Kapitalanlage profitieren Investoren von der 5 % degressiven Abschreibung für Neubauten sowie der 5 % Sonderabschreibung für den KfW-40-QNG-Standard.`,
-    highlights:['Neubau in serieller Modulbauweise','KfW 40 QNG Energiestandard','Alle Wohnungen mit Balkon und Kellerabstellraum','Wohnungen im EG barrierefrei','5 % degressive AfA + 5 % Sonderabschreibung','Wärmepumpe mit Fußbodenheizung','Photovoltaikanlage auf dem Dach','Parkett, bodengleiche Dusche, Rollläden'],
-    lage:`Die Liegenschaft am Mittelring 13 befindet sich im nordöstlichen Leipziger Stadtgebiet, im Übergangsbereich der Stadtteile Sellerhausen und Schönefeld-Abtnaundorf. Diese Lage zählt zu den innerstadtnahen Entwicklungsräumen Leipzigs und profitiert in besonderem Maße von der anhaltend positiven Stadt- und Wirtschaftsentwicklung.
+Als Kapitalanlage profitieren Investoren von der 5 % degressiven Abschreibung für Neubauten sowie dem kontinuierlich wachsenden Düsseldorfer Wohnungsmarkt mit stabiler Nachfrage und steigenden Mieten.`,
+    highlights:['Neubau in zentraler Düsseldorfer Lage','KfW 40 Energiestandard','Alle Wohnungen mit Balkon oder Terrasse','Wohnungen im EG barrierefrei','5 % degressive AfA für Neubauten','Wärmepumpe mit Fußbodenheizung','Photovoltaikanlage auf dem Dach','Parkett, bodengleiche Dusche, elektrische Rollläden'],
+    lage:`Düsseldorf-Flingern zählt zu den attraktivsten innenstadtnahen Stadtteilen der Landeshauptstadt. Die Ackerstraße liegt im Herzen des Quartiers, das sich in den vergangenen Jahren zu einem lebendigen Kreativ- und Wohnviertel entwickelt hat.
 
-Der Stadtteil ist geprägt von einer gewachsenen gründerzeitlichen Wohnstruktur, ergänzt durch kontinuierlich sanierte Bestandsimmobilien und punktuelle Neubauprojekte. Die Mikrolage am Mittelring zeichnet sich durch ihre sehr gute infrastrukturelle Anbindung aus – Straßenbahn- und Busverbindungen befinden sich in fußläufiger Entfernung.
+Die Lage überzeugt durch eine exzellente ÖPNV-Anbindung: Die U-Bahn-Haltestelle Flingern sowie mehrere Straßenbahnlinien sind fußläufig erreichbar. In wenigen Minuten ist die Düsseldorfer Innenstadt, die Königsallee und der Hauptbahnhof bequem erreichbar.
 
-Einkaufsmöglichkeiten für den täglichen Bedarf, medizinische Versorgung, Schulen und Kindertagesstätten befinden sich im direkten Umfeld.`,
-    stadtbeschr:`Leipzig zählt heute zu den wachstumsstärksten Städten Deutschlands. Historisch als bedeutende Handels- und Messestadt gewachsen, verbindet die Stadt wirtschaftliche Tradition mit zukunftsorientierter Entwicklung.
+Das direkte Umfeld bietet eine hohe Versorgungsqualität: Restaurants, Cafés, Boutiquen und Supermärkte prägen das Straßenbild. Schulen und Kitas sind im Nahbereich vorhanden.`,
+    stadtbeschr:`Düsseldorf ist eine der wirtschaftsstärksten Metropolen Deutschlands und Sitz zahlreicher nationaler und internationaler Konzerne. Als Landeshauptstadt Nordrhein-Westfalens vereint die Rheinmetropole Wirtschaftskraft, Internationalität und eine ausgeprägte Lebensqualität.
 
-Mit den Produktionsstandorten von Porsche und BMW hat sich Leipzig als moderner Automobilstandort etabliert. Die Branchen Logistik, Life Sciences, IT und Kreativwirtschaft prägen das wirtschaftliche Profil der Stadt.
+Der Immobilienmarkt Düsseldorf zählt zu den stabilsten und wertstabilsten in Deutschland. Anhaltende Nachfrage bei begrenztem Angebot sorgt für kontinuierliche Wertentwicklung. Besonders gefragte Lagen wie Flingern, Pempelfort oder Unterbilk verzeichnen überdurchschnittliches Mietpreiswachstum.
 
-Leipzig gehört seit Jahren zu den Städten mit kontinuierlichem Bevölkerungswachstum. Für Investoren bietet Leipzig ein ausgewogenes Verhältnis von Wachstumspotenzial und Marktstabilität.`,
-    ausstattung:`Das Gebäude wird als energieeffizientes Wohnhaus im KfW-40-QNG-Standard in serieller industrieller Modulbauweise errichtet. Die Modulbauweise gewährleistet eine hohe Ausführungsqualität und kurze Bauzeiten.
+Für Kapitalanleger bietet Düsseldorf ein ideales Umfeld: internationale Mieterschaft, starke Wirtschaft, Top-Infrastruktur und ein diversifizierter Arbeitsmarkt in Bereichen wie Finanzen, Mode, Medien und IT.`,
+    ausstattung:`Das Gebäude wird als energieeffizientes Wohnhaus nach KfW-40-Standard errichtet. Die hochwertige Ausführung garantiert Langlebigkeit und niedrige Betriebskosten.
 
 Die Beheizung erfolgt über eine effiziente Wärmepumpe mit Fußbodenheizung und Einzelraumregelung. Eine Photovoltaikanlage auf dem Dach wird in das energetische Gesamtkonzept integriert.
 
-In allen Wohn- und Aufenthaltsräumen wird Parkett verlegt. Bäder erhalten hochwertige Feinsteinzeugfliesen. Bäder und WCs werden mit Sanitärobjekten namhafter Hersteller (z. B. Geberit) ausgestattet, inkl. bodengleicher Dusche. Alle Fenster erhalten Rollläden.`,
-    ausstattungList:['Serielle Modulbauweise / Neubau 2026','KfW 40 QNG Energiestandard','Wärmepumpe + Fußbodenheizung mit Einzelraumregelung','Photovoltaikanlage','Parkett in allen Wohnräumen','Bodengleiche Dusche','Rollläden an allen Fenstern','Hochwertige Sanitärobjekte (Geberit o. ä.)','Barrierefrei im Erdgeschoss','Kellerabstellraum je Wohnung'],
+In allen Wohn- und Aufenthaltsräumen wird Parkett verlegt. Bäder erhalten großformatige Feinsteinzeugfliesen. Sanitärobjekte stammen von Markenherstellern wie Duravit und Hansgrohe, inklusive bodengleicher Dusche. Alle Fenster erhalten elektrische Rollläden.`,
+    ausstattungList:['Neubau 2026','KfW 40 Energiestandard','Wärmepumpe + Fußbodenheizung mit Einzelraumregelung','Photovoltaikanlage','Parkett in allen Wohnräumen','Bodengleiche Dusche','Elektrische Rollläden an allen Fenstern','Hochwertige Sanitärobjekte (Duravit / Hansgrohe)','Barrierefrei im Erdgeschoss','Kellerabstellraum je Wohnung'],
     einheiten:[
-      {typ:'1-Zimmer-Wohnung',anzahl:'3',flaeche:'36,21 – 43,18 m²',preis:'Ab 189.000 €',besonderheit:'EG barrierefrei verfügbar'},
-      {typ:'2-Zimmer-Wohnung',anzahl:'5',flaeche:'52,80 – 65,40 m²',preis:'Ab 249.000 €',besonderheit:''},
-      {typ:'3-Zimmer-Wohnung',anzahl:'3',flaeche:'70,20 – 77,60 m²',preis:'Ab 329.000 €',besonderheit:''},
+      {typ:'1-Zimmer-Wohnung',anzahl:'2',flaeche:'42,50 – 51,80 m²',preis:'Ab 319.000 €',besonderheit:'EG barrierefrei verfügbar'},
+      {typ:'2-Zimmer-Wohnung',anzahl:'4',flaeche:'58,60 – 72,40 m²',preis:'Ab 419.000 €',besonderheit:''},
+      {typ:'3-Zimmer-Wohnung',anzahl:'3',flaeche:'79,90 – 89,30 m²',preis:'Ab 559.000 €',besonderheit:'Dachgeschoss mit Dachterrasse'},
     ],
-    investment:`Diese Kapitalanlage überzeugt durch außergewöhnliche steuerliche Vorteile und ein attraktives Renditeprofil. Der KfW-40-QNG-Standard eröffnet Investoren einzigartige Abschreibungsmöglichkeiten, die die Netto-Investitionskosten erheblich reduzieren.
+    investment:`Düsseldorf zählt zu den stabilsten Immobilienmärkten Deutschlands – mit anhaltend hoher Nachfrage, geringem Leerstand und einem starken Mietpreisniveau. Die Ackerstraße 12 bietet Investoren ein attraktives Gesamtpaket aus Lage, Qualität und steuerlichen Vorteilen.
 
-Der Wohnungsmarkt Leipzig zeigt kontinuierliches Wachstum bei moderatem Preisniveau – ideale Voraussetzungen für langfristige Wertsteigerung und stabile Mieteinnahmen.`,
-    investHighlights:['5 % degressive Abschreibung für Neubauten (§ 7 EStG)','5 % Sonderabschreibung für KfW-40-QNG-Standard (§ 7b EStG)','KfW-Förderung möglich','Starker Wohnungsmarkt Leipzig – anhaltende Nachfrage','Nachhaltige Wertsteigerung durch Stadtentwicklung','Serielle Bauweise = kalkulierbare Qualität und Kosten'],
-    name:'Ihr Ansprechpartner', tel:'+49 89 / 000 000 00', email:'info@boldr.de', firma:'Boldr Immobilien GmbH', kontaktAdresse:'Musterstraße 1, 80333 München',
+Neubauten profitieren von der 5 % degressiven Abschreibung, die gegenüber der klassischen linearen AfA erhebliche steuerliche Vorteile in den ersten Jahren bietet und die Netto-Investitionskosten deutlich reduziert.`,
+    investHighlights:['5 % degressive Abschreibung für Neubauten (§ 7 EStG)','KfW-Förderung möglich','Stabiler Düsseldorfer Wohnungsmarkt – anhaltend hohe Nachfrage','Steigende Mietnachfrage in Flingern','Nachhaltige Wertsteigerung durch exzellente Innenstadtlage','Hochwertige Ausstattung = attraktiv für bonitätsstarke Mieter'],
+    name:'Ihr Ansprechpartner', tel:'+49 211 / 000 000 00', email:'info@boldr.de', firma:'Boldr Immobilien GmbH', kontaktAdresse:'Königsallee 92, 40212 Düsseldorf',
   };
 
   data = d;
@@ -1744,6 +1781,37 @@ function applyVoiceData(d) {
   saveToStorage();
   navigateToStep(14);
 }
+
+// ══════════════════════════════════════════════════════
+// MOBILE BURGER / STEPPER DRAWER
+// ══════════════════════════════════════════════════════
+function openStepperDrawer() {
+  document.getElementById('stepperCol').classList.add('open');
+  document.getElementById('stepperBackdrop').classList.add('open');
+}
+
+function closeStepperDrawer() {
+  document.getElementById('stepperCol').classList.remove('open');
+  document.getElementById('stepperBackdrop').classList.remove('open');
+}
+
+function updateBurgerLabel() {
+  const lbl = document.getElementById('burgerBtnLabel');
+  if (!lbl) return;
+  const active = getActiveStepIds();
+  const idx = active.indexOf(current);
+  const def = ALL_STEP_DEFS.find(s => s.id === current);
+  if (def) lbl.textContent = `${idx + 1} · ${def.label}`;
+}
 </script>
+
+<!-- Mobile Stepper Backdrop -->
+<div class="stepper-backdrop" id="stepperBackdrop" onclick="closeStepperDrawer()"></div>
+
+<!-- Mobile Burger Button -->
+<button class="burger-btn" id="burgerBtn" onclick="openStepperDrawer()">
+  <span class="burger-btn-icon">☰</span>
+  <span class="burger-btn-label" id="burgerBtnLabel">Schritte</span>
+</button>
 </body>
 </html>
