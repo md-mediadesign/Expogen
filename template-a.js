@@ -36,7 +36,7 @@ function buildPreviewA() {
 
   // ── PAGE 1: COVER ──
   const heroImg = photos.length
-    ? `<img src="${photos[0]}" alt="Hauptbild">`
+    ? `<img src="${photos[0].src}" alt="Hauptbild">`
     : `<div class="expo-cover-hero-placeholder"><span>Kein Hauptbild hochgeladen</span></div>`;
   out.innerHTML += `
   <div class="expo-page expo-cover">
@@ -63,11 +63,14 @@ function buildPreviewA() {
     ['Wohnfläche', d.wohnflaeche],
     ['Gesamtfläche', d.gesamtflaeche],
     ['Zimmer', d.zimmer],
-    ['Stellplätze', d.stellplaetze],
+    ['Stellplätze', [d.stellplaetzeTyp, d.stellplaetzeAnz ? d.stellplaetzeAnz+' Pl.' : '', d.stellplaetzeKosten].filter(Boolean).join(' · ') || d.stellplaetze],
     ['Energiestandard', d.energiestandard],
     ['Heizung', d.heizung],
     ['Heizungsart', d.heizungsart],
     ['Energieausweis', d.energieausweis],
+    ['Energieklasse', d.energieklasse],
+    ['Primärenergiebedarf', d.energiekennwert ? d.energiekennwert + ' kWh/(m²·a)' : ''],
+    ['Ausweistyp', d.energieausweisTyp],
     ['Kaufpreis', d.preis],
     ['Käuferprovision', d.kaeuferp],
     ['Weitere Kosten', d.weitereKosten],
@@ -78,7 +81,7 @@ function buildPreviewA() {
 
   const mkTable = rows => `<table class="expo-data-table">${rows.map(r=>`<tr><td>${escHtml(r[0])}</td><td>${escHtml(r[1])}</td></tr>`).join('')}</table>`;
 
-  const sideImg = photos.length > 1 ? `<img src="${photos[1]}" class="expo-sidebar-img" alt="">` : '';
+  const sideImg = photos.length > 1 ? `<img src="${photos[1].src}" class="expo-sidebar-img" alt="">` : '';
 
   out.innerHTML += `
   <div class="expo-page expo-inner">
@@ -111,7 +114,7 @@ function buildPreviewA() {
         </div>
         <div>
           ${hlHtml}
-          ${photos.length>2?`<img src="${photos[2]}" style="width:100%;aspect-ratio:4/3;object-fit:cover;margin-top:1rem;border-radius:4px" alt="">` : ''}
+          ${photos.length>2?`<img src="${photos[2].src}" style="width:100%;aspect-ratio:4/3;object-fit:cover;margin-top:1rem;border-radius:4px" alt="">` : ''}
         </div>
       </div>
     </div>
@@ -127,7 +130,7 @@ function buildPreviewA() {
         <div class="expo-page-title">Stadtteil & Mikrolage</div>
         <div class="expo-two-col">
           <div class="expo-body-plain"><p>${d.lage.split('\n').filter(Boolean).map(escHtml).join('</p><p>')}</p></div>
-          <div>${photos.length>3?`<img src="${photos[3]}" style="width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:4px" alt="">`:''}</div>
+          <div>${photos.length>3?`<img src="${photos[3].src}" style="width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:4px" alt="">`:''}</div>
         </div>
       </div>
     </div>`;
@@ -158,7 +161,7 @@ function buildPreviewA() {
         <div class="expo-page-title">Ausstattung & Qualität</div>
         <div class="expo-two-col">
           <div><div class="expo-body">${escHtml(d.ausstattung||'')}</div></div>
-          <div>${ausHtml}${photos.length>4?`<img src="${photos[4]}" style="width:100%;aspect-ratio:4/3;object-fit:cover;margin-top:1rem;border-radius:4px" alt="">`:''}
+          <div>${ausHtml}${photos.length>4?`<img src="${photos[4].src}" style="width:100%;aspect-ratio:4/3;object-fit:cover;margin-top:1rem;border-radius:4px" alt="">`:''}
           </div>
         </div>
       </div>

@@ -123,6 +123,15 @@ const TB_CSS = `
   transform: rotate(20deg);
   z-index: 7;
 }
+.tb-cover-subtitle {
+  font-size: 8.5pt;
+  color: rgba(255,255,255,0.82);
+  letter-spacing: 0.06em;
+  margin-top: 0.9rem;
+  line-height: 1.55;
+  font-weight: 400;
+  max-width: 100%;
+}
 .tb-cover-caption {
   position: absolute;
   bottom: 1rem;
@@ -190,6 +199,24 @@ const TB_CSS = `
   letter-spacing: 0.12em;
   text-transform: uppercase;
   margin-top: 0.6rem;
+}
+.tb-ek-chip {
+  display: inline-block;
+  color: white;
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 18pt;
+  font-weight: 700;
+  padding: 0.2rem 0.7rem;
+  letter-spacing: 0.05em;
+  margin-top: 1.2rem;
+  border-radius: 2px;
+}
+.tb-ek-label {
+  font-size: 6.5pt;
+  color: rgba(255,255,255,0.75);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-top: 0.25rem;
 }
 .tb-facts-right {
   flex: 1;
@@ -510,8 +537,10 @@ const TB_CSS = `
   text-transform: uppercase;
   color: #b25450;
 }
-.tb-gallery-hero {
+.tb-gallery-hero-wrap {
   padding: 0 2.5rem;
+}
+.tb-gallery-hero {
   height: 68mm;
   overflow: hidden;
 }
@@ -521,29 +550,32 @@ const TB_CSS = `
   object-fit: cover;
   display: block;
 }
+.tb-gallery-caption {
+  font-size: 5.5pt;
+  color: #7a7a7a;
+  padding: 0.18rem 0.1rem;
+  line-height: 1.3;
+}
+.tb-gallery-img-wrap {
+  overflow: hidden;
+}
+.tb-gallery-img-wrap img {
+  width: 100%;
+  height: 40mm;
+  object-fit: cover;
+  display: block;
+}
 .tb-gallery-grid3 {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 3px;
   padding: 3px 2.5rem 0;
 }
-.tb-gallery-grid3 img {
-  width: 100%;
-  height: 40mm;
-  object-fit: cover;
-  display: block;
-}
 .tb-gallery-grid2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 3px;
   padding: 3px 2.5rem 0;
-}
-.tb-gallery-grid2 img {
-  width: 100%;
-  height: 40mm;
-  object-fit: cover;
-  display: block;
 }
 
 /* ─── KONTAKT ────────────────────────────────────────── */
@@ -718,6 +750,13 @@ const TB_CSS = `
   color: #b25450;
   line-height: 0.85;
 }
+.tb-back-subtitle {
+  font-size: 8pt;
+  color: rgba(58,58,58,0.78);
+  letter-spacing: 0.08em;
+  margin-top: 0.7rem;
+  line-height: 1.5;
+}
 .tb-back-footer {
   position: absolute;
   bottom: 2rem;
@@ -778,7 +817,7 @@ function buildPreviewB() {
   const coverNum   = addrMatch ? addrMatch[2] : '';
 
   // ── PAGE 1: COVER ──────────────────────────────────────
-  const hero = photos.length ? `<img src="${photos[0]}" alt="">` : `<div class="tb-cover-photo-placeholder">Kein Foto hochgeladen</div>`;
+  const hero = photos.length ? `<img src="${photos[0].src}" alt="">` : `<div class="tb-cover-photo-placeholder">Kein Foto hochgeladen</div>`;
   out.innerHTML += `
   <div class="tb-page tb-cover">
     <div class="tb-cover-hatch"></div>
@@ -789,6 +828,7 @@ function buildPreviewB() {
       ${coverNum
         ? `<div class="tb-cover-number">${esc(coverNum)}</div>`
         : `<div class="tb-cover-number" style="font-size:32pt;line-height:1.1">${esc(d.titel || '')}</div>`}
+      ${d.untertitel ? `<div class="tb-cover-subtitle">${esc(d.untertitel)}</div>` : ''}
     </div>
     <div class="tb-cover-diag"></div>
     ${d.adresse ? `<div class="tb-cover-caption">${esc(d.adresse)}</div>` : ''}
@@ -805,11 +845,14 @@ function buildPreviewB() {
     ['Wohnfläche',       d.wohnflaeche],
     ['Gesamtfläche',     d.gesamtflaeche],
     ['Zimmer',           d.zimmer],
-    ['Stellplätze',      d.stellplaetze],
+    ['Stellplätze',      [d.stellplaetzeTyp, d.stellplaetzeAnz ? d.stellplaetzeAnz+' Pl.' : '', d.stellplaetzeKosten].filter(Boolean).join(' · ') || d.stellplaetze],
     ['Energiestandard',  d.energiestandard],
     ['Heizung',          d.heizung],
     ['Heizungsart',      d.heizungsart],
     ['Energieausweis',   d.energieausweis],
+    ['Energieklasse',    d.energieklasse],
+    ['Primärenergiebedarf', d.energiekennwert ? d.energiekennwert + ' kWh/(m²·a)' : ''],
+    ['Ausweistyp',       d.energieausweisTyp],
     ['Verfügbarkeit',    d.verfuegbar],
     ['Hausgeld',         d.hausgeld],
     ['Kaufpreis',        d.preis],
@@ -826,6 +869,10 @@ function buildPreviewB() {
     : d.einheitenAnz ? esc(d.type || '')
     : '';
 
+  const ekColors = {'A+':'#00a651','A':'#57b240','B':'#a8c840','C':'#d4c800','D':'#f0a800','E':'#e87000','F':'#e84000','G':'#c80000','H':'#780000'};
+  const ekColor = d.energieklasse ? (ekColors[d.energieklasse] || '#888') : null;
+  const ekChipHtml = ekColor ? `<div class="tb-ek-chip" style="background:${ekColor}">${esc(d.energieklasse)}</div><div class="tb-ek-label">Energieklasse</div>` : '';
+
   const subheadParts = [
     d.einheitenAnz ? `${esc(d.einheitenAnz)} Einheiten` : '',
     d.zimmer       ? `${esc(d.zimmer)} Zimmer` : '',
@@ -841,6 +888,7 @@ function buildPreviewB() {
         <div class="tb-facts-badge">
           <div class="tb-facts-badge-title">${badgeTitle}</div>
           ${badgeSub ? `<div class="tb-facts-badge-sub">${esc(badgeSub)}</div>` : ''}
+          ${ekChipHtml}
         </div>
       </div>
       <div class="tb-facts-right">
@@ -857,6 +905,7 @@ function buildPreviewB() {
   const hlHtml = d.highlights?.length
     ? `<ul class="tb-hl-list">${d.highlights.map(h => `<li>${esc(h)}</li>`).join('')}</ul>` : '';
   const descPhoto = photos.length > 1 ? photos[1] : null;
+  const descPhotoSrc = descPhoto ? descPhoto.src : null;
 
   out.innerHTML += `
   <div class="tb-page">
@@ -865,9 +914,9 @@ function buildPreviewB() {
       <div class="tb-desc-body">${esc(d.beschreibung || '')}</div>
       <div>${hlHtml}</div>
     </div>
-    ${descPhoto ? `
+    ${descPhotoSrc ? `
     <div class="tb-photo-overlay-wrap">
-      <img src="${descPhoto}" alt="">
+      <img src="${descPhotoSrc}" alt="">
       <div class="tb-photo-overlay-text">
         <div class="tb-photo-overlay-headline">${esc((d.titel || '').toUpperCase())}</div>
       </div>
@@ -876,8 +925,8 @@ function buildPreviewB() {
 
   // ── PAGE 4: LAGE (M+L) ────────────────────────────────
   if ((size === 'M' || size === 'L') && d.lage && isStepEnabled(8)) {
-    const lp1 = photos.length > 2 ? photos[2] : null;
-    const lp2 = photos.length > 3 ? photos[3] : null;
+    const lp1 = photos.length > 2 ? photos[2].src : null;
+    const lp2 = photos.length > 3 ? photos[3].src : null;
     out.innerHTML += `
     <div class="tb-page">
       ${pageHeader}
@@ -897,7 +946,7 @@ function buildPreviewB() {
 
   // ── PAGE 5: STADTBESCHREIBUNG (L) ─────────────────────
   if (size === 'L' && d.stadtbeschr && isStepEnabled(9)) {
-    const sp = photos.length > 4 ? photos[4] : null;
+    const sp = photos.length > 4 ? photos[4].src : null;
     out.innerHTML += `
     <div class="tb-page tb-stadt-page">
       <div class="tb-stadt-bg">
@@ -912,7 +961,7 @@ function buildPreviewB() {
 
   // ── PAGE 6: AUSSTATTUNG (L) ───────────────────────────
   if (size === 'L' && (d.ausstattung || d.ausstattungList?.length) && isStepEnabled(10)) {
-    const ap = photos.length > 5 ? photos[5] : photos.length > 2 ? photos[2] : null;
+    const ap = photos.length > 5 ? photos[5].src : photos.length > 2 ? photos[2].src : null;
     const ausListHtml = d.ausstattungList?.length
       ? `<ul class="tb-aus-list">${d.ausstattungList.map(a => `<li>${esc(a)}</li>`).join('')}</ul>` : '';
     const buildingIcon = `<svg viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#3a3a3a" stroke-width="2.5" stroke-linecap="round">
@@ -988,32 +1037,41 @@ function buildPreviewB() {
     }
   }
 
-  // ── PAGE 8: FOTOGALERIE ───────────────────────────────
+  // ── PAGE 8+: FOTOGALERIE ─────────────────────────────
   if (photos.length) {
-    const gall = photos.slice(0, 10);
-    const [p0, ...rest] = gall;
-    // Group rest into chunks of 3, last chunk of 1-2 → grid2
-    const chunks = [];
-    for (let i = 0; i < rest.length; i += 3) chunks.push(rest.slice(i, i + 3));
+    // Split into pages: 1 hero + up to 6 more (2 rows of 3) = 7 per page
+    const PHOTOS_PER_PAGE = 7;
+    const gallPages = [];
+    for (let i = 0; i < photos.length; i += PHOTOS_PER_PAGE) gallPages.push(photos.slice(i, i + PHOTOS_PER_PAGE));
 
-    out.innerHTML += `
-    <div class="tb-page">
-      ${pageHeader}
-      <div class="tb-gallery-label">IMPRESSIONEN</div>
-      <div class="tb-gallery-hero"><img src="${p0}" alt=""></div>
-      ${chunks.map(ch => ch.length === 3
-        ? `<div class="tb-gallery-grid3">${ch.map(s => `<img src="${s}" alt="">`).join('')}</div>`
-        : `<div class="tb-gallery-grid2">${ch.map(s => `<img src="${s}" alt="">`).join('')}</div>`
-      ).join('')}
-    </div>`;
+    gallPages.forEach((pagePhotos, pgIdx) => {
+      const [p0, ...rest] = pagePhotos;
+      const chunks = [];
+      for (let i = 0; i < rest.length; i += 3) chunks.push(rest.slice(i, i + 3));
+      const pageLabel = gallPages.length > 1 ? `IMPRESSIONEN ${pgIdx + 1} / ${gallPages.length}` : 'IMPRESSIONEN';
+
+      out.innerHTML += `
+      <div class="tb-page">
+        ${pageHeader}
+        <div class="tb-gallery-label">${pageLabel}</div>
+        <div class="tb-gallery-hero-wrap">
+          <div class="tb-gallery-hero"><img src="${p0.src}" alt=""></div>
+          ${p0.caption ? `<div class="tb-gallery-caption">${esc(p0.caption)}</div>` : ''}
+        </div>
+        ${chunks.map(ch => ch.length === 3
+          ? `<div class="tb-gallery-grid3">${ch.map(p => `<div class="tb-gallery-img-wrap"><img src="${p.src}" alt="">${p.caption ? `<div class="tb-gallery-caption">${esc(p.caption)}</div>` : ''}</div>`).join('')}</div>`
+          : `<div class="tb-gallery-grid2">${ch.map(p => `<div class="tb-gallery-img-wrap"><img src="${p.src}" alt="">${p.caption ? `<div class="tb-gallery-caption">${esc(p.caption)}</div>` : ''}</div>`).join('')}</div>`
+        ).join('')}
+      </div>`;
+    });
   }
 
   // ── PAGE 9: KONTAKT ───────────────────────────────────
   const hasInvest = size === 'L' && isStepEnabled(12) && (d.investment || d.investHighlights?.length);
-  const cp = photos.length >= 3 ? photos.slice(-3) : photos;
-  const cp0 = cp[0] || null;
-  const cp1 = cp[1] || null;
-  const cp2 = cp[2] || null;
+  const cpArr = photos.length >= 3 ? photos.slice(-3) : photos;
+  const cp0 = cpArr[0] ? cpArr[0].src : null;
+  const cp1 = cpArr[1] ? cpArr[1].src : null;
+  const cp2 = cpArr[2] ? cpArr[2].src : null;
 
   const contactLogoHtml = d.brandLogoSrc
     ? `<img src="${d.brandLogoSrc}" style="max-height:36px;object-fit:contain" alt="">`
@@ -1061,6 +1119,7 @@ function buildPreviewB() {
       ${coverNum
         ? `<div class="tb-back-number">${esc(coverNum)}</div>`
         : `<div class="tb-back-number" style="font-size:30pt">${esc(d.titel || '')}</div>`}
+      ${d.untertitel ? `<div class="tb-back-subtitle">${esc(d.untertitel)}</div>` : ''}
     </div>
     <div class="tb-back-footer">
       ${backLogoHtml}

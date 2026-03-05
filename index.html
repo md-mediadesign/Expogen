@@ -171,11 +171,13 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
 .btn-photo{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);border-radius:8px;color:var(--gold);font-family:'Roboto',sans-serif;font-size:.8rem;font-weight:500;padding:.6rem 1.4rem;cursor:pointer;transition:all .25s}
 .btn-photo:hover{background:rgba(201,168,76,.18);border-color:var(--gold)}
 .photo-count{font-size:.75rem;color:var(--muted);margin-bottom:.8rem;text-align:center}
-.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.8rem;margin-bottom:1rem}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.8rem;margin-bottom:1rem}
+.photo-item{display:flex;flex-direction:column;gap:.3rem}
 .photo-thumb{position:relative;border-radius:8px;overflow:hidden;aspect-ratio:4/3;border:1px solid rgba(201,168,76,.15)}
 .photo-thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .photo-thumb .del-photo{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.7);border:none;color:#fff;font-size:.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
 .photo-thumb:hover .del-photo{opacity:1}
+.photo-caption-input{font-size:.72rem;padding:.22rem .4rem;border:1px solid rgba(201,168,76,.2);border-radius:4px;background:rgba(255,255,255,.05);color:var(--fg);width:100%;box-sizing:border-box}
 
 /* ── Highlights / Einheiten ── */
 .list-items{display:flex;flex-direction:column;gap:.65rem;margin-bottom:.9rem}
@@ -293,6 +295,27 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
 
 /* Sidebar photo on data page */
 .expo-sidebar-img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:4px}
+
+/* ══════════════════════════════════════════════════════
+   STARTUP MODAL
+══════════════════════════════════════════════════════ */
+.startup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);z-index:3000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+.startup-overlay.open{opacity:1;pointer-events:all}
+.startup-modal{background:var(--navy2);border:1px solid var(--border);border-radius:20px;padding:2.5rem 2.4rem;max-width:460px;width:92%;box-shadow:0 32px 100px rgba(0,0,0,.8);transform:scale(.95);transition:transform .3s;text-align:center}
+.startup-overlay.open .startup-modal{transform:scale(1)}
+.startup-logo{font-family:'Ubuntu',sans-serif;font-size:1.6rem;font-weight:700;color:var(--gold);letter-spacing:.04em;margin-bottom:.4rem}
+.startup-tagline{font-size:.82rem;color:var(--muted);margin-bottom:2rem}
+.startup-options{display:flex;flex-direction:column;gap:.75rem}
+.btn-startup{border-radius:12px;padding:1rem 1.4rem;font-family:'Roboto',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;border:none;display:flex;align-items:center;gap:.8rem;text-align:left}
+.btn-startup-primary{background:var(--gold);color:var(--navy)}
+.btn-startup-primary:hover{background:#dbb84a;transform:translateY(-1px)}
+.btn-startup-secondary{background:rgba(255,255,255,.06);color:var(--cream);border:1px solid rgba(255,255,255,.1)}
+.btn-startup-secondary:hover{background:rgba(255,255,255,.1);transform:translateY(-1px)}
+.btn-startup-resume{background:rgba(201,168,76,.12);color:var(--gold);border:1px solid rgba(201,168,76,.25)}
+.btn-startup-resume:hover{background:rgba(201,168,76,.2);transform:translateY(-1px)}
+.btn-startup-icon{font-size:1.3rem;flex-shrink:0}
+.btn-startup-text strong{display:block;font-size:.88rem}
+.btn-startup-text span{font-size:.76rem;font-weight:400;opacity:.7}
 
 /* ══════════════════════════════════════════════════════
    MODALS
@@ -634,8 +657,8 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
     <div class="step-content" data-step="5">
       <div class="step-num" id="stepNum5"></div>
       <div class="step-title">Fotos & Visualisierungen</div>
-      <div class="step-desc">Das erste Bild wird als Deckblatt-Hauptbild verwendet. Bis zu 10 Bilder.</div>
-      <div class="photo-count" id="photoCount">0 / 10 Fotos</div>
+      <div class="step-desc">Das erste Bild wird als Deckblatt-Hauptbild verwendet. Bis zu 20 Bilder. Optional Beschreibung pro Bild.</div>
+      <div class="photo-count" id="photoCount">0 / 20 Fotos</div>
       <div class="photo-grid" id="photoGrid"></div>
       <div class="photo-upload-area" id="dropZone">
         <div class="upload-icon">📷</div>
@@ -663,12 +686,19 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
       <div class="fields-section">
         <div class="fields-section-title">Fläche & Aufteilung</div>
         <div class="field-row"><div><label>Wohnfläche (Einheit)</label><input type="text" id="f-wohnflaeche" placeholder="z. B. 36 – 78 m²"></div><div><label>Gesamtfläche</label><input type="text" id="f-gesamtflaeche" placeholder="z. B. 621,36 m²"></div></div>
-        <div class="field-row"><div><label>Zimmer</label><input type="text" id="f-zimmer" placeholder="z. B. 1 – 3-Zimmer-Wohnungen"></div><div><label>Stellplätze</label><input type="text" id="f-stellplaetze" placeholder="z. B. Tiefgarage vorhanden"></div></div>
+        <div class="field-row"><div><label>Zimmer</label><input type="text" id="f-zimmer" placeholder="z. B. 1 – 3-Zimmer-Wohnungen"></div><div></div></div>
+      </div>
+      <div class="fields-section">
+        <div class="fields-section-title">Stellplätze</div>
+        <div style="margin-bottom:.7rem"><label style="margin-bottom:.4rem;display:block">Art (Mehrfachauswahl)</label><div style="display:flex;flex-wrap:wrap;gap:.5rem .9rem"><label style="display:flex;align-items:center;gap:.35rem;font-size:.85rem;font-weight:400"><input type="checkbox" class="stellplatz-typ" value="Tiefgarage"> Tiefgarage</label><label style="display:flex;align-items:center;gap:.35rem;font-size:.85rem;font-weight:400"><input type="checkbox" class="stellplatz-typ" value="Außenstellplatz"> Außenstellplatz</label><label style="display:flex;align-items:center;gap:.35rem;font-size:.85rem;font-weight:400"><input type="checkbox" class="stellplatz-typ" value="Garage"> Garage</label><label style="display:flex;align-items:center;gap:.35rem;font-size:.85rem;font-weight:400"><input type="checkbox" class="stellplatz-typ" value="Duplex (Hublift)"> Duplex (Hublift)</label><label style="display:flex;align-items:center;gap:.35rem;font-size:.85rem;font-weight:400"><input type="checkbox" class="stellplatz-typ" value="Carport"> Carport</label></div></div>
+        <div class="field-row"><div><label>Anzahl Stellplätze</label><input type="number" id="f-stellplaetze-anz" placeholder="z. B. 11" min="0"></div><div><label>Kosten</label><input type="text" id="f-stellplaetze-kosten" placeholder="z. B. 75 €/Monat oder Im Kaufpreis"></div></div>
       </div>
       <div class="fields-section">
         <div class="fields-section-title">Heizung & Energie</div>
         <div class="field-row"><div><label>Energiestandard</label><input type="text" id="f-energiestandard" placeholder="z. B. KfW 40 QNG"></div><div><label>Heizung</label><input type="text" id="f-heizung" placeholder="z. B. Wärmepumpe"></div></div>
         <div class="field-row"><div><label>Heizungsart</label><input type="text" id="f-heizungsart" placeholder="z. B. Fußbodenheizung"></div><div><label>Energieausweis</label><input type="text" id="f-energieausweis" placeholder="z. B. Liegt vor / Wird beigestellt"></div></div>
+        <div class="field-row"><div><label>Energieklasse</label><select id="f-energieklasse"><option value="">— keine Angabe —</option><option>A+</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option></select></div><div><label>Primärenergiebedarf (kWh/m²·a)</label><input type="text" id="f-energiekennwert" placeholder="z. B. 28,5"></div></div>
+        <div class="field-row"><div><label>Ausweistyp</label><select id="f-energieausweisTyp"><option value="">— keine Angabe —</option><option>Bedarfsausweis</option><option>Verbrauchsausweis</option></select></div><div></div></div>
       </div>
       <div class="fields-section">
         <div class="fields-section-title">Kaufpreis</div>
@@ -836,6 +866,17 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
   </div>
 </div>
 
+<!-- Startup Modal -->
+<div class="startup-overlay" id="startupOverlay">
+  <div class="startup-modal">
+    <div class="startup-logo">EXPOGEN</div>
+    <div class="startup-tagline">Professionelle Exposés in Minuten</div>
+    <div class="startup-options" id="startupOptions">
+      <!-- buttons rendered by JS -->
+    </div>
+  </div>
+</div>
+
 <!-- Confirm Modal -->
 <div class="confirm-overlay" id="confirmOverlay" onclick="closeConfirmOnBg(event)">
   <div class="confirm-modal">
@@ -969,13 +1010,59 @@ let voiceTranscript = '';
 // INIT
 // ══════════════════════════════════════════════════════
 function init() {
-  loadFromStorage();
   buildStepper();
   initHighlights();
   initAusstattungList();
   initEinheiten();
   initInvestList();
   setupDragDrop();
+  showStartupModal();
+}
+
+function showStartupModal() {
+  const hasSaved = !!localStorage.getItem('expogen_data');
+  const opts = document.getElementById('startupOptions');
+  opts.innerHTML = '';
+
+  if (hasSaved) {
+    opts.innerHTML += `
+      <button class="btn-startup btn-startup-resume" onclick="startupResume()">
+        <span class="btn-startup-icon">↩</span>
+        <span class="btn-startup-text"><strong>Letzten Stand fortsetzen</strong><span>Gespeicherte Eingaben laden</span></span>
+      </button>`;
+  }
+  opts.innerHTML += `
+    <button class="btn-startup btn-startup-primary" onclick="startupDemo()">
+      <span class="btn-startup-icon">★</span>
+      <span class="btn-startup-text"><strong>Mit Demodaten starten</strong><span>Beispielobjekt – sofort loslegen</span></span>
+    </button>
+    <button class="btn-startup btn-startup-secondary" onclick="startupEmpty()">
+      <span class="btn-startup-icon">○</span>
+      <span class="btn-startup-text"><strong>Leer starten</strong><span>Alle Felder leer – eigene Daten eingeben</span></span>
+    </button>`;
+
+  document.getElementById('startupOverlay').classList.add('open');
+}
+
+function closeStartupModal() {
+  document.getElementById('startupOverlay').classList.remove('open');
+}
+
+function startupResume() {
+  closeStartupModal();
+  loadFromStorage();
+  showStep(current);
+  updateNav();
+}
+
+function startupDemo() {
+  closeStartupModal();
+  loadDemo();
+}
+
+function startupEmpty() {
+  closeStartupModal();
+  current = 1;
   showStep(current);
   updateNav();
 }
@@ -1147,7 +1234,7 @@ function val(id){ const e=document.getElementById(id); return e?e.value.trim():'
 function collectStep(id) {
   if (id===3){ data.brandFirma=val('f-brandFirma'); }
   if (id===4){ data.titel=val('f-titel'); data.untertitel=val('f-untertitel'); data.adresse=val('f-adresse'); data.preis=val('f-preis'); data.preisDetail=val('f-preisDetail'); }
-  if (id===6){ ['baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','stellplaetze','energiestandard','heizung','heizungsart','energieausweis','kaeuferp','weitereKosten'].forEach(k=>{ data[k]=val('f-'+k); }); }
+  if (id===6){ ['baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','energiestandard','heizung','heizungsart','energieausweis','energieklasse','energiekennwert','energieausweisTyp','kaeuferp','weitereKosten'].forEach(k=>{ data[k]=val('f-'+k); }); data.stellplaetzeTyp=[...document.querySelectorAll('.stellplatz-typ:checked')].map(cb=>cb.value).join(', '); data.stellplaetzeAnz=val('f-stellplaetze-anz'); data.stellplaetzeKosten=val('f-stellplaetze-kosten'); }
   if (id===7){ data.beschreibung=val('f-beschreibung'); data.highlights=[...document.querySelectorAll('.hl-input')].map(i=>i.value.trim()).filter(Boolean); }
   if (id===8){ data.lage=val('f-lage'); }
   if (id===9){ data.stadtbeschr=val('f-stadtbeschr'); }
@@ -1227,11 +1314,11 @@ function setupDragDrop() {
 }
 
 function handlePhotoFiles(files) {
-  const arr = Array.from(files).slice(0, 10 - photos.length);
+  const arr = Array.from(files).slice(0, 20 - photos.length);
   arr.forEach(file=>{
     if (!file.type.startsWith('image/')) return;
     const reader = new FileReader();
-    reader.onload = e => { photos.push(e.target.result); renderPhotoGrid(); };
+    reader.onload = e => { photos.push({src: e.target.result, caption: ''}); renderPhotoGrid(); };
     reader.readAsDataURL(file);
   });
 }
@@ -1239,14 +1326,23 @@ function handlePhotoFiles(files) {
 function renderPhotoGrid() {
   const grid = document.getElementById('photoGrid');
   grid.innerHTML = '';
-  photos.forEach((src,i)=>{
-    const wrap = document.createElement('div');
-    wrap.className = 'photo-thumb';
-    wrap.innerHTML = `<img src="${src}" alt="Foto ${i+1}"><button class="del-photo" onclick="removePhoto(${i})">×</button>`;
-    grid.appendChild(wrap);
+  photos.forEach((p,i)=>{
+    const item = document.createElement('div');
+    item.className = 'photo-item';
+    const thumb = document.createElement('div');
+    thumb.className = 'photo-thumb';
+    thumb.innerHTML = `<img src="${p.src}" alt="Foto ${i+1}"><button class="del-photo" onclick="removePhoto(${i})">×</button>`;
+    const cap = document.createElement('input');
+    cap.className = 'photo-caption-input';
+    cap.placeholder = 'Beschreibung (optional)';
+    cap.value = p.caption || '';
+    cap.oninput = () => { photos[i].caption = cap.value; };
+    item.appendChild(thumb);
+    item.appendChild(cap);
+    grid.appendChild(item);
   });
-  document.getElementById('photoCount').textContent = `${photos.length} / 10 Fotos`;
-  document.getElementById('dropZone').style.display = photos.length >= 10 ? 'none' : '';
+  document.getElementById('photoCount').textContent = `${photos.length} / 20 Fotos`;
+  document.getElementById('dropZone').style.display = photos.length >= 20 ? 'none' : '';
 }
 
 function removePhoto(idx) { photos.splice(idx,1); renderPhotoGrid(); }
@@ -1349,7 +1445,7 @@ function doResetAll() {
   document.getElementById('einheitenBody').innerHTML='';
   document.getElementById('investList').innerHTML='';
   document.getElementById('photoGrid').innerHTML='';
-  document.getElementById('photoCount').textContent='0 / 10 Fotos';
+  document.getElementById('photoCount').textContent='0 / 20 Fotos';
   document.getElementById('dropZone').style.display='';
   document.getElementById('logoPreviewImg').style.display='none';
   document.getElementById('logoPlaceholder').style.display='';
@@ -1365,7 +1461,7 @@ function resetCurrentStep() {
     case 3: setVal('f-brandFirma',''); data.brandFirma=''; data.brandLogoSrc=null; document.getElementById('logoPreviewImg').style.display='none'; document.getElementById('logoPlaceholder').style.display=''; break;
     case 4: ['f-titel','f-untertitel','f-adresse','f-preis','f-preisDetail'].forEach(id=>setVal(id,'')); break;
     case 5: photos=[]; renderPhotoGrid(); break;
-    case 6: ['baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','stellplaetze','energiestandard','heizung','heizungsart','energieausweis','kaeuferp','weitereKosten'].forEach(k=>{setVal('f-'+k,''); delete data[k];}); break;
+    case 6: ['baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','energiestandard','heizung','heizungsart','energieausweis','energieklasse','energiekennwert','energieausweisTyp','kaeuferp','weitereKosten'].forEach(k=>{setVal('f-'+k,''); delete data[k];}); document.querySelectorAll('.stellplatz-typ').forEach(cb=>cb.checked=false); setVal('f-stellplaetze-anz',''); setVal('f-stellplaetze-kosten',''); data.stellplaetzeTyp=''; data.stellplaetzeAnz=''; data.stellplaetzeKosten=''; break;
     case 7: setVal('f-beschreibung',''); document.getElementById('highlightList').innerHTML=''; data.highlights=[]; initHighlights(); break;
     case 8: setVal('f-lage',''); delete data.lage; break;
     case 9: setVal('f-stadtbeschr',''); delete data.stadtbeschr; break;
@@ -1446,8 +1542,11 @@ function loadFromStorage() {
       if(data.size){ const c=document.querySelector(`.groesse-card[data-size="${data.size}"]`); if(c) c.classList.add('selected'); }
       if(data.type){ const c=document.querySelector(`.type-card[data-type="${data.type}"]`); if(c) c.classList.add('selected'); }
       if(data.colorPair){ const c=document.querySelector(`.color-pair-card[data-pair="${data.colorPair}"]`); if(c) c.classList.add('selected'); }
-      const fields=['brandFirma','titel','untertitel','adresse','preis','preisDetail','baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','stellplaetze','energiestandard','heizung','heizungsart','energieausweis','kaeuferp','weitereKosten','beschreibung','lage','stadtbeschr','ausstattung','investment','name','tel','email','firma','kontaktAdresse'];
+      const fields=['brandFirma','titel','untertitel','adresse','preis','preisDetail','baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','energiestandard','heizung','heizungsart','energieausweis','energieklasse','energiekennwert','energieausweisTyp','kaeuferp','weitereKosten','beschreibung','lage','stadtbeschr','ausstattung','investment','name','tel','email','firma','kontaktAdresse'];
       fields.forEach(k=>{ if(data[k]) setVal('f-'+k, data[k]); });
+      if(data.stellplaetzeTyp){ data.stellplaetzeTyp.split(', ').forEach(v=>{ const cb=document.querySelector(`.stellplatz-typ[value="${v}"]`); if(cb) cb.checked=true; }); }
+      if(data.stellplaetzeAnz) setVal('f-stellplaetze-anz', data.stellplaetzeAnz);
+      if(data.stellplaetzeKosten) setVal('f-stellplaetze-kosten', data.stellplaetzeKosten);
       if(data.highlights?.length){ document.getElementById('highlightList').innerHTML=''; data.highlights.forEach(h=>addHighlight(h)); }
       if(data.ausstattungList?.length){ document.getElementById('ausstattungList').innerHTML=''; data.ausstattungList.forEach(a=>addAusstattung(a)); }
       if(data.investHighlights?.length){ document.getElementById('investList').innerHTML=''; data.investHighlights.forEach(v=>addInvest(v)); }
@@ -1504,9 +1603,11 @@ function loadDemo() {
     baujahr:'2026 (Neubau)', zustand:'Neubau / Erstbezug', verfuegbar:'Voraussichtlich Q2 2027',
     hausgeld:'Auf Anfrage', denkmal:'Nein', einheitenAnz:'9 Wohneinheiten',
     wohnflaeche:'42,50 – 89,30 m² (je Einheit)', gesamtflaeche:'578,20 m²',
-    zimmer:'1 bis 3-Zimmer-Wohnungen', stellplaetze:'Tiefgarage vorhanden',
+    zimmer:'1 bis 3-Zimmer-Wohnungen',
+    stellplaetzeTyp:'Tiefgarage, Duplex (Hublift)', stellplaetzeAnz:'9', stellplaetzeKosten:'75 €/Monat',
     energiestandard:'KfW 40', heizung:'Wärmepumpe', heizungsart:'Fußbodenheizung (Einzelraumregelung)',
-    energieausweis:'Wird beigestellt', kaeuferp:'2,38 % inkl. MwSt. aus dem Kaufpreis',
+    energieausweis:'Wird beigestellt', energieklasse:'A', energiekennwert:'28,5', energieausweisTyp:'Bedarfsausweis',
+    kaeuferp:'2,38 % inkl. MwSt. aus dem Kaufpreis',
     weitereKosten:'Notar, Grunderwerbsteuer, ggf. Grundbuch',
     beschreibung:`Exklusiver Neubau in begehrter Lage von Düsseldorf-Flingern – das Mehrfamilienhaus Ackerstraße 12 verbindet urbane Wohnqualität mit attraktivem Renditepotenzial.
 
@@ -1545,16 +1646,18 @@ Neubauten profitieren von der 5 % degressiven Abschreibung, die gegenüber der k
   data = d;
   const gc = document.querySelector(`.groesse-card[data-size="L"]`); if(gc) gc.classList.add('selected');
   const tc = document.querySelector(`.type-card[data-type="Neubau-Projekt"]`); if(tc) tc.classList.add('selected');
-  const fields=['brandFirma','titel','untertitel','adresse','preis','preisDetail','baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','stellplaetze','energiestandard','heizung','heizungsart','energieausweis','kaeuferp','weitereKosten','beschreibung','lage','stadtbeschr','ausstattung','investment','name','tel','email','firma','kontaktAdresse'];
+  const fields=['brandFirma','titel','untertitel','adresse','preis','preisDetail','baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','energiestandard','heizung','heizungsart','energieausweis','energieklasse','energiekennwert','energieausweisTyp','kaeuferp','weitereKosten','beschreibung','lage','stadtbeschr','ausstattung','investment','name','tel','email','firma','kontaktAdresse'];
   fields.forEach(k=>{ if(d[k]) setVal('f-'+k,d[k]); });
+  if(d.stellplaetzeTyp){ d.stellplaetzeTyp.split(', ').forEach(v=>{ const cb=document.querySelector(`.stellplatz-typ[value="${v}"]`); if(cb) cb.checked=true; }); }
+  if(d.stellplaetzeAnz) setVal('f-stellplaetze-anz', d.stellplaetzeAnz);
+  if(d.stellplaetzeKosten) setVal('f-stellplaetze-kosten', d.stellplaetzeKosten);
   document.getElementById('highlightList').innerHTML=''; d.highlights.forEach(h=>addHighlight(h));
   document.getElementById('ausstattungList').innerHTML=''; d.ausstattungList.forEach(a=>addAusstattung(a));
   document.getElementById('investList').innerHTML=''; d.investHighlights.forEach(v=>addInvest(v));
   document.getElementById('einheitenBody').innerHTML=''; d.einheiten.forEach(e=>addEinheit(e.typ,e.anzahl,e.flaeche,e.preis,e.besonderheit));
   buildStepper();
 
-  // Jump to preview
-  current = 14; showStep(14); updateNav();
+  current = 1; showStep(1); updateNav();
   saveToStorage();
 }
 
@@ -1567,8 +1670,6 @@ function escHtml(s) {
 }
 
 init();
-// Auto-load demo data
-loadDemo();
 
 // ══════════════════════════════════════════════════════
 // VOICE RECORDING
@@ -1751,8 +1852,9 @@ function applyVoiceData(d) {
 
   const fields = ['titel','untertitel','adresse','preis','preisDetail',
     'baujahr','zustand','verfuegbar','wohnflaeche','gesamtflaeche',
-    'zimmer','einheitenAnz','stellplaetze','energiestandard','heizung',
-    'heizungsart','energieausweis','hausgeld','denkmal','kaeuferp',
+    'zimmer','einheitenAnz','energiestandard','heizung',
+    'heizungsart','energieausweis','energieklasse','energiekennwert','energieausweisTyp',
+    'hausgeld','denkmal','kaeuferp',
     'weitereKosten','beschreibung','lage','stadtbeschr','ausstattung','investment'];
 
   fields.forEach(key => {
