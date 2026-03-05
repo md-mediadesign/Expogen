@@ -181,10 +181,10 @@ function buildPreviewA() {
         <div class="expo-page-title">Fotogalerie</div>
       </div>
       <div class="expo-photo-grid" style="margin:0 2.8rem">
-        ${firstThree.map((s,i)=>i===0?`<img src="${s}" alt="">`:``).join('')}
+        ${firstThree.map((s,i)=>i===0?`<img src="${s.src}" alt="">`:``).join('')}
       </div>
-      ${firstThree.length>1?`<div class="expo-photo-grid-2col" style="margin:3px 2.8rem 0">${firstThree.slice(1).map(s=>`<img src="${s}" alt="">`).join('')}</div>`:''}
-      ${rest.length?`<div class="expo-photo-grid-2col" style="margin:3px 2.8rem 0">${rest.map(s=>`<img src="${s}" alt="">`).join('')}</div>`:''}
+      ${firstThree.length>1?`<div class="expo-photo-grid-2col" style="margin:3px 2.8rem 0">${firstThree.slice(1).map(s=>`<img src="${s.src}" alt="">`).join('')}</div>`:''}
+      ${rest.length?`<div class="expo-photo-grid-2col" style="margin:3px 2.8rem 0">${rest.map(s=>`<img src="${s.src}" alt="">`).join('')}</div>`:''}
       <div style="height:2rem"></div>
     </div>`;
   }
