@@ -1436,7 +1436,7 @@ function openConfirmStep() {
 }
 
 function doResetAll() {
-  localStorage.removeItem('expogen_data'); localStorage.removeItem('expogen_step');
+  localStorage.removeItem('expogen_data'); localStorage.removeItem('expogen_step'); localStorage.removeItem('expogen_photos');
   data={}; photos=[]; current=1;
   document.querySelectorAll('input:not([type=file]),textarea').forEach(el=>el.value='');
   document.querySelectorAll('.groesse-card,.type-card,.color-pair-card').forEach(c=>c.classList.remove('selected'));
@@ -1460,7 +1460,7 @@ function resetCurrentStep() {
     case 2: delete data.type; document.querySelectorAll('.type-card').forEach(c=>c.classList.remove('selected')); buildStepper(); break;
     case 3: setVal('f-brandFirma',''); data.brandFirma=''; data.brandLogoSrc=null; document.getElementById('logoPreviewImg').style.display='none'; document.getElementById('logoPlaceholder').style.display=''; break;
     case 4: ['f-titel','f-untertitel','f-adresse','f-preis','f-preisDetail'].forEach(id=>setVal(id,'')); break;
-    case 5: photos=[]; renderPhotoGrid(); break;
+    case 5: photos=[]; renderPhotoGrid(); localStorage.removeItem('expogen_photos'); break;
     case 6: ['baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','energiestandard','heizung','heizungsart','energieausweis','energieklasse','energiekennwert','energieausweisTyp','kaeuferp','weitereKosten'].forEach(k=>{setVal('f-'+k,''); delete data[k];}); document.querySelectorAll('.stellplatz-typ').forEach(cb=>cb.checked=false); setVal('f-stellplaetze-anz',''); setVal('f-stellplaetze-kosten',''); data.stellplaetzeTyp=''; data.stellplaetzeAnz=''; data.stellplaetzeKosten=''; break;
     case 7: setVal('f-beschreibung',''); document.getElementById('highlightList').innerHTML=''; data.highlights=[]; initHighlights(); break;
     case 8: setVal('f-lage',''); delete data.lage; break;
@@ -1532,11 +1532,14 @@ async function runAiGenerate() {
 // ══════════════════════════════════════════════════════
 function saveToStorage() {
   try { localStorage.setItem('expogen_data',JSON.stringify(data)); localStorage.setItem('expogen_step',current); } catch(e){}
+  try { localStorage.setItem('expogen_photos',JSON.stringify(photos)); } catch(e){}
 }
 function loadFromStorage() {
   try {
     const d=localStorage.getItem('expogen_data');
     const s=localStorage.getItem('expogen_step');
+    const ph=localStorage.getItem('expogen_photos');
+    if(ph){ photos=JSON.parse(ph); renderPhotoGrid(); }
     if(d) {
       data=JSON.parse(d);
       if(data.size){ const c=document.querySelector(`.groesse-card[data-size="${data.size}"]`); if(c) c.classList.add('selected'); }
