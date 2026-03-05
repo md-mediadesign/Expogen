@@ -1593,7 +1593,7 @@ function loadDemo() {
     'demo/fotos/innenvisu-arbeiten.png',
     'demo/fotos/innenvisu-flur.png',
     'demo/fotos/visu-balkon.png',
-  ];
+  ].map(src => ({ src, caption: '' }));
   renderPhotoGrid();
 
   const d = {
