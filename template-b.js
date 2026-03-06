@@ -91,26 +91,33 @@ const TB_CSS = `
 .tb-cover-content {
   position: absolute;
   left: 0;
-  bottom: 18%;
+  top: 50%;
+  transform: translateY(-50%);
   width: 44%;
   padding: 0 3rem;
   z-index: 6;
 }
-.tb-cover-street {
-  font-size: 13pt;
-  letter-spacing: 0.12em;
-  color: #3a3a3a;
-  text-transform: uppercase;
-  font-weight: 400;
-  line-height: 1.2;
-  margin-bottom: 0.5rem;
-}
-.tb-cover-number {
-  font-family: 'Ubuntu', sans-serif;
-  font-size: 82pt;
-  font-weight: 700;
+.tb-cover-type-label {
+  font-size: 8pt;
+  letter-spacing: 0.18em;
   color: #b25450;
-  line-height: 0.85;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 0.7rem;
+}
+.tb-cover-title {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 26pt;
+  font-weight: 700;
+  color: #3a3a3a;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+}
+.tb-cover-addr {
+  font-size: 8.5pt;
+  color: rgba(58,58,58,0.65);
+  letter-spacing: 0.06em;
+  line-height: 1.55;
 }
 .tb-cover-diag {
   position: absolute;
@@ -122,24 +129,6 @@ const TB_CSS = `
   transform-origin: top center;
   transform: rotate(20deg);
   z-index: 7;
-}
-.tb-cover-subtitle {
-  font-size: 8.5pt;
-  color: rgba(255,255,255,0.82);
-  letter-spacing: 0.06em;
-  margin-top: 0.9rem;
-  line-height: 1.55;
-  font-weight: 400;
-  max-width: 100%;
-}
-.tb-cover-caption {
-  position: absolute;
-  bottom: 1rem;
-  right: 1.2rem;
-  font-size: 5.5pt;
-  color: rgba(255,255,255,0.6);
-  z-index: 8;
-  letter-spacing: 0.05em;
 }
 
 /* ─── INNER PAGE HEADER ─────────────────────────────── */
@@ -811,11 +800,6 @@ function buildPreviewB() {
       <div class="tb-header-addr">${esc(d.adresse || d.titel || '')}</div>
     </div>`;
 
-  // Parse address for cover display
-  const addrMatch = (d.adresse || '').match(/^(.*?)\s+(\d+\w*[a-z]?)$/i);
-  const coverStreet = addrMatch ? addrMatch[1].toUpperCase() : (d.titel || 'Ihre Immobilie').toUpperCase();
-  const coverNum   = addrMatch ? addrMatch[2] : '';
-
   // ── PAGE 1: COVER ──────────────────────────────────────
   const hero = photos.length ? `<img src="${photos[0].src}" alt="">` : `<div class="tb-cover-photo-placeholder">Kein Foto hochgeladen</div>`;
   out.innerHTML += `
@@ -824,14 +808,11 @@ function buildPreviewB() {
     <div class="tb-cover-photo">${hero}</div>
     <div class="tb-cover-logo">${logoHtml}</div>
     <div class="tb-cover-content">
-      <div class="tb-cover-street">${coverStreet}</div>
-      ${coverNum
-        ? `<div class="tb-cover-number">${esc(coverNum)}</div>`
-        : `<div class="tb-cover-number" style="font-size:32pt;line-height:1.1">${esc(d.titel || '')}</div>`}
-      ${d.untertitel ? `<div class="tb-cover-subtitle">${esc(d.untertitel)}</div>` : ''}
+      ${d.type ? `<div class="tb-cover-type-label">${esc(d.type)}</div>` : ''}
+      <div class="tb-cover-title">${esc(d.titel || 'Ihre Immobilie')}</div>
+      ${d.adresse ? `<div class="tb-cover-addr">${esc(d.adresse)}</div>` : ''}
     </div>
     <div class="tb-cover-diag"></div>
-    ${d.adresse ? `<div class="tb-cover-caption">${esc(d.adresse)}</div>` : ''}
   </div>`;
 
   // ── PAGE 2: DATEN & FAKTEN ─────────────────────────────
