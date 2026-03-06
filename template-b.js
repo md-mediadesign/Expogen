@@ -918,10 +918,7 @@ function buildPreviewB() {
       </div>
       <div class="tb-lage-body">${esc(d.lage)}</div>
       ${(data.mapEnabled && data.mapLat) ? `
-      <div class="tb-lage-photos">
-        <div class="tb-lage-photo1"><div class="expogen-map" style="width:100%;height:100%;border-radius:4px"></div></div>
-        ${lp2 ? `<div class="tb-lage-photo2"><img src="${lp2}" alt=""></div>` : ''}
-      </div>` : (lp1 || lp2) ? `
+      <div class="expogen-map" style="width:100%;height:58mm;border-radius:4px;margin-top:.8rem"></div>` : (lp1 || lp2) ? `
       <div class="tb-lage-photos">
         ${lp1 ? `<div class="tb-lage-photo1"><img src="${lp1}" alt=""></div>` : ''}
         ${lp2 ? `<div class="tb-lage-photo2"><img src="${lp2}" alt=""></div>` : ''}

@@ -1246,6 +1246,7 @@ function initTemplateMaps() {
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(m);
       L.marker([data.mapLat, data.mapLon]).addTo(m);
       _templateMaps.push(m);
+      setTimeout(() => { try { m.invalidateSize(); } catch(e){} }, 200);
     } catch(e) {}
   });
 }
