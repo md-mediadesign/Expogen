@@ -840,6 +840,7 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
       <div class="tmpl-toggle">
         <button class="tmpl-btn active" id="tmplBtnA" onclick="selectTemplate('A')">Template A – Klassisch</button>
         <button class="tmpl-btn" id="tmplBtnB" onclick="selectTemplate('B')">Template B – Editorial</button>
+        <button class="tmpl-btn" id="tmplBtnC" onclick="selectTemplate('C')">Template C – Modern</button>
       </div>
       <div id="preview-output"></div>
       <div class="preview-actions" style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.5rem">
@@ -947,6 +948,7 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
 
 <script src="template-a.js"></script>
 <script src="template-b.js"></script>
+<script src="template-c.js"></script>
 <script>
 // ══════════════════════════════════════════════════════
 // STEP DEFINITIONS
@@ -1583,6 +1585,7 @@ function buildPreview() {
   const btn = document.getElementById('tmplBtn'+tmpl);
   if (btn) btn.classList.add('active');
   if (tmpl === 'B' && typeof buildPreviewB === 'function') buildPreviewB();
+  else if (tmpl === 'C' && typeof buildPreviewC === 'function') buildPreviewC();
   else buildPreviewA();
 }
 
