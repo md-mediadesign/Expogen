@@ -6,6 +6,8 @@
 <title>Expogen – Exposé Generator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&family=Ubuntu:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 /* ══════════════════════════════════════════════════════
    BASE
@@ -348,7 +350,15 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
 /* ══════════════════════════════════════════════════════
    PRINT
 ══════════════════════════════════════════════════════ */
+.map-toggle-row{display:flex;align-items:center;gap:.6rem;margin-top:1.2rem;font-size:.85rem;color:var(--text);cursor:pointer;user-select:none}
+.map-toggle-row input{accent-color:var(--gold);width:16px;height:16px;cursor:pointer}
+#lageMapPreview{z-index:0}
+
 @media print{
+  .leaflet-container{position:relative!important}
+  .leaflet-pane,.leaflet-tile-pane{position:absolute!important}
+  .expogen-map{overflow:visible!important}
+
   /* Farben & Hintergründe erzwingen */
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
 
@@ -728,7 +738,15 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
       <div class="step-title">Lage & Stadtteil</div>
       <div class="step-desc">Beschreibung der Mikrolage und des Stadtteils.</div>
       <div class="field-header"><label>Lagetext</label><div class="field-header-btns"><button class="btn-ai" onclick="openAiModal('f-lage','Lagebeschreibung')">✦ KI</button></div></div>
-      <textarea id="f-lage" rows="10" placeholder="Lage, Stadtteil, Infrastruktur, Verkehrsanbindung …"></textarea>
+      <textarea id="f-lage" rows="7" placeholder="Lage, Stadtteil, Infrastruktur, Verkehrsanbindung …"></textarea>
+      <label class="map-toggle-row">
+        <input type="checkbox" id="f-mapEnabled" onchange="onMapToggle()">
+        Karte in Exposé einbinden
+      </label>
+      <div id="lageMapWrap" style="display:none">
+        <div id="lageMapPreview" style="height:220px;border-radius:8px;margin-top:.7rem;border:1px solid rgba(201,168,76,.2);overflow:hidden"></div>
+        <button class="btn-add" onclick="geocodeAdresse()" style="margin-top:.6rem">Adresse auf Karte suchen</button>
+      </div>
     </div>
 
     <!-- Step 9: Stadtbeschreibung [L] -->
@@ -1172,11 +1190,72 @@ function toggleStep(id, e) {
 // ══════════════════════════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════════════════════════
+// ── MAP GLOBALS ──────────────────────────────────────
+let _lageMap = null;
+let _templateMaps = [];
+
+function onMapToggle() {
+  const on = document.getElementById('f-mapEnabled').checked;
+  data.mapEnabled = on;
+  document.getElementById('lageMapWrap').style.display = on ? '' : 'none';
+  if (on) initLageFormMap();
+}
+
+async function geocodeAdresse() {
+  const addr = data.adresse || val('f-adresse');
+  if (!addr) return;
+  const btn = document.querySelector('#lageMapWrap .btn-add');
+  if (btn) { btn.disabled = true; btn.textContent = 'Suche …'; }
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(addr)}&format=json&limit=1`;
+    const res = await fetch(url, { headers: { 'Accept-Language': 'de' } });
+    const json = await res.json();
+    if (json.length > 0) {
+      data.mapLat = parseFloat(json[0].lat);
+      data.mapLon = parseFloat(json[0].lon);
+      saveToStorage();
+      initLageFormMap();
+    }
+  } catch(e) {}
+  if (btn) { btn.disabled = false; btn.textContent = 'Adresse auf Karte suchen'; }
+}
+
+function initLageFormMap() {
+  if (!data.mapLat || !data.mapLon) { geocodeAdresse(); return; }
+  const el = document.getElementById('lageMapPreview');
+  if (!el) return;
+  if (_lageMap) {
+    _lageMap.setView([data.mapLat, data.mapLon], 15);
+    return;
+  }
+  _lageMap = L.map('lageMapPreview').setView([data.mapLat, data.mapLon], 15);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
+  }).addTo(_lageMap);
+  L.marker([data.mapLat, data.mapLon]).addTo(_lageMap);
+}
+
+function initTemplateMaps() {
+  _templateMaps.forEach(m => { try { m.remove(); } catch(e){} });
+  _templateMaps = [];
+  if (!data.mapEnabled || !data.mapLat || !data.mapLon) return;
+  document.querySelectorAll('.expogen-map').forEach(el => {
+    try {
+      const m = L.map(el, { zoomControl: false, attributionControl: false })
+                 .setView([data.mapLat, data.mapLon], 15);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(m);
+      L.marker([data.mapLat, data.mapLon]).addTo(m);
+      _templateMaps.push(m);
+    } catch(e) {}
+  });
+}
+
 function showStep(id) {
   document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
   const el = document.querySelector(`.step-content[data-step="${id}"]`);
   if (el) el.classList.add('active');
   updateStepper();
+  if (id === 8 && data.mapEnabled) setTimeout(initLageFormMap, 150);
   if (id === 15) buildPreview();
   updateBurgerLabel();
 }
@@ -1241,7 +1320,7 @@ function collectStep(id) {
   if (id===4){ data.titel=val('f-titel'); data.untertitel=val('f-untertitel'); data.adresse=val('f-adresse'); data.preis=val('f-preis'); data.preisDetail=val('f-preisDetail'); }
   if (id===6){ ['baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','energiestandard','heizung','heizungsart','energieausweis','energieklasse','energiekennwert','energieausweisTyp','kaeuferp','weitereKosten'].forEach(k=>{ data[k]=val('f-'+k); }); data.stellplaetzeTyp=[...document.querySelectorAll('.stellplatz-typ:checked')].map(cb=>cb.value).join(', '); data.stellplaetzeAnz=val('f-stellplaetze-anz'); data.stellplaetzeKosten=val('f-stellplaetze-kosten'); }
   if (id===7){ data.beschreibung=val('f-beschreibung'); data.highlights=[...document.querySelectorAll('.hl-input')].map(i=>i.value.trim()).filter(Boolean); }
-  if (id===8){ data.lage=val('f-lage'); }
+  if (id===8){ data.lage=val('f-lage'); data.mapEnabled=document.getElementById('f-mapEnabled')?.checked||false; }
   if (id===9){ data.stadtbeschr=val('f-stadtbeschr'); }
   if (id===10){ data.ausstattung=val('f-ausstattung'); data.ausstattungList=[...document.querySelectorAll('.aus-input')].map(i=>i.value.trim()).filter(Boolean); }
   if (id===11){ collectEinheiten(); }
@@ -1560,6 +1639,7 @@ function loadFromStorage() {
       if(data.investHighlights?.length){ document.getElementById('investList').innerHTML=''; data.investHighlights.forEach(v=>addInvest(v)); }
       if(data.einheiten?.length){ document.getElementById('einheitenBody').innerHTML=''; data.einheiten.forEach(e=>addEinheit(e.typ,e.anzahl,e.flaeche,e.preis,e.besonderheit)); }
       if(data.brandLogoSrc){ const img=document.getElementById('logoPreviewImg'); img.src=data.brandLogoSrc; img.style.display='block'; document.getElementById('logoPlaceholder').style.display='none'; }
+      if(data.mapEnabled){ const cb=document.getElementById('f-mapEnabled'); if(cb){ cb.checked=true; document.getElementById('lageMapWrap').style.display=''; } }
     }
     if(s) current=parseInt(s)||1;
   } catch(e){}
@@ -1587,6 +1667,7 @@ function buildPreview() {
   if (tmpl === 'B' && typeof buildPreviewB === 'function') buildPreviewB();
   else if (tmpl === 'C' && typeof buildPreviewC === 'function') buildPreviewC();
   else buildPreviewA();
+  setTimeout(initTemplateMaps, 400);
 }
 
 // ══════════════════════════════════════════════════════

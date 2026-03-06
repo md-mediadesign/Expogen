@@ -130,7 +130,10 @@ function buildPreviewA() {
         <div class="expo-page-title">Stadtteil & Mikrolage</div>
         <div class="expo-two-col">
           <div class="expo-body-plain"><p>${d.lage.split('\n').filter(Boolean).map(escHtml).join('</p><p>')}</p></div>
-          <div>${photos.length>3?`<img src="${photos[3].src}" style="width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:4px" alt="">`:''}</div>
+          <div>${data.mapEnabled && data.mapLat
+            ? `<div class="expogen-map" style="width:100%;aspect-ratio:3/4;border-radius:4px"></div>`
+            : photos.length>3 ? `<img src="${photos[3].src}" style="width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:4px" alt="">` : ''
+          }</div>
         </div>
       </div>
     </div>`;

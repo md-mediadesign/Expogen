@@ -917,7 +917,11 @@ function buildPreviewB() {
         <div class="tb-lage-hl3">INMITTEN URBANER LEBENDIGKEIT</div>
       </div>
       <div class="tb-lage-body">${esc(d.lage)}</div>
-      ${(lp1 || lp2) ? `
+      ${(data.mapEnabled && data.mapLat) ? `
+      <div class="tb-lage-photos">
+        <div class="tb-lage-photo1"><div class="expogen-map" style="width:100%;height:100%;border-radius:4px"></div></div>
+        ${lp2 ? `<div class="tb-lage-photo2"><img src="${lp2}" alt=""></div>` : ''}
+      </div>` : (lp1 || lp2) ? `
       <div class="tb-lage-photos">
         ${lp1 ? `<div class="tb-lage-photo1"><img src="${lp1}" alt=""></div>` : ''}
         ${lp2 ? `<div class="tb-lage-photo2"><img src="${lp2}" alt=""></div>` : ''}

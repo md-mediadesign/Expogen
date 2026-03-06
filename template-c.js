@@ -646,9 +646,11 @@ function buildPreviewC() {
           <div class="tc-body">${body(d.lage)}</div>
         </div>
         <div class="tc-lage-right">
-          ${photos.length > 3
-            ? `<img src="${photos[3].src}" class="tc-lage-photo" alt="">`
-            : `<div class="tc-lage-photo-placeholder"></div>`}
+          ${(data.mapEnabled && data.mapLat)
+            ? `<div class="expogen-map tc-lage-photo" style="min-height:70mm"></div>`
+            : photos.length > 3
+              ? `<img src="${photos[3].src}" class="tc-lage-photo" alt="">`
+              : `<div class="tc-lage-photo-placeholder"></div>`}
           ${stadtSnippet}
         </div>
       </div>
