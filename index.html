@@ -1235,20 +1235,31 @@ function initLageFormMap() {
   L.marker([data.mapLat, data.mapLon]).addTo(_lageMap);
 }
 
-function initTemplateMaps() {
-  _templateMaps.forEach(m => { try { m.remove(); } catch(e){} });
-  _templateMaps = [];
-  if (!data.mapEnabled || !data.mapLat || !data.mapLon) return;
-  document.querySelectorAll('.expogen-map').forEach(el => {
-    try {
-      const m = L.map(el, { zoomControl: false, attributionControl: false })
-                 .setView([data.mapLat, data.mapLon], 15);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(m);
-      L.marker([data.mapLat, data.mapLon]).addTo(m);
-      _templateMaps.push(m);
-      setTimeout(() => { try { m.invalidateSize(); } catch(e){} }, 200);
-    } catch(e) {}
-  });
+function buildStaticMapHtml(lat, lon, heightMm) {
+  if (!lat || !lon) return '';
+  const zoom = 16;
+  const n = Math.pow(2, zoom);
+  const tileX = (lon + 180) / 360 * n;
+  const latRad = lat * Math.PI / 180;
+  const tileY = (1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * n;
+  const cx = Math.floor(tileX);
+  const cy = Math.floor(tileY);
+  const fracX = tileX - cx;
+  const fracY = tileY - cy;
+  const mLeft = ((1 + fracX) / 3 * 100).toFixed(2);
+  const mTop  = ((1 + fracY) / 3 * 100).toFixed(2);
+  const subs = ['a','b','c'];
+  let tiles = '';
+  for (let dy = -1; dy <= 1; dy++)
+    for (let dx = -1; dx <= 1; dx++) {
+      const s = subs[((dx + dy * 3) % 3 + 3) % 3];
+      tiles += `<img src="https://${s}.tile.openstreetmap.org/${zoom}/${cx+dx}/${cy+dy}.png" style="width:100%;height:100%;object-fit:fill;display:block">`;
+    }
+  return `<div style="width:100%;height:${heightMm}mm;position:relative;overflow:hidden;border-radius:4px">
+    <div style="position:absolute;top:0;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(3,33.334%);grid-template-rows:repeat(3,33.334%)">${tiles}</div>
+    <div style="position:absolute;left:${mLeft}%;top:${mTop}%;transform:translate(-50%,-100%);z-index:1;pointer-events:none"><svg width="22" height="30" viewBox="0 0 22 30" fill="none"><path d="M11 0C4.925 0 0 4.925 0 11c0 8.25 11 19 11 19S22 19.25 22 11C22 4.925 17.075 0 11 0z" fill="#e74c3c"/><circle cx="11" cy="11" r="4.5" fill="#fff"/></svg></div>
+    <div style="position:absolute;bottom:3px;right:4px;background:rgba(255,255,255,.75);font-size:7px;padding:1px 3px;border-radius:2px;color:#555;line-height:1.4">© OpenStreetMap</div>
+  </div>`;
 }
 
 function showStep(id) {
@@ -1668,7 +1679,6 @@ function buildPreview() {
   if (tmpl === 'B' && typeof buildPreviewB === 'function') buildPreviewB();
   else if (tmpl === 'C' && typeof buildPreviewC === 'function') buildPreviewC();
   else buildPreviewA();
-  setTimeout(initTemplateMaps, 400);
 }
 
 // ══════════════════════════════════════════════════════

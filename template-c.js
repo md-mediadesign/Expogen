@@ -647,7 +647,7 @@ function buildPreviewC() {
         </div>
         <div class="tc-lage-right">
           ${(data.mapEnabled && data.mapLat)
-            ? `<div class="expogen-map tc-lage-photo" style="height:70mm"></div>`
+            ? buildStaticMapHtml(data.mapLat, data.mapLon, 70)
             : photos.length > 3
               ? `<img src="${photos[3].src}" class="tc-lage-photo" alt="">`
               : `<div class="tc-lage-photo-placeholder"></div>`}
