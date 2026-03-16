@@ -416,6 +416,29 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
 }
 
 /* ── Voice Entry Button ─────────────────────────── */
+/* ── Hinweis Generator ── */
+.hinweis-gen-panel{background:rgba(201,168,76,.03);border:1px solid rgba(201,168,76,.14);border-radius:10px;padding:1.2rem 1.4rem;margin-bottom:1.2rem}
+.hinweis-mode-row{display:flex;gap:.5rem;margin-bottom:1.2rem;align-items:center}
+.hinweis-mode-label{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-right:.3rem;white-space:nowrap}
+.hinweis-mode-btn{background:rgba(255,255,255,.04);border:1px solid rgba(201,168,76,.2);border-radius:6px;color:var(--muted);font-family:'Roboto',sans-serif;font-size:.78rem;padding:.35rem .9rem;cursor:pointer;transition:all .2s}
+.hinweis-mode-btn.active{background:rgba(201,168,76,.12);border-color:var(--gold);color:var(--gold2);font-weight:500}
+.hinweis-cats-label{font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:.7rem}
+.hinweis-cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:.35rem .8rem;margin-bottom:1rem}
+@media(max-width:600px){.hinweis-cat-grid{grid-template-columns:1fr}}
+.hinweis-cat-item{display:flex;align-items:center;gap:.5rem;cursor:pointer;padding:.2rem .3rem;border-radius:5px;transition:background .15s}
+.hinweis-cat-item:hover{background:rgba(201,168,76,.06)}
+.hinweis-cat-item input[type=checkbox]{accent-color:var(--gold);width:14px;height:14px;cursor:pointer;flex-shrink:0;margin-top:1px}
+.hinweis-cat-name{font-size:.78rem;color:var(--text);line-height:1.3}
+.hinweis-cat-auto{font-size:.62rem;background:rgba(201,168,76,.12);color:var(--gold);padding:.1rem .4rem;border-radius:3px;white-space:nowrap;flex-shrink:0}
+.btn-hinweis-gen{background:var(--gold);border:none;border-radius:8px;color:var(--navy);font-family:'Roboto',sans-serif;font-size:.84rem;font-weight:700;padding:.7rem 1.4rem;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:.5rem;width:100%;justify-content:center;margin-bottom:1rem;letter-spacing:.04em}
+.btn-hinweis-gen:hover{background:var(--gold2);box-shadow:0 4px 18px rgba(201,168,76,.35);transform:translateY(-1px)}
+.hinweis-result-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;flex-wrap:wrap;gap:.5rem}
+.hinweis-result-label{font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.btn-hinweis-ki{background:transparent;border:1px solid rgba(201,168,76,.3);border-radius:6px;color:var(--gold);font-family:'Roboto',sans-serif;font-size:.72rem;font-weight:500;padding:.3rem .85rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:.35rem}
+.btn-hinweis-ki:hover{background:rgba(201,168,76,.1);border-color:var(--gold)}
+.btn-hinweis-ki:disabled{opacity:.4;cursor:not-allowed}
+.hinweis-info-note{font-size:.72rem;color:var(--muted);line-height:1.6;margin-bottom:.9rem;padding:.6rem .8rem;border-left:2px solid rgba(201,168,76,.25);background:rgba(201,168,76,.03);border-radius:0 6px 6px 0}
+
 /* ── Extras Step Toggle ── */
 .extras-block{border:1px solid rgba(201,168,76,.18);border-radius:12px;padding:1.4rem 1.5rem;margin-bottom:1.2rem;transition:border-color .25s}
 .extras-block.active{border-color:rgba(201,168,76,.4)}
@@ -919,14 +942,14 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
         </div>
       </div>
 
-      <!-- AGBs / Hinweistext -->
+      <!-- Hinweistexte -->
       <div class="extras-block" id="extrasBlockAgb">
         <div class="extras-block-header" onclick="toggleExtrasBlock('Agb')">
           <div class="extras-block-header-left">
             <span class="extras-block-icon">§</span>
             <div>
-              <div class="extras-block-title">AGBs / Hinweistext</div>
-              <div class="extras-block-desc">Rechtlicher Hinweis oder Haftungsausschluss</div>
+              <div class="extras-block-title">Hinweistexte</div>
+              <div class="extras-block-desc">Professionelle Hinweise automatisch generieren</div>
             </div>
           </div>
           <label class="extras-toggle" onclick="event.stopPropagation()">
@@ -935,7 +958,28 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
           </label>
         </div>
         <div class="extras-block-body" id="extrasBodyAgb" style="display:none">
-          <textarea id="f-agbText" rows="5" placeholder="Alle Angaben stammen vom Eigentümer. Der Makler übernimmt hierfür keine Haftung. …"></textarea>
+          <p class="hinweis-info-note">Kategorien werden automatisch anhand Ihrer Objektdaten erkannt und können manuell angepasst werden.</p>
+
+          <!-- Generator Panel -->
+          <div class="hinweis-gen-panel">
+            <div class="hinweis-mode-row">
+              <span class="hinweis-mode-label">Umfang:</span>
+              <button class="hinweis-mode-btn active" id="hinweisModeKurz" onclick="setHinweisMode('kurz')">Kurzfassung</button>
+              <button class="hinweis-mode-btn" id="hinweisModeLang" onclick="setHinweisMode('lang')">Langfassung</button>
+            </div>
+            <div class="hinweis-cats-label">Hinweis-Kategorien</div>
+            <div class="hinweis-cat-grid" id="hinweisCatList"></div>
+            <button class="btn-hinweis-gen" onclick="generateHinweisText()">
+              ✦ Hinweistexte generieren
+            </button>
+          </div>
+
+          <!-- Result -->
+          <div class="hinweis-result-bar" id="hinweisResultBar" style="display:none">
+            <span class="hinweis-result-label">Generierter Text (bearbeitbar)</span>
+            <button class="btn-hinweis-ki" id="btnHinweisKi" onclick="polishHinweisText()">✦ KI verbessern</button>
+          </div>
+          <textarea id="f-agbText" rows="8" placeholder="Klicken Sie auf „Hinweistexte generieren" – oder schreiben Sie hier direkt …"></textarea>
         </div>
       </div>
     </div>
@@ -1524,6 +1568,7 @@ function toggleExtrasBlock(key, forcedState) {
   body.style.display = enabled ? '' : 'none';
   block.classList.toggle('active', enabled);
   if (enabled && (key === '360' || key === 'YT')) updateQr(key);
+  if (enabled && key === 'Agb') renderHinweisCats();
 }
 
 function updateQr(key) {
@@ -1538,6 +1583,183 @@ function updateQr(key) {
   }
   const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(url);
   preview.innerHTML = '<img src="' + qrUrl + '" alt="QR-Code" style="width:100%;height:100%;object-fit:contain">';
+}
+
+// ══════════════════════════════════════════════════════
+// HINWEIS GENERATOR
+// Architektur: HINWEIS_CATEGORIES → regelbasierte Auswahl →
+// Template-Assemblierung (sofort) + optionale KI-Politur
+// ══════════════════════════════════════════════════════
+let hinweisModeSelected = 'kurz';
+let hinweisManualOverrides = {}; // cat.id → true/false
+
+// ── Ebene 1+3: Kategorien mit Regeln und Textbausteinen ──
+// Neue Kategorien können jederzeit am Ende des Arrays ergänzt werden.
+// Jede Kategorie hat: id, label, rule(data)→bool, short, long
+const HINWEIS_CATEGORIES = [
+  {
+    id: 'haftung',
+    label: 'Allgemeiner Haftungshinweis',
+    rule: () => true,
+    short: 'Alle Angaben in diesem Exposé beruhen auf Informationen des Eigentümers bzw. Auftraggebers. Eine Gewähr für die Richtigkeit und Vollständigkeit wird nicht übernommen.',
+    long: 'Alle in diesem Exposé enthaltenen Informationen, Angaben und Beschreibungen basieren auf Mitteilungen des Eigentümers bzw. Auftraggebers und wurden nicht in allen Punkten unabhängig geprüft. Der Makler übernimmt keine Haftung für die Richtigkeit, Vollständigkeit oder Aktualität der enthaltenen Angaben. Maßgeblich sind ausschließlich die Inhalte des notariellen Kaufvertrages sowie die offiziellen Unterlagen des Objekts.'
+  },
+  {
+    id: 'angaben',
+    label: 'Verbindlichkeit der Unterlagen',
+    rule: () => true,
+    short: 'Maßgeblich sind ausschließlich die im notariellen Kaufvertrag vereinbarten Regelungen sowie die offiziellen Unterlagen des Objekts.',
+    long: 'Dieses Exposé dient der unverbindlichen Vorinformation und ersetzt nicht die Einsichtnahme in offizielle Unterlagen wie Grundbuchauszug, Baugenehmigungen, Teilungserklärung, Gemeinschaftsordnung oder Hausgeldabrechnungen. Die Regelungen des notariellen Kaufvertrages sind in jedem Fall verbindlich und gehen den Angaben dieses Exposés vor.'
+  },
+  {
+    id: 'verfuegbar',
+    label: 'Verfügbarkeit / Zwischenverkauf',
+    rule: () => true,
+    short: 'Das Angebot ist freibleibend. Zwischenverkauf, Zwischenvermietung sowie Preisanpassungen bleiben ausdrücklich vorbehalten.',
+    long: 'Das vorliegende Angebot ist freibleibend und unverbindlich. Der Verkäufer behält sich Zwischenverkauf, Zwischenvermietung sowie jederzeit Änderungen des Angebotspreises vor. Ein Anspruch auf Abschluss eines Kaufvertrages entsteht erst durch die notarielle Beurkundung.'
+  },
+  {
+    id: 'flaeche',
+    label: 'Flächenangaben',
+    rule: d => !!(d.wohnflaeche || d.gesamtflaeche),
+    short: 'Flächenangaben sind Näherungswerte gemäß Angaben des Eigentümers. Abweichungen gegenüber offiziellen Messungen sind möglich und begründen keine Haftung.',
+    long: 'Die angegebenen Wohn-, Nutz- und Grundstücksflächen wurden vom Eigentümer mitgeteilt und nicht eigenständig vermessen. Geringfügige Abweichungen gegenüber amtlichen Messungen, Katasterunterlagen oder einer neuen Wohnflächenberechnung nach WoFlV sind möglich und begründen keinen Anspruch auf Kaufpreisminderung oder Schadenersatz.'
+  },
+  {
+    id: 'provision',
+    label: 'Provision / Maklercourtage',
+    rule: d => !!(d.kaeuferp || d.preisDetail || d.preis),
+    short: 'Sofern eine Maklerprovision anfällt, ist diese im Exposé gesondert ausgewiesen und nach Abschluss des notariellen Kaufvertrages fällig.',
+    long: 'Die Maklerprovision (Courtage) ist, soweit im vorliegenden Exposé ausgewiesen, nach Abschluss des notariellen Kaufvertrages zur Zahlung fällig. Bei beidseitiger Courtagevereinbarung gilt die gesetzliche Regelung gemäß § 656c BGB. Die ausgewiesene Provision versteht sich inklusive der gesetzlichen Mehrwertsteuer, sofern nicht anders angegeben.'
+  },
+  {
+    id: 'energie',
+    label: 'Energieausweis',
+    rule: d => !!(d.energieausweis || d.energieklasse || d.energiekennwert || d.energieausweisTyp),
+    short: 'Angaben zur Energieeffizienz basieren auf dem vorliegenden Energieausweis, der auf Anfrage zur Einsicht bereitgestellt wird.',
+    long: 'Für das Objekt liegt ein Energieausweis gemäß Gebäudeenergiegesetz (GEG) vor. Die enthaltenen Energiekennwerte sowie die Effizienzklasse wurden diesem Ausweis entnommen. Der Energieausweis kann im Rahmen einer Besichtigung eingesehen werden. Tatsächliche Verbrauchswerte können je nach Nutzungsverhalten der Bewohner abweichen.'
+  },
+  {
+    id: 'neubau',
+    label: 'Neubau / Projektvertrieb',
+    rule: d => d.type === 'Neubau-Projekt' || /neubau|kfw/i.test(d.energiestandard || ''),
+    short: 'Technische Angaben, Ausstattungsdetails und Plandarstellungen sind unverbindlich. Änderungen bleiben bis zur Beurkundung vorbehalten.',
+    long: 'Bei Neubauprojekten und Projektverkäufen sind alle technischen Angaben, Grundrissdarstellungen, Ausstattungsbeschreibungen und Visualisierungen als unverbindlich zu verstehen. Änderungen der Baubeschreibung, der Ausstattung sowie technischer Details bleiben dem Bauträger bis zur notariellen Beurkundung ausdrücklich vorbehalten. Maßgeblich ist ausschließlich die vertraglich vereinbarte Baubeschreibung.'
+  },
+  {
+    id: 'visualisierungen',
+    label: 'Visualisierungen / Beispielbilder',
+    rule: d => d.type === 'Neubau-Projekt',
+    short: 'Enthaltene Visualisierungen und Darstellungen dienen der unverbindlichen Veranschaulichung und entsprechen nicht zwingend der tatsächlichen Ausführung.',
+    long: 'Enthaltene Visualisierungen, Renderings, Grundrissdarstellungen und Beispielabbildungen dienen ausschließlich der illustrativen Veranschaulichung. Sie begründen keinen Anspruch auf eine bestimmte Ausführung oder Ausstattung und können von der tatsächlichen Umsetzung abweichen. Maßgeblich sind die vertraglich vereinbarten Leistungen und die genehmigte Baubeschreibung.'
+  },
+  {
+    id: 'kapitalanlage',
+    label: 'Kapitalanlage / Mietrendite',
+    rule: d => d.type === 'Kapitalanlage' || !!(d.investment) || !!(d.investHighlights?.length),
+    short: 'Angenommene Mieteinnahmen und Renditeangaben dienen der Orientierung und sind nicht garantiert. Tatsächliche Erträge können abweichen.',
+    long: 'Angaben zu Mieteinnahmen, Renditen, Mietpotenzial und wirtschaftlicher Entwicklung sind Prognosewerte und unverbindlich. Sie basieren auf aktuellen Marktvergleichen oder Angaben des Eigentümers und stellen keine Garantie für zukünftige Erträge dar. Leerstandsrisiken, Mietausfälle sowie Wertentwicklungen am Immobilienmarkt können nicht zuverlässig prognostiziert werden.'
+  },
+  {
+    id: 'steuer',
+    label: 'Steuerliche Hinweise',
+    rule: d => /steuer|afa|abschreib|denkmal/i.test([d.investment||'', ...(d.investHighlights||[])].join(' ')),
+    short: 'Steuerliche Hinweise sind unverbindlich und ersetzen keine individuelle Beratung durch einen qualifizierten Steuerberater.',
+    long: 'Steuerliche Ausführungen – insbesondere zu Abschreibungsmöglichkeiten, Denkmalschutzabschreibungen oder sonstigen steuerlichen Vorteilen – sind allgemeiner Natur und unverbindlich. Sie ersetzen keine individuelle Beratung durch einen qualifizierten Steuerberater. Die steuerliche Behandlung hängt von den persönlichen Verhältnissen des Käufers ab und kann sich durch Gesetzesänderungen jederzeit verändern.'
+  },
+  {
+    id: 'finanzierung',
+    label: 'Finanzierung / Fördermittel',
+    rule: d => /kfw|förder|finanzier/i.test([d.energiestandard||'', d.investment||'', d.beschreibung||''].join(' ')),
+    short: 'Hinweise zu Fördermitteln oder Finanzierungsmöglichkeiten sind unverbindlich. Verbindliche Auskünfte erteilt Ihre Bank oder ein Finanzierungsberater.',
+    long: 'Angaben zu Förderprogrammen, KfW-Darlehen und sonstigen Finanzierungsmöglichkeiten sind allgemeiner Natur und ohne Gewähr. Förderbedingungen und -konditionen können sich ändern. Für verbindliche Aussagen und individuelle Finanzierungsberatung wenden Sie sich bitte an Ihre Bank oder einen unabhängigen Finanzierungsberater.'
+  },
+];
+
+// ── Ebene 2: Regelbasierte Auswahl ──
+function getActiveHinweisIds() {
+  return HINWEIS_CATEGORIES
+    .filter(cat => (cat.id in hinweisManualOverrides)
+      ? hinweisManualOverrides[cat.id]
+      : cat.rule(data))
+    .map(cat => cat.id);
+}
+
+function setHinweisMode(mode) {
+  hinweisModeSelected = mode;
+  document.getElementById('hinweisModeKurz')?.classList.toggle('active', mode === 'kurz');
+  document.getElementById('hinweisModeLang')?.classList.toggle('active', mode === 'lang');
+}
+
+function onHinweisCatChange(id, checked) {
+  hinweisManualOverrides[id] = checked;
+}
+
+// Render category checkboxes (called when block is opened)
+function renderHinweisCats() {
+  const list = document.getElementById('hinweisCatList');
+  if (!list) return;
+  list.innerHTML = HINWEIS_CATEGORIES.map(cat => {
+    const autoActive = cat.rule(data);
+    const checked = (cat.id in hinweisManualOverrides)
+      ? hinweisManualOverrides[cat.id]
+      : autoActive;
+    const autoLabel = autoActive && !(cat.id in hinweisManualOverrides)
+      ? '<span class="hinweis-cat-auto">auto</span>' : '';
+    return `<label class="hinweis-cat-item">
+      <input type="checkbox" ${checked ? 'checked' : ''} onchange="onHinweisCatChange('${cat.id}',this.checked)">
+      <span class="hinweis-cat-name">${cat.label}</span>${autoLabel}
+    </label>`;
+  }).join('');
+}
+
+// ── Ebene 3+4: Assemblierung ──
+function generateHinweisText() {
+  // Collect latest data before evaluating rules
+  collectStep(4); collectStep(6); collectStep(7); collectStep(12);
+  renderHinweisCats();
+
+  const activeIds = getActiveHinweisIds();
+  const blocks = HINWEIS_CATEGORIES
+    .filter(cat => activeIds.includes(cat.id))
+    .map(cat => hinweisModeSelected === 'lang' ? cat.long : cat.short);
+
+  const text = blocks.join('\n\n');
+  const ta = document.getElementById('f-agbText');
+  if (ta) ta.value = text;
+
+  // Show result bar
+  const bar = document.getElementById('hinweisResultBar');
+  if (bar) bar.style.display = 'flex';
+
+  // Auto-enable toggle if not yet active
+  const cb = document.getElementById('toggle-Agb');
+  if (cb && !cb.checked) { cb.checked = true; toggleExtrasBlock('Agb', true); }
+}
+
+// Optional: KI-Politur via pollinations.ai (wie andere ✦ KI-Buttons)
+async function polishHinweisText() {
+  const ta = document.getElementById('f-agbText');
+  if (!ta?.value.trim()) return;
+  const btn = document.getElementById('btnHinweisKi');
+  if (btn) { btn.textContent = '⟳ …'; btn.disabled = true; }
+
+  const sys = 'Du bist ein professioneller Immobilienmarketing-Texter für Deutschland. Überarbeite die folgenden Hinweisbausteine: Fasse sie sprachlich zusammen, vermeide Wiederholungen, behalte den sachlichen und seriösen Ton bei. Ausgabe: nur der fertige Text, kein Kommentar.';
+  try {
+    const res = await fetch('https://text.pollinations.ai/', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [{ role:'system', content:sys }, { role:'user', content:ta.value.trim() }],
+        model: 'openai', seed: Math.floor(Math.random()*9999)
+      })
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    ta.value = (await res.text()).trim();
+  } catch(err) {
+    alert('KI-Überarbeitung fehlgeschlagen: ' + err.message);
+  } finally {
+    if (btn) { btn.textContent = '✦ KI verbessern'; btn.disabled = false; }
+  }
 }
 
 // ══════════════════════════════════════════════════════
@@ -1723,7 +1945,9 @@ function resetCurrentStep() {
     case 13: ['f-name','f-tel','f-email','f-firma','f-kontaktAdresse'].forEach(id=>setVal(id,'')); break;
     case 14: setVal('f-link360',''); setVal('f-linkYT',''); setVal('f-sonstigerText',''); setVal('f-agbText','');
       ['360','YT','Sonstiges','Agb'].forEach(k=>{ const cb=document.getElementById('toggle-'+k); if(cb){cb.checked=false;} const b=document.getElementById('extrasBody'+k); if(b) b.style.display='none'; const bl=document.getElementById('extrasBlock'+k); if(bl) bl.classList.remove('active'); const qr=document.getElementById('qrPreview'+k); if(qr) qr.innerHTML='<span style="color:rgba(120,130,160,.4);font-size:.65rem;text-align:center;padding:.3rem">QR erscheint nach Link-Eingabe</span>'; });
-      delete data.link360; delete data.linkYT; delete data.sonstigerText; delete data.agbText; delete data.extras360Enabled; delete data.extrasYTEnabled; delete data.extrasSonstigesEnabled; delete data.extrasAgbEnabled; break;
+      delete data.link360; delete data.linkYT; delete data.sonstigerText; delete data.agbText; delete data.extras360Enabled; delete data.extrasYTEnabled; delete data.extrasSonstigesEnabled; delete data.extrasAgbEnabled;
+      hinweisManualOverrides={}; hinweisModeSelected='kurz'; setHinweisMode('kurz');
+      const hbar=document.getElementById('hinweisResultBar'); if(hbar) hbar.style.display='none'; break;
     case 15: delete data.colorPair; resetColorPairSelection(); break;
   }
   clearErrors(); saveToStorage();
