@@ -387,9 +387,9 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
   .step-card{background:transparent!important;border:none!important;box-shadow:none!important;padding:0!important;border-radius:0!important;overflow:visible!important}
   .step-card::before{display:none!important}
 
-  /* Alle Schritte ausblenden – nur Vorschau (Step 15) zeigen */
+  /* Alle Schritte ausblenden – nur Vorschau (Step 16) zeigen */
   .step-content{display:none!important}
-  .step-content[data-step="15"]{display:block!important}
+  .step-content[data-step="16"]{display:block!important}
 
   /* Preview-Output */
   #preview-output{max-width:none!important;margin:0!important}
@@ -416,6 +416,28 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
 }
 
 /* ── Voice Entry Button ─────────────────────────── */
+/* ── Extras Step Toggle ── */
+.extras-block{border:1px solid rgba(201,168,76,.18);border-radius:12px;padding:1.4rem 1.5rem;margin-bottom:1.2rem;transition:border-color .25s}
+.extras-block.active{border-color:rgba(201,168,76,.4)}
+.extras-block-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:0;cursor:pointer;gap:.8rem}
+.extras-block-header-left{display:flex;align-items:center;gap:.75rem}
+.extras-block-icon{font-size:1.2rem;flex-shrink:0}
+.extras-block-title{font-family:'Ubuntu',sans-serif;font-size:1rem;font-weight:700;color:var(--cream)}
+.extras-block-desc{font-size:.75rem;color:var(--muted);margin-top:.15rem}
+.extras-toggle{position:relative;width:44px;height:24px;flex-shrink:0}
+.extras-toggle input{opacity:0;width:0;height:0;position:absolute}
+.extras-toggle-slider{position:absolute;inset:0;background:rgba(120,130,160,.3);border-radius:12px;transition:.3s;cursor:pointer}
+.extras-toggle-slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s}
+.extras-toggle input:checked + .extras-toggle-slider{background:var(--gold)}
+.extras-toggle input:checked + .extras-toggle-slider::before{transform:translateX(20px)}
+.extras-block-body{margin-top:1.2rem;padding-top:1.2rem;border-top:1px solid rgba(201,168,76,.15)}
+.extras-qr-row{display:flex;gap:1.5rem;align-items:flex-start;flex-wrap:wrap;margin-top:.8rem}
+.extras-qr-preview{width:100px;height:100px;border:1px solid rgba(201,168,76,.2);border-radius:8px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.03)}
+.extras-qr-preview img{width:100%;height:100%;object-fit:contain;display:block}
+.extras-qr-hint{font-size:.72rem;color:var(--muted);margin-top:.5rem;line-height:1.5}
+.extras-pair{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+@media(max-width:600px){.extras-pair{grid-template-columns:1fr}}
+
 .voice-entry-wrap {
   text-align: center;
   margin-bottom: 1.5rem;
@@ -815,9 +837,112 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
       <input type="text" id="f-kontaktAdresse" placeholder="Straße, PLZ Stadt">
     </div>
 
-    <!-- Step 14: Farbschema -->
+    <!-- Step 14: Extras -->
     <div class="step-content" data-step="14">
       <div class="step-num" id="stepNum14"></div>
+      <div class="step-title">Extras & Anhang</div>
+      <div class="step-desc">Optionale Zusatzinhalte für Ihr Exposé – aktivieren Sie nur, was Sie benötigen.</div>
+
+      <div class="extras-pair">
+        <!-- 360° Rundgang -->
+        <div class="extras-block" id="extrasBlock360">
+          <div class="extras-block-header" onclick="toggleExtrasBlock('360')">
+            <div class="extras-block-header-left">
+              <span class="extras-block-icon">🔄</span>
+              <div>
+                <div class="extras-block-title">360°-Rundgang</div>
+                <div class="extras-block-desc">Matterport oder ähnlicher Link</div>
+              </div>
+            </div>
+            <label class="extras-toggle" onclick="event.stopPropagation()">
+              <input type="checkbox" id="toggle-360" onchange="toggleExtrasBlock('360', this.checked)">
+              <span class="extras-toggle-slider"></span>
+            </label>
+          </div>
+          <div class="extras-block-body" id="extrasBody360" style="display:none">
+            <label>Link zum 360°-Rundgang</label>
+            <input type="text" id="f-link360" placeholder="https://my.matterport.com/show/?m=…" oninput="updateQr('360')">
+            <div class="extras-qr-row">
+              <div class="extras-qr-preview" id="qrPreview360">
+                <span style="color:rgba(120,130,160,.4);font-size:.65rem;text-align:center;padding:.3rem">QR erscheint nach Link-Eingabe</span>
+              </div>
+              <div class="extras-qr-hint">Der Link wird als QR-Code im Exposé dargestellt – Interessenten können direkt mit dem Smartphone scannen.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- YouTube Video -->
+        <div class="extras-block" id="extrasBlockYT">
+          <div class="extras-block-header" onclick="toggleExtrasBlock('YT')">
+            <div class="extras-block-header-left">
+              <span class="extras-block-icon">▶</span>
+              <div>
+                <div class="extras-block-title">YouTube Video</div>
+                <div class="extras-block-desc">Objektvideo oder Drohnenaufnahme</div>
+              </div>
+            </div>
+            <label class="extras-toggle" onclick="event.stopPropagation()">
+              <input type="checkbox" id="toggle-YT" onchange="toggleExtrasBlock('YT', this.checked)">
+              <span class="extras-toggle-slider"></span>
+            </label>
+          </div>
+          <div class="extras-block-body" id="extrasBodyYT" style="display:none">
+            <label>YouTube-Link</label>
+            <input type="text" id="f-linkYT" placeholder="https://www.youtube.com/watch?v=…" oninput="updateQr('YT')">
+            <div class="extras-qr-row">
+              <div class="extras-qr-preview" id="qrPreviewYT">
+                <span style="color:rgba(120,130,160,.4);font-size:.65rem;text-align:center;padding:.3rem">QR erscheint nach Link-Eingabe</span>
+              </div>
+              <div class="extras-qr-hint">Besucher scannen den QR-Code und gelangen direkt zum Video auf ihrem Smartphone.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sonstiger Text -->
+      <div class="extras-block" id="extrasBlockSonstiges">
+        <div class="extras-block-header" onclick="toggleExtrasBlock('Sonstiges')">
+          <div class="extras-block-header-left">
+            <span class="extras-block-icon">📝</span>
+            <div>
+              <div class="extras-block-title">Sonstiger Text</div>
+              <div class="extras-block-desc">Freier Zusatztext (z. B. Besonderheiten, Hinweise)</div>
+            </div>
+          </div>
+          <label class="extras-toggle" onclick="event.stopPropagation()">
+            <input type="checkbox" id="toggle-Sonstiges" onchange="toggleExtrasBlock('Sonstiges', this.checked)">
+            <span class="extras-toggle-slider"></span>
+          </label>
+        </div>
+        <div class="extras-block-body" id="extrasBodySonstiges" style="display:none">
+          <textarea id="f-sonstigerText" rows="5" placeholder="Freier Text – erscheint auf der letzten Seite des Exposés …"></textarea>
+        </div>
+      </div>
+
+      <!-- AGBs / Hinweistext -->
+      <div class="extras-block" id="extrasBlockAgb">
+        <div class="extras-block-header" onclick="toggleExtrasBlock('Agb')">
+          <div class="extras-block-header-left">
+            <span class="extras-block-icon">§</span>
+            <div>
+              <div class="extras-block-title">AGBs / Hinweistext</div>
+              <div class="extras-block-desc">Rechtlicher Hinweis oder Haftungsausschluss</div>
+            </div>
+          </div>
+          <label class="extras-toggle" onclick="event.stopPropagation()">
+            <input type="checkbox" id="toggle-Agb" onchange="toggleExtrasBlock('Agb', this.checked)">
+            <span class="extras-toggle-slider"></span>
+          </label>
+        </div>
+        <div class="extras-block-body" id="extrasBodyAgb" style="display:none">
+          <textarea id="f-agbText" rows="5" placeholder="Alle Angaben stammen vom Eigentümer. Der Makler übernimmt hierfür keine Haftung. …"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 15: Farbschema -->
+    <div class="step-content" data-step="15">
+      <div class="step-num" id="stepNum15"></div>
       <div class="step-title">Farbschema</div>
       <div class="step-desc">Wählen Sie ein Farbpaar – passend zu Ihrer Immobilie. Alle Kombinationen sind druckoptimiert.</div>
       <div class="color-pair-grid" id="colorPairGrid">
@@ -850,8 +975,8 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
       <p class="error-msg" id="err-colorPair">Bitte wählen Sie ein Farbschema.</p>
     </div>
 
-    <!-- Step 15: Vorschau -->
-    <div class="step-content" data-step="15">
+    <!-- Step 16: Vorschau -->
+    <div class="step-content" data-step="16">
       <div class="step-num">Vorschau & Export</div>
       <div class="step-title">Ihr Exposé</div>
       <div class="step-desc">Wählen Sie eine Vorlage und überprüfen Sie das Exposé – dann als PDF drucken.</div>
@@ -985,8 +1110,9 @@ const ALL_STEP_DEFS = [
   {id:11,label:'Einheiten',    minSize:'L', optional:true},
   {id:12,label:'Investment',   minSize:'L', optional:true},
   {id:13,label:'Kontakt',      minSize:'S'},
-  {id:14,label:'Farben',       minSize:'S'},
-  {id:15,label:'Vorschau',     minSize:'S'},
+  {id:14,label:'Extras',       minSize:'S', optional:true},
+  {id:15,label:'Farben',       minSize:'S'},
+  {id:16,label:'Vorschau',     minSize:'S'},
 ];
 const COLOR_PAIRS = [
   { id:1, name:'Navy & Gold',            accent:'#0f1d40', secondary:'#c4a43c' },
@@ -1338,6 +1464,7 @@ function collectStep(id) {
   if (id===11){ collectEinheiten(); }
   if (id===12){ data.investment=val('f-investment'); data.investHighlights=[...document.querySelectorAll('.inv-input')].map(i=>i.value.trim()).filter(Boolean); }
   if (id===13){ data.name=val('f-name'); data.tel=val('f-tel'); data.email=val('f-email'); data.firma=val('f-firma'); data.kontaktAdresse=val('f-kontaktAdresse'); }
+  if (id===14){ data.link360=val('f-link360'); data.linkYT=val('f-linkYT'); data.sonstigerText=val('f-sonstigerText'); data.agbText=val('f-agbText'); data.extras360Enabled=document.getElementById('toggle-360')?.checked||false; data.extrasYTEnabled=document.getElementById('toggle-YT')?.checked||false; data.extrasSonstigesEnabled=document.getElementById('toggle-Sonstiges')?.checked||false; data.extrasAgbEnabled=document.getElementById('toggle-Agb')?.checked||false; }
 }
 
 function collectEinheiten() {
@@ -1382,6 +1509,35 @@ function getColorPair() {
 
 function resetColorPairSelection() {
   document.querySelectorAll('.color-pair-card').forEach(c=>c.classList.remove('selected'));
+}
+
+// ══════════════════════════════════════════════════════
+// EXTRAS
+// ══════════════════════════════════════════════════════
+function toggleExtrasBlock(key, forcedState) {
+  const cb = document.getElementById('toggle-' + key);
+  const body = document.getElementById('extrasBody' + key);
+  const block = document.getElementById('extrasBlock' + key);
+  if (!cb || !body || !block) return;
+  const enabled = forcedState !== undefined ? forcedState : cb.checked;
+  if (forcedState !== undefined) cb.checked = enabled;
+  body.style.display = enabled ? '' : 'none';
+  block.classList.toggle('active', enabled);
+  if (enabled && (key === '360' || key === 'YT')) updateQr(key);
+}
+
+function updateQr(key) {
+  const inputId = key === '360' ? 'f-link360' : 'f-linkYT';
+  const previewId = 'qrPreview' + key;
+  const url = document.getElementById(inputId)?.value?.trim();
+  const preview = document.getElementById(previewId);
+  if (!preview) return;
+  if (!url) {
+    preview.innerHTML = '<span style="color:rgba(120,130,160,.4);font-size:.65rem;text-align:center;padding:.3rem">QR erscheint nach Link-Eingabe</span>';
+    return;
+  }
+  const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(url);
+  preview.innerHTML = '<img src="' + qrUrl + '" alt="QR-Code" style="width:100%;height:100%;object-fit:contain">';
 }
 
 // ══════════════════════════════════════════════════════
@@ -1549,7 +1705,7 @@ function doResetAll() {
   buildStepper(); showStep(1); updateNav();
 }
 
-const STEP_RESET_MAP = {1:'Größe',2:'Typ',3:'Branding',4:'Objekt',5:'Fotos',6:'Daten',7:'Beschreibung',8:'Lage',9:'Standort',10:'Ausstattung',11:'Einheiten',12:'Investment',13:'Kontakt'};
+const STEP_RESET_MAP = {1:'Größe',2:'Typ',3:'Branding',4:'Objekt',5:'Fotos',6:'Daten',7:'Beschreibung',8:'Lage',9:'Standort',10:'Ausstattung',11:'Einheiten',12:'Investment',13:'Kontakt',14:'Extras'};
 function resetCurrentStep() {
   switch(current) {
     case 1: delete data.size; document.querySelectorAll('.groesse-card').forEach(c=>c.classList.remove('selected')); buildStepper(); break;
@@ -1565,7 +1721,10 @@ function resetCurrentStep() {
     case 11: document.getElementById('einheitenBody').innerHTML=''; data.einheiten=[]; initEinheiten(); break;
     case 12: setVal('f-investment',''); document.getElementById('investList').innerHTML=''; data.investHighlights=[]; initInvestList(); break;
     case 13: ['f-name','f-tel','f-email','f-firma','f-kontaktAdresse'].forEach(id=>setVal(id,'')); break;
-    case 14: delete data.colorPair; resetColorPairSelection(); break;
+    case 14: setVal('f-link360',''); setVal('f-linkYT',''); setVal('f-sonstigerText',''); setVal('f-agbText','');
+      ['360','YT','Sonstiges','Agb'].forEach(k=>{ const cb=document.getElementById('toggle-'+k); if(cb){cb.checked=false;} const b=document.getElementById('extrasBody'+k); if(b) b.style.display='none'; const bl=document.getElementById('extrasBlock'+k); if(bl) bl.classList.remove('active'); const qr=document.getElementById('qrPreview'+k); if(qr) qr.innerHTML='<span style="color:rgba(120,130,160,.4);font-size:.65rem;text-align:center;padding:.3rem">QR erscheint nach Link-Eingabe</span>'; });
+      delete data.link360; delete data.linkYT; delete data.sonstigerText; delete data.agbText; delete data.extras360Enabled; delete data.extrasYTEnabled; delete data.extrasSonstigesEnabled; delete data.extrasAgbEnabled; break;
+    case 15: delete data.colorPair; resetColorPairSelection(); break;
   }
   clearErrors(); saveToStorage();
 }
@@ -1641,7 +1800,7 @@ function loadFromStorage() {
       if(data.size){ const c=document.querySelector(`.groesse-card[data-size="${data.size}"]`); if(c) c.classList.add('selected'); }
       if(data.type){ const c=document.querySelector(`.type-card[data-type="${data.type}"]`); if(c) c.classList.add('selected'); }
       if(data.colorPair){ const c=document.querySelector(`.color-pair-card[data-pair="${data.colorPair}"]`); if(c) c.classList.add('selected'); }
-      const fields=['brandFirma','titel','untertitel','adresse','preis','preisDetail','baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','energiestandard','heizung','heizungsart','energieausweis','energieklasse','energiekennwert','energieausweisTyp','kaeuferp','weitereKosten','beschreibung','lage','stadtbeschr','ausstattung','investment','name','tel','email','firma','kontaktAdresse'];
+      const fields=['brandFirma','titel','untertitel','adresse','preis','preisDetail','baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','energiestandard','heizung','heizungsart','energieausweis','energieklasse','energiekennwert','energieausweisTyp','kaeuferp','weitereKosten','beschreibung','lage','stadtbeschr','ausstattung','investment','name','tel','email','firma','kontaktAdresse','link360','linkYT','sonstigerText','agbText'];
       fields.forEach(k=>{ if(data[k]) setVal('f-'+k, data[k]); });
       if(data.stellplaetzeTyp){ data.stellplaetzeTyp.split(', ').forEach(v=>{ const cb=document.querySelector(`.stellplatz-typ[value="${v}"]`); if(cb) cb.checked=true; }); }
       if(data.stellplaetzeAnz) setVal('f-stellplaetze-anz', data.stellplaetzeAnz);
@@ -1652,6 +1811,7 @@ function loadFromStorage() {
       if(data.einheiten?.length){ document.getElementById('einheitenBody').innerHTML=''; data.einheiten.forEach(e=>addEinheit(e.typ,e.anzahl,e.flaeche,e.preis,e.besonderheit)); }
       if(data.brandLogoSrc){ const img=document.getElementById('logoPreviewImg'); img.src=data.brandLogoSrc; img.style.display='block'; document.getElementById('logoPlaceholder').style.display='none'; }
       if(data.mapEnabled){ const cb=document.getElementById('f-mapEnabled'); if(cb){ cb.checked=true; document.getElementById('lageMapWrap').style.display=''; } }
+      [['360','extras360Enabled'],['YT','extrasYTEnabled'],['Sonstiges','extrasSonstigesEnabled'],['Agb','extrasAgbEnabled']].forEach(([k,dk])=>{ if(data[dk]){ const cb=document.getElementById('toggle-'+k); if(cb){ cb.checked=true; const b=document.getElementById('extrasBody'+k); if(b) b.style.display=''; const bl=document.getElementById('extrasBlock'+k); if(bl) bl.classList.add('active'); if(k==='360'&&data.link360) updateQr('360'); if(k==='YT'&&data.linkYT) updateQr('YT'); } } });
     }
     if(s) current=parseInt(s)||1;
   } catch(e){}

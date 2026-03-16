@@ -236,4 +236,48 @@ function buildPreviewA() {
       </div>
     </div>
   </div>`;
+
+  // ── EXTRAS PAGE (optional) ──
+  const hasExtras = isStepEnabled(14) && (
+    (d.extras360Enabled && d.link360) ||
+    (d.extrasYTEnabled && d.linkYT) ||
+    (d.extrasSonstigesEnabled && d.sonstigerText) ||
+    (d.extrasAgbEnabled && d.agbText)
+  );
+  if (hasExtras) {
+    const qrBlock = (enabled, url, label, icon) => {
+      if (!enabled || !url) return '';
+      const qrSrc = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=' + encodeURIComponent(url);
+      return `<div style="display:flex;gap:1.5rem;align-items:flex-start;margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid #f0f0f0">
+        <img src="${qrSrc}" alt="QR-Code" style="width:90px;height:90px;flex-shrink:0;border:1px solid #e5e7eb;border-radius:6px">
+        <div>
+          <div style="font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:${pair.accent};font-weight:700;margin-bottom:.3rem">${icon} ${escHtml(label)}</div>
+          <div style="font-size:.8rem;color:#555;word-break:break-all">${escHtml(url)}</div>
+          <div style="font-size:.72rem;color:#999;margin-top:.3rem">QR-Code scannen oder Link direkt aufrufen</div>
+        </div>
+      </div>`;
+    };
+    const sonstigesBlock = (d.extrasSonstigesEnabled && d.sonstigerText) ? `
+      <div style="margin-bottom:1.5rem">
+        <div style="font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:${pair.accent};font-weight:700;margin-bottom:.5rem">SONSTIGES</div>
+        <div style="font-size:.88rem;color:#333;line-height:1.8;white-space:pre-wrap">${escHtml(d.sonstigerText)}</div>
+      </div>` : '';
+    const agbBlock = (d.extrasAgbEnabled && d.agbText) ? `
+      <div style="padding-top:1.5rem;border-top:1px solid #f0f0f0">
+        <div style="font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:#999;font-weight:700;margin-bottom:.5rem">RECHTLICHE HINWEISE / AGBS</div>
+        <div style="font-size:.75rem;color:#888;line-height:1.7;white-space:pre-wrap">${escHtml(d.agbText)}</div>
+      </div>` : '';
+    out.innerHTML += `
+    <div class="expo-page expo-inner">
+      ${pageHeader}
+      <div class="expo-page-content">
+        <div class="expo-page-badge">EXTRAS</div>
+        <div class="expo-page-title">Weitere Informationen</div>
+        ${qrBlock(d.extras360Enabled, d.link360, '360°-Rundgang', '🔄')}
+        ${qrBlock(d.extrasYTEnabled, d.linkYT, 'Video', '▶')}
+        ${sonstigesBlock}
+        ${agbBlock}
+      </div>
+    </div>`;
+  }
 }

@@ -764,4 +764,39 @@ function buildPreviewC() {
       </div>
     </div>`;
   }
+
+  // ── EXTRAS PAGE (optional) ──
+  const cpairC = (typeof getColorPair === 'function') ? getColorPair() : { accent:'#1a2744', secondary:'#c4a43c' };
+  const hasExtrasC = isStepEnabled(14) && (
+    (d.extras360Enabled && d.link360) ||
+    (d.extrasYTEnabled && d.linkYT) ||
+    (d.extrasSonstigesEnabled && d.sonstigerText) ||
+    (d.extrasAgbEnabled && d.agbText)
+  );
+  if (hasExtrasC) {
+    const qrBlockC = (enabled, url, label, icon) => {
+      if (!enabled || !url) return '';
+      const qrSrc = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=' + encodeURIComponent(url);
+      return `<div style="display:flex;gap:1.5rem;align-items:flex-start;margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid #e8ebf2">
+        <img src="${qrSrc}" alt="QR-Code" style="width:90px;height:90px;flex-shrink:0;border:1px solid #e0e3ea;border-radius:6px">
+        <div>
+          <div style="font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:${cpairC.accent};font-weight:700;margin-bottom:.3rem">${icon} ${esc(label)}</div>
+          <div style="font-size:.8rem;color:#555;word-break:break-all">${esc(url)}</div>
+          <div style="font-size:.72rem;color:#999;margin-top:.3rem">QR-Code scannen oder Link direkt aufrufen</div>
+        </div>
+      </div>`;
+    };
+    out.innerHTML += `
+    <div class="tc-page" style="background:#fff;padding:0">
+      <div style="height:8px;background:${cpairC.accent}"></div>
+      <div style="padding:2.5rem 2.8rem">
+        <div style="font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:#aaa;margin-bottom:.3rem">EXTRAS</div>
+        <div style="font-family:'Ubuntu',sans-serif;font-size:1.7rem;font-weight:700;color:${cpairC.accent};text-transform:uppercase;letter-spacing:.04em;padding-bottom:.8rem;border-bottom:2px solid ${cpairC.accent};margin-bottom:1.8rem">Weitere Informationen</div>
+        ${qrBlockC(d.extras360Enabled, d.link360, '360°-Rundgang', '🔄')}
+        ${qrBlockC(d.extrasYTEnabled, d.linkYT, 'Video', '▶')}
+        ${(d.extrasSonstigesEnabled && d.sonstigerText) ? `<div style="margin-bottom:1.5rem"><div style="font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:${cpairC.accent};font-weight:700;margin-bottom:.5rem">SONSTIGES</div><div style="font-size:.88rem;color:#333;line-height:1.8;white-space:pre-wrap">${esc(d.sonstigerText)}</div></div>` : ''}
+        ${(d.extrasAgbEnabled && d.agbText) ? `<div style="padding-top:1.5rem;border-top:1px solid #e8ebf2"><div style="font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:#aaa;font-weight:700;margin-bottom:.5rem">RECHTLICHE HINWEISE / AGBS</div><div style="font-size:.75rem;color:#888;line-height:1.7;white-space:pre-wrap">${esc(d.agbText)}</div></div>` : ''}
+      </div>
+    </div>`;
+  }
 }
