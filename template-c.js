@@ -508,6 +508,11 @@ function tcWaveSvg(color) {
 }
 
 // ══════════════════════════════════════════════════════
+function fmtArC(p) {
+  const f = p?.format || 'landscape';
+  return f === 'portrait' ? '9/16' : f === 'square' ? '1/1' : '16/9';
+}
+
 function buildPreviewC() {
   const d = data;
   const out = document.getElementById('preview-output');
@@ -547,8 +552,9 @@ function buildPreviewC() {
     </div>`;
 
   // ── PAGE 1: COVER ──────────────────────────────────
-  const heroImg = photos.length
-    ? `<img src="${photos[0].src}" class="tc-cover-upper-img" alt="">`
+  const coverPhotoC = photos.find(p => p.isCover) || photos[0];
+  const heroImg = coverPhotoC
+    ? `<img src="${coverPhotoC.src}" class="tc-cover-upper-img" alt="">`
     : `<div class="tc-cover-upper-placeholder"></div>`;
 
   out.innerHTML += `
@@ -732,7 +738,8 @@ function buildPreviewC() {
 
   // ── PAGE 8: FOTOGALERIE ────────────────────────────
   if (photos.length > 0) {
-    const set = photos.slice(0, 7);
+    const perPage = d.photosPerPage || 7;
+    const set = photos.slice(0, perPage);
     out.innerHTML += `
     <div class="tc-page tc-inner">
       ${pageHdr(8)}
@@ -741,7 +748,7 @@ function buildPreviewC() {
       <div class="tc-gallery">
         ${set.map((p, i) => `
         <div class="tc-gallery-item${i === 0 ? ' tc-wide' : ''}">
-          <img src="${p.src}" alt="">
+          <img src="${p.src}" style="aspect-ratio:${fmtArC(p)};object-fit:cover" alt="">
         </div>`).join('')}
       </div>
     </div>`;

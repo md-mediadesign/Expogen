@@ -2,6 +2,11 @@
 // TEMPLATE A — Klassisch / Strukturiert
 // Weißes Drucklayout, Navy/Gold Akzente
 // ══════════════════════════════════════════════════════
+function fmtAr(p) {
+  const f = p?.format || 'landscape';
+  return f === 'portrait' ? '9/16' : f === 'square' ? '1/1' : '16/9';
+}
+
 function buildPreviewA() {
   const d = data;
   const size = d.size || 'L';
@@ -35,8 +40,9 @@ function buildPreviewA() {
   const pageHeader = `<div class="expo-page-header"><div class="expo-page-header-logo">${d.brandLogoSrc?`<img src="${d.brandLogoSrc}" style="max-height:28px;object-fit:contain">`:escHtml(d.brandFirma||'')}</div></div>`;
 
   // ── PAGE 1: COVER ──
-  const heroImg = photos.length
-    ? `<img src="${photos[0].src}" alt="Hauptbild">`
+  const coverPhoto = photos.find(p => p.isCover) || photos[0];
+  const heroImg = coverPhoto
+    ? `<img src="${coverPhoto.src}" alt="Hauptbild">`
     : `<div class="expo-cover-hero-placeholder"><span>Kein Hauptbild hochgeladen</span></div>`;
   out.innerHTML += `
   <div class="expo-page expo-cover">
@@ -114,7 +120,7 @@ function buildPreviewA() {
         </div>
         <div>
           ${hlHtml}
-          ${photos.length>2?`<img src="${photos[2].src}" style="width:100%;aspect-ratio:4/3;object-fit:cover;margin-top:1rem;border-radius:4px" alt="">` : ''}
+          ${photos.length>2?`<img src="${photos[2].src}" style="width:100%;aspect-ratio:${fmtAr(photos[2])};object-fit:cover;margin-top:1rem;border-radius:4px" alt="">` : ''}
         </div>
       </div>
     </div>
@@ -132,7 +138,7 @@ function buildPreviewA() {
           <div class="expo-body-plain"><p>${d.lage.split('\n').filter(Boolean).map(escHtml).join('</p><p>')}</p></div>
           <div>${data.mapEnabled && data.mapLat
             ? buildStaticMapHtml(data.mapLat, data.mapLon, 80)
-            : photos.length>3 ? `<img src="${photos[3].src}" style="width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:4px" alt="">` : ''
+            : photos.length>3 ? `<img src="${photos[3].src}" style="width:100%;aspect-ratio:${fmtAr(photos[3])};object-fit:cover;border-radius:4px" alt="">` : ''
           }</div>
         </div>
       </div>
@@ -164,7 +170,7 @@ function buildPreviewA() {
         <div class="expo-page-title">Ausstattung & Qualität</div>
         <div class="expo-two-col">
           <div><div class="expo-body">${escHtml(d.ausstattung||'')}</div></div>
-          <div>${ausHtml}${photos.length>4?`<img src="${photos[4].src}" style="width:100%;aspect-ratio:4/3;object-fit:cover;margin-top:1rem;border-radius:4px" alt="">`:''}
+          <div>${ausHtml}${photos.length>4?`<img src="${photos[4].src}" style="width:100%;aspect-ratio:${fmtAr(photos[4])};object-fit:cover;margin-top:1rem;border-radius:4px" alt="">`:''}
           </div>
         </div>
       </div>
@@ -173,7 +179,8 @@ function buildPreviewA() {
 
   // ── PAGE 7: FOTOS ──
   if (photos.length) {
-    const photoSet = photos.slice(0, 7);
+    const perPage = d.photosPerPage || 7;
+    const photoSet = photos.slice(0, perPage);
     const firstThree = photoSet.slice(0,3);
     const rest = photoSet.slice(3);
     out.innerHTML += `
@@ -184,10 +191,10 @@ function buildPreviewA() {
         <div class="expo-page-title">Fotogalerie</div>
       </div>
       <div class="expo-photo-grid" style="margin:0 2.8rem">
-        ${firstThree.map((s,i)=>i===0?`<img src="${s.src}" alt="">`:``).join('')}
+        ${firstThree.map((s,i)=>i===0?`<img src="${s.src}" style="aspect-ratio:${fmtAr(s)};object-fit:cover" alt="">`:``).join('')}
       </div>
-      ${firstThree.length>1?`<div class="expo-photo-grid-2col" style="margin:3px 2.8rem 0">${firstThree.slice(1).map(s=>`<img src="${s.src}" alt="">`).join('')}</div>`:''}
-      ${rest.length?`<div class="expo-photo-grid-2col" style="margin:3px 2.8rem 0">${rest.map(s=>`<img src="${s.src}" alt="">`).join('')}</div>`:''}
+      ${firstThree.length>1?`<div class="expo-photo-grid-2col" style="margin:3px 2.8rem 0">${firstThree.slice(1).map(s=>`<img src="${s.src}" style="aspect-ratio:${fmtAr(s)};object-fit:cover" alt="">`).join('')}</div>`:''}
+      ${rest.length?`<div class="expo-photo-grid-2col" style="margin:3px 2.8rem 0">${rest.map(s=>`<img src="${s.src}" style="aspect-ratio:${fmtAr(s)};object-fit:cover" alt="">`).join('')}</div>`:''}
       <div style="height:2rem"></div>
     </div>`;
   }

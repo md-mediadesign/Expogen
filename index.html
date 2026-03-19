@@ -182,6 +182,13 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
 .photo-thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .photo-thumb .del-photo{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.7);border:none;color:#fff;font-size:.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
 .photo-thumb:hover .del-photo{opacity:1}
+.photo-thumb .cover-star{position:absolute;top:4px;left:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);border:none;color:#ccc;font-size:.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;padding:0;line-height:1}
+.photo-thumb .cover-star:hover{background:rgba(0,0,0,.85)}
+.photo-thumb .cover-star.active-cover{color:#f5c518;background:rgba(0,0,0,.75)}
+.photo-fmt-row{display:flex;gap:.2rem;margin-top:.2rem}
+.fmt-btn{flex:1;font-size:.6rem;padding:.18rem .2rem;border:1px solid rgba(201,168,76,.2);border-radius:4px;background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap}
+.fmt-btn:hover{border-color:var(--gold);color:var(--gold)}
+.fmt-btn.fmt-active{border-color:var(--gold);background:rgba(201,168,76,.15);color:var(--gold2);font-weight:600}
 .photo-caption-input{font-size:.72rem;padding:.22rem .4rem;border:1px solid rgba(201,168,76,.2);border-radius:4px;background:rgba(255,255,255,.05);color:var(--fg);width:100%;box-sizing:border-box}
 
 /* ── Highlights / Einheiten ── */
@@ -715,9 +722,8 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
     <div class="step-content" data-step="5">
       <div class="step-num" id="stepNum5"></div>
       <div class="step-title">Fotos & Visualisierungen</div>
-      <div class="step-desc">Das erste Bild wird als Deckblatt-Hauptbild verwendet. Bis zu 20 Bilder. Optional Beschreibung pro Bild.</div>
+      <div class="step-desc">Reihenfolge per Drag & Drop ändern. ★ Titelbild festlegen. Format pro Bild wählbar. Bis zu 20 Bilder.</div>
       <div class="photo-count" id="photoCount">0 / 20 Fotos</div>
-      <div class="photo-grid" id="photoGrid"></div>
       <div class="photo-upload-area" id="dropZone">
         <div class="upload-icon">📷</div>
         <div class="upload-text">Fotos / Visualisierungen hier hineinziehen oder auswählen</div>
@@ -728,6 +734,11 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
       </div>
       <input type="file" id="fileUpload" accept="image/*" multiple style="display:none" onchange="handlePhotoFiles(this.files)">
       <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoFiles(this.files)">
+      <div class="field-row" style="margin-bottom:12px; align-items:center; margin-top:12px;">
+        <label style="margin-right:8px;">Bilder pro Seite:</label>
+        <input type="number" id="f-photosPerPage" min="1" max="12" value="7" style="width:60px;" oninput="saveToStorage()">
+      </div>
+      <div class="photo-grid" id="photoGrid"></div>
     </div>
 
     <!-- Step 6: Objektdaten -->
@@ -760,7 +771,7 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
       </div>
       <div class="fields-section">
         <div class="fields-section-title">Kaufpreis</div>
-        <div class="field-row"><div><label>Käuferprovision</label><input type="text" id="f-kaeuferp" placeholder="z. B. 3,57 % inkl. MwSt."></div><div><label>Weitere Kosten</label><input type="text" id="f-weitereKosten" placeholder="z. B. Notarkosten, Grunderwerbssteuer"></div></div>
+        <div class="field-row"><div><label>Käuferprovision</label><div style="display:flex;gap:.5rem;align-items:center"><input type="text" id="f-kaeuferp" placeholder="z. B. 3,57 % inkl. MwSt." style="flex:1"><button class="btn-step-reset" style="white-space:nowrap;font-size:.7rem;padding:.3rem .6rem" onclick="saveDefaultProvision()">💾 Als Standard</button></div></div><div><label>Weitere Kosten</label><input type="text" id="f-weitereKosten" placeholder="z. B. Notarkosten, Grunderwerbssteuer"></div></div>
       </div>
     </div>
 
@@ -1192,6 +1203,7 @@ function isStepEnabled(id) {
 let current = 1;
 let data = {};
 let photos = [];
+let dragSrcIndex = null;
 let confirmCallback = null;
 let aiTargetField = null;
 let aiTargetContext = null;
@@ -1500,6 +1512,7 @@ function val(id){ const e=document.getElementById(id); return e?e.value.trim():'
 function collectStep(id) {
   if (id===3){ data.brandFirma=val('f-brandFirma'); }
   if (id===4){ data.titel=val('f-titel'); data.untertitel=val('f-untertitel'); data.adresse=val('f-adresse'); data.preis=val('f-preis'); data.preisDetail=val('f-preisDetail'); }
+  if (id===5){ data.photosPerPage = parseInt(document.getElementById('f-photosPerPage')?.value) || 7; }
   if (id===6){ ['baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','energiestandard','heizung','heizungsart','energieausweis','energieklasse','energiekennwert','energieausweisTyp','kaeuferp','weitereKosten'].forEach(k=>{ data[k]=val('f-'+k); }); data.stellplaetzeTyp=[...document.querySelectorAll('.stellplatz-typ:checked')].map(cb=>cb.value).join(', '); data.stellplaetzeAnz=val('f-stellplaetze-anz'); data.stellplaetzeKosten=val('f-stellplaetze-kosten'); }
   if (id===7){ data.beschreibung=val('f-beschreibung'); data.highlights=[...document.querySelectorAll('.hl-input')].map(i=>i.value.trim()).filter(Boolean); }
   if (id===8){ data.lage=val('f-lage'); data.mapEnabled=document.getElementById('f-mapEnabled')?.checked||false; }
@@ -1800,23 +1813,64 @@ function handlePhotoFiles(files) {
 function renderPhotoGrid() {
   const grid = document.getElementById('photoGrid');
   grid.innerHTML = '';
+  const hasCover = photos.some(p => p.isCover);
   photos.forEach((p,i)=>{
+    const isCover = p.isCover || (!hasCover && i === 0);
+    const fmt = p.format || 'landscape';
+    const ar = fmt === 'portrait' ? '9/16' : fmt === 'square' ? '1/1' : '16/9';
+
     const item = document.createElement('div');
     item.className = 'photo-item';
+    item.draggable = true;
+    item.addEventListener('dragstart', e => { dragSrcIndex = i; e.dataTransfer.effectAllowed = 'move'; item.style.opacity = '0.4'; });
+    item.addEventListener('dragend', () => { item.style.opacity = ''; });
+    item.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+    item.addEventListener('drop', e => {
+      e.preventDefault();
+      if (dragSrcIndex === null || dragSrcIndex === i) return;
+      const moved = photos.splice(dragSrcIndex, 1)[0];
+      photos.splice(i, 0, moved);
+      dragSrcIndex = null;
+      renderPhotoGrid();
+    });
+
     const thumb = document.createElement('div');
     thumb.className = 'photo-thumb';
-    thumb.innerHTML = `<img src="${p.src}" alt="Foto ${i+1}"><button class="del-photo" onclick="removePhoto(${i})">×</button>`;
+    thumb.style.aspectRatio = ar;
+    thumb.innerHTML = `<img src="${p.src}" alt="Foto ${i+1}" style="aspect-ratio:${ar};object-fit:cover">
+      <button class="del-photo" onclick="removePhoto(${i})">×</button>
+      <button class="cover-star${isCover?' active-cover':''}" onclick="setCover(${i})" title="Als Titelbild">${isCover ? '★' : '☆'}</button>`;
+
+    const fmtRow = document.createElement('div');
+    fmtRow.className = 'photo-fmt-row';
+    fmtRow.innerHTML = `
+      <button class="fmt-btn${fmt==='landscape'?' fmt-active':''}" onclick="setFormat(${i},'landscape')">↔ Quer</button>
+      <button class="fmt-btn${fmt==='portrait'?' fmt-active':''}" onclick="setFormat(${i},'portrait')">↕ Hoch</button>
+      <button class="fmt-btn${fmt==='square'?' fmt-active':''}" onclick="setFormat(${i},'square')">⬛ Quad</button>`;
+
     const cap = document.createElement('input');
     cap.className = 'photo-caption-input';
     cap.placeholder = 'Beschreibung (optional)';
     cap.value = p.caption || '';
     cap.oninput = () => { photos[i].caption = cap.value; };
+
     item.appendChild(thumb);
+    item.appendChild(fmtRow);
     item.appendChild(cap);
     grid.appendChild(item);
   });
   document.getElementById('photoCount').textContent = `${photos.length} / 20 Fotos`;
   document.getElementById('dropZone').style.display = photos.length >= 20 ? 'none' : '';
+}
+
+function setCover(idx) {
+  photos.forEach((p,i) => p.isCover = (i === idx));
+  renderPhotoGrid();
+}
+
+function setFormat(idx, fmt) {
+  photos[idx].format = fmt;
+  renderPhotoGrid();
 }
 
 function removePhoto(idx) { photos.splice(idx,1); renderPhotoGrid(); }
@@ -2036,9 +2090,16 @@ function loadFromStorage() {
       if(data.brandLogoSrc){ const img=document.getElementById('logoPreviewImg'); img.src=data.brandLogoSrc; img.style.display='block'; document.getElementById('logoPlaceholder').style.display='none'; }
       if(data.mapEnabled){ const cb=document.getElementById('f-mapEnabled'); if(cb){ cb.checked=true; document.getElementById('lageMapWrap').style.display=''; } }
       [['360','extras360Enabled'],['YT','extrasYTEnabled'],['Sonstiges','extrasSonstigesEnabled'],['Agb','extrasAgbEnabled']].forEach(([k,dk])=>{ if(data[dk]){ const cb=document.getElementById('toggle-'+k); if(cb){ cb.checked=true; const b=document.getElementById('extrasBody'+k); if(b) b.style.display=''; const bl=document.getElementById('extrasBlock'+k); if(bl) bl.classList.add('active'); if(k==='360'&&data.link360) updateQr('360'); if(k==='YT'&&data.linkYT) updateQr('YT'); } } });
+      if(data.photosPerPage) setVal('f-photosPerPage', data.photosPerPage);
+      if(!data.kaeuferp){ const def=localStorage.getItem('expogen_default_provision'); if(def){ setVal('f-kaeuferp',def); data.kaeuferp=def; } }
     }
     if(s) current=parseInt(s)||1;
   } catch(e){}
+}
+
+function saveDefaultProvision() {
+  const val = document.getElementById('f-kaeuferp').value;
+  if (val) localStorage.setItem('expogen_default_provision', val);
 }
 function setVal(id,v){ const el=document.getElementById(id); if(el) el.value=v; }
 

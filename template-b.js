@@ -768,6 +768,11 @@ const TB_CSS = `
 }
 `;
 
+function fmtArB(p) {
+  const f = p?.format || 'landscape';
+  return f === 'portrait' ? '9/16' : f === 'square' ? '1/1' : '16/9';
+}
+
 function buildPreviewB() {
   const d = data;
   const size = d.size || 'L';
@@ -801,7 +806,8 @@ function buildPreviewB() {
     </div>`;
 
   // ── PAGE 1: COVER ──────────────────────────────────────
-  const hero = photos.length ? `<img src="${photos[0].src}" alt="">` : `<div class="tb-cover-photo-placeholder">Kein Foto hochgeladen</div>`;
+  const coverPhotoB = photos.find(p => p.isCover) || photos[0];
+  const hero = coverPhotoB ? `<img src="${coverPhotoB.src}" alt="">` : `<div class="tb-cover-photo-placeholder">Kein Foto hochgeladen</div>`;
   out.innerHTML += `
   <div class="tb-page tb-cover">
     <div class="tb-cover-hatch"></div>
@@ -1021,8 +1027,7 @@ function buildPreviewB() {
 
   // ── PAGE 8+: FOTOGALERIE ─────────────────────────────
   if (photos.length) {
-    // Split into pages: 1 hero + up to 6 more (2 rows of 3) = 7 per page
-    const PHOTOS_PER_PAGE = 7;
+    const PHOTOS_PER_PAGE = d.photosPerPage || 7;
     const gallPages = [];
     for (let i = 0; i < photos.length; i += PHOTOS_PER_PAGE) gallPages.push(photos.slice(i, i + PHOTOS_PER_PAGE));
 
@@ -1037,12 +1042,12 @@ function buildPreviewB() {
         ${pageHeader}
         <div class="tb-gallery-label">${pageLabel}</div>
         <div class="tb-gallery-hero-wrap">
-          <div class="tb-gallery-hero"><img src="${p0.src}" alt=""></div>
+          <div class="tb-gallery-hero"><img src="${p0.src}" style="aspect-ratio:${fmtArB(p0)};object-fit:cover" alt=""></div>
           ${p0.caption ? `<div class="tb-gallery-caption">${esc(p0.caption)}</div>` : ''}
         </div>
         ${chunks.map(ch => ch.length === 3
-          ? `<div class="tb-gallery-grid3">${ch.map(p => `<div class="tb-gallery-img-wrap"><img src="${p.src}" alt="">${p.caption ? `<div class="tb-gallery-caption">${esc(p.caption)}</div>` : ''}</div>`).join('')}</div>`
-          : `<div class="tb-gallery-grid2">${ch.map(p => `<div class="tb-gallery-img-wrap"><img src="${p.src}" alt="">${p.caption ? `<div class="tb-gallery-caption">${esc(p.caption)}</div>` : ''}</div>`).join('')}</div>`
+          ? `<div class="tb-gallery-grid3">${ch.map(p => `<div class="tb-gallery-img-wrap"><img src="${p.src}" style="aspect-ratio:${fmtArB(p)};object-fit:cover" alt="">${p.caption ? `<div class="tb-gallery-caption">${esc(p.caption)}</div>` : ''}</div>`).join('')}</div>`
+          : `<div class="tb-gallery-grid2">${ch.map(p => `<div class="tb-gallery-img-wrap"><img src="${p.src}" style="aspect-ratio:${fmtArB(p)};object-fit:cover" alt="">${p.caption ? `<div class="tb-gallery-caption">${esc(p.caption)}</div>` : ''}</div>`).join('')}</div>`
         ).join('')}
       </div>`;
     });
