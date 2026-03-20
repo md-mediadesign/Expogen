@@ -832,7 +832,7 @@ function buildPreviewB() {
     ['Wohnfläche',       d.wohnflaeche],
     ['Gesamtfläche',     d.gesamtflaeche],
     ['Zimmer',           d.zimmer],
-    ['Stellplätze',      [d.stellplaetzeTyp, d.stellplaetzeAnz ? d.stellplaetzeAnz+' Pl.' : '', d.stellplaetzeKosten].filter(Boolean).join(' · ') || d.stellplaetze],
+    ['Stellplätze',      (formatStellplaetzeLines(d.stellplaetze)||[]).join(' · ')],
     ['Energiestandard',  d.energiestandard],
     ['Heizung',          d.heizung],
     ['Heizungsart',      d.heizungsart],

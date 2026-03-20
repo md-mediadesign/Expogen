@@ -588,6 +588,7 @@ function buildPreviewC() {
     ['Wohnfläche', d.wohnflaeche],
     ['Gesamtfläche', d.gesamtflaeche],
     ['Zimmer', d.zimmer],
+    ['Stellplätze', (formatStellplaetzeLines(d.stellplaetze)||[]).join(' · ')],
     ['Einheiten', d.einheitenAnz],
     ['Hausgeld', d.hausgeld],
     ['Energiestandard', d.energiestandard],

@@ -2496,15 +2496,27 @@ function saveStellplatzModal() {
   closeStellplatzModal();
 }
 
-function updateStellplatzSummary() {
-  const sp = data.stellplaetze || {};
-  const aktive = STELLPLATZ_TYPEN.filter(typ => {
+function formatStellplaetzeLines(sp) {
+  if (!sp) return [];
+  return STELLPLATZ_TYPEN.map(typ => {
     const key = typ.toLowerCase().replace(/\s/g,'_');
     const e = sp[key];
-    return e && (e.anzahl || e.preis) && e.vermarktung !== 'keine Angaben';
-  });
+    if (!e || e.vermarktung === '—' || (!e.anzahl && !e.preis)) return null;
+    let line = '';
+    if (e.anzahl) line += e.anzahl + ' × ';
+    line += typ;
+    if (e.vermarktung) line += ' | ' + e.vermarktung;
+    if (e.preis) line += ' | je ' + e.preis;
+    return line;
+  }).filter(Boolean);
+}
+
+function updateStellplatzSummary() {
+  const lines = formatStellplaetzeLines(data.stellplaetze);
   const el = document.getElementById('stellplatz-summary');
-  if (el) el.textContent = aktive.length ? aktive.join(', ') : 'Keine Angaben';
+  if (!el) return;
+  if (!lines.length) { el.textContent = 'Keine Angaben'; return; }
+  el.innerHTML = lines.map(l => `<div>${l}</div>`).join('');
 }
 </script>
 
