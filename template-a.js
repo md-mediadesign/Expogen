@@ -69,7 +69,7 @@ function buildPreviewA() {
     ['Wohnfläche', d.wohnflaeche],
     ['Gesamtfläche', d.gesamtflaeche],
     ['Zimmer', d.zimmer],
-    ['Stellplätze', (formatStellplaetzeLines(d.stellplaetze)||[]).join(' · ')],
+    ['Stellplätze', (formatStellplaetzeLines(d.stellplaetze)||[]).join('\n')],
     ['Energiestandard', d.energiestandard],
     ['Heizung', d.heizung],
     ['Heizungsart', d.heizungsart],
@@ -85,7 +85,7 @@ function buildPreviewA() {
   const leftRows = dataRows.slice(0, Math.ceil(dataRows.length/2));
   const rightRows = dataRows.slice(Math.ceil(dataRows.length/2));
 
-  const mkTable = rows => `<table class="expo-data-table">${rows.map(r=>`<tr><td>${escHtml(r[0])}</td><td>${escHtml(r[1])}</td></tr>`).join('')}</table>`;
+  const mkTable = rows => `<table class="expo-data-table">${rows.map(r=>`<tr><td>${escHtml(r[0])}</td><td>${escHtml(r[1]).replace(/\n/g,'<br>')}</td></tr>`).join('')}</table>`;
 
   const sideImg = photos.length > 1 ? `<img src="${photos[1].src}" class="expo-sidebar-img" alt="">` : '';
 

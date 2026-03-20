@@ -832,7 +832,7 @@ function buildPreviewB() {
     ['Wohnfläche',       d.wohnflaeche],
     ['Gesamtfläche',     d.gesamtflaeche],
     ['Zimmer',           d.zimmer],
-    ['Stellplätze',      (formatStellplaetzeLines(d.stellplaetze)||[]).join(' · ')],
+    ['Stellplätze',      (formatStellplaetzeLines(d.stellplaetze)||[]).join('\n')],
     ['Energiestandard',  d.energiestandard],
     ['Heizung',          d.heizung],
     ['Heizungsart',      d.heizungsart],
@@ -882,7 +882,7 @@ function buildPreviewB() {
         <div class="tb-facts-headline">DATEN &amp;<br>FAKTEN</div>
         ${subheadParts.length ? `<div class="tb-facts-subhead">${subheadParts.join(' · ')}</div>` : ''}
         <table class="tb-data-table">
-          ${dataRows.map(([l, v]) => `<tr><td>${esc(l)}</td><td>${esc(v)}</td></tr>`).join('')}
+          ${dataRows.map(([l, v]) => `<tr><td>${esc(l)}</td><td>${esc(v).replace(/\n/g,'<br>')}</td></tr>`).join('')}
         </table>
       </div>
     </div>
