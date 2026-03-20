@@ -237,6 +237,8 @@ const TB_CSS = `
   padding: 0.45rem 0.8rem;
   font-size: 8.5pt;
   color: #3a3a3a;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 .tb-data-table td:first-child { color: #5a5a5a; width: 44%; }
 .tb-data-table td:last-child  { font-weight: 500; }

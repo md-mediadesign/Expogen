@@ -217,6 +217,8 @@ const TC_CSS = `
   color: #1a2744;
   font-weight: 500;
   text-align: right;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 /* ─── BESCHREIBUNG ───────────────────────────────────── */
