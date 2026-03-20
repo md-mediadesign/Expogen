@@ -186,10 +186,11 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
 .photo-thumb .cover-star:hover{background:rgba(0,0,0,.85)}
 .photo-thumb .cover-star.active-cover{color:#f5c518;background:rgba(0,0,0,.75)}
 .photo-fmt-row{display:flex;gap:.2rem;margin-top:.2rem}
-.stellplatz-row td { padding: .55rem .4rem; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
-.stellplatz-row select, .stellplatz-row input { font-size: .84rem; padding: .3rem .4rem; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
-.stellplatz-row select { min-width: 130px; }
-.stellplatz-row input { min-width: 80px; }
+.stellplatz-row td { padding: .55rem .5rem; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text); font-size: .85rem; }
+.stellplatz-row select, .stellplatz-row input[type=text], .stellplatz-row input[type=number] { background: var(--navy); border: 1px solid var(--border); border-radius: 5px; color: var(--text); font-family: 'Roboto', sans-serif; font-size: .82rem; padding: .35rem .5rem; width: 100%; box-sizing: border-box; }
+.stellplatz-row select:focus, .stellplatz-row input:focus { outline: none; border-color: var(--gold); }
+.stellplatz-row select { min-width: 100px; }
+.stellplatz-row input[type=number] { width: 70px; }
 .fmt-btn{flex:1;font-size:.6rem;padding:.18rem .2rem;border:1px solid rgba(201,168,76,.2);border-radius:4px;background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap}
 .fmt-btn:hover{border-color:var(--gold);color:var(--gold)}
 .fmt-btn.fmt-active{border-color:var(--gold);background:rgba(201,168,76,.15);color:var(--gold2);font-weight:600}
@@ -2474,8 +2475,6 @@ function openStellplatzModal() {
       <td><input type="number" data-sp-key="${key}" data-sp-field="anzahl" value="${entry.anzahl||''}" placeholder="" min="0" style="width:70px;"></td>
     </tr>`;
   }).join('');
-  const std = data.stellplaetzeStandard || 'Gesamt';
-  document.getElementById('f-stellplaetzeStandard').value = std;
   document.getElementById('stellplatzModal').style.display = 'flex';
 }
 
@@ -2492,7 +2491,6 @@ function saveStellplatzModal() {
     sp[key][field] = el.value;
   });
   data.stellplaetze = sp;
-  data.stellplaetzeStandard = document.getElementById('f-stellplaetzeStandard').value;
   updateStellplatzSummary();
   saveToStorage();
   closeStellplatzModal();
@@ -2511,46 +2509,26 @@ function updateStellplatzSummary() {
 </script>
 
 <!-- Stellplatz Modal -->
-<div id="stellplatzModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center;">
-  <div style="background:#fff;border-radius:8px;width:min(680px,95vw);max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.25);">
-    <div style="background:var(--gold,#c9a84c);color:#fff;padding:1rem 1.4rem;display:flex;justify-content:space-between;align-items:center;border-radius:8px 8px 0 0;">
-      <strong>Angaben zu Stellplätzen</strong>
-      <span style="cursor:pointer;font-size:.9rem" onclick="closeStellplatzModal()">Fenster schließen</span>
+<div id="stellplatzModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:var(--navy2);border:1px solid var(--border);border-radius:var(--radius);width:min(660px,95vw);max-height:88vh;overflow-y:auto;box-shadow:var(--shadow);">
+    <div style="padding:1.1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-family:'Ubuntu',sans-serif;font-size:1rem;font-weight:600;color:var(--gold2);letter-spacing:.04em;">Stellplätze</span>
+      <button onclick="closeStellplatzModal()" style="background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:.82rem;letter-spacing:.04em;">✕ Schließen</button>
     </div>
-    <div style="padding:1.4rem 1.6rem;">
-      <table style="width:100%;border-collapse:collapse;font-size:.88rem;">
+    <div style="padding:1.2rem 1.5rem;">
+      <table style="width:100%;border-collapse:collapse;font-size:.85rem;">
         <thead>
-          <tr style="border-bottom:1px solid #ddd;">
-            <th style="text-align:left;padding:.5rem .4rem;font-weight:500;color:#444;">Stellplatzart</th>
-            <th style="text-align:left;padding:.5rem .4rem;font-weight:500;color:#444;">Vermarktungsart</th>
-            <th style="text-align:left;padding:.5rem .4rem;font-weight:500;color:#444;">Einzelpreis*</th>
-            <th style="text-align:left;padding:.5rem .4rem;font-weight:500;color:#444;">Anzahl</th>
+          <tr>
+            <th style="text-align:left;padding:.4rem .5rem .7rem;font-weight:500;color:var(--gold);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--border);">Art</th>
+            <th style="text-align:left;padding:.4rem .5rem .7rem;font-weight:500;color:var(--gold);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--border);">Vermarktung</th>
+            <th style="text-align:left;padding:.4rem .5rem .7rem;font-weight:500;color:var(--gold);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--border);">Preis</th>
+            <th style="text-align:left;padding:.4rem .5rem .7rem;font-weight:500;color:var(--gold);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--border);">Anzahl</th>
           </tr>
         </thead>
         <tbody id="stellplatzTableBody"></tbody>
       </table>
-
-      <div style="margin-top:1.2rem;display:flex;align-items:center;gap:.8rem;">
-        <strong style="font-size:.88rem;">Standardwert**</strong>
-        <select id="f-stellplaetzeStandard" style="font-size:.85rem;padding:.3rem .5rem;border:1px solid #ccc;border-radius:4px;">
-          <option value="Gesamt">Gesamt</option>
-          <option value="Carport">Carport</option>
-          <option value="Duplex">Duplex</option>
-          <option value="Freiplatz">Freiplatz</option>
-          <option value="Garage">Garage</option>
-          <option value="Parkhausstellplatz">Parkhausstellplatz</option>
-          <option value="Tiefgaragenstellplatz">Tiefgaragenstellplatz</option>
-          <option value="Sonstige">Sonstige</option>
-        </select>
-      </div>
-
-      <div style="margin-top:1rem;font-size:.78rem;color:#666;line-height:1.5;">
-        <p>*) Sofern keine Preisangabe getroffen worden ist, ist der Preis des Stellplatzes im Kauf- bzw. Mietpreis enthalten.</p>
-        <p>**) Beachten Sie, dass zum Immobilienscout24 nur eine einzige Stellplatzart übertragen werden kann. Diese Stellplatzart kann hier bestimmt werden.</p>
-      </div>
-
-      <div style="margin-top:1.2rem;text-align:right;">
-        <button onclick="saveStellplatzModal()" style="background:#eee;border:1px solid #ccc;border-radius:4px;padding:.5rem 1.2rem;cursor:pointer;font-size:.88rem;">Speichern</button>
+      <div style="margin-top:1.4rem;text-align:right;">
+        <button onclick="saveStellplatzModal()" style="background:var(--gold);color:var(--navy);border:none;border-radius:6px;padding:.55rem 1.4rem;font-size:.85rem;font-weight:600;cursor:pointer;font-family:'Roboto',sans-serif;letter-spacing:.03em;">Speichern</button>
       </div>
     </div>
   </div>
