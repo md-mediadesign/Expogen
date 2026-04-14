@@ -16,6 +16,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&family=Ubuntu:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- PDF text extraction -->
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+<!-- Word (.docx) text extraction -->
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.7.2/mammoth.browser.min.js"></script>
 <style>
 /* ══════════════════════════════════════════════════════
    BASE
@@ -340,25 +344,104 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
 .expo-sidebar-img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:4px}
 
 /* ══════════════════════════════════════════════════════
-   STARTUP MODAL
+   STARTUP WIZARD
 ══════════════════════════════════════════════════════ */
-.startup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);z-index:3000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+.startup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(10px);z-index:3000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s;padding:1rem}
 .startup-overlay.open{opacity:1;pointer-events:all}
-.startup-modal{background:var(--navy2);border:1px solid var(--border);border-radius:20px;padding:2.5rem 2.4rem;max-width:460px;width:92%;box-shadow:0 32px 100px rgba(0,0,0,.8);transform:scale(.95);transition:transform .3s;text-align:center}
-.startup-overlay.open .startup-modal{transform:scale(1)}
-.startup-logo{font-family:'Ubuntu',sans-serif;font-size:1.6rem;font-weight:700;color:var(--gold);letter-spacing:.04em;margin-bottom:.4rem}
-.startup-tagline{font-size:.82rem;color:var(--muted);margin-bottom:2rem}
-.startup-options{display:flex;flex-direction:column;gap:.75rem}
-.btn-startup{border-radius:12px;padding:1rem 1.4rem;font-family:'Roboto',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;border:none;display:flex;align-items:center;gap:.8rem;text-align:left}
-.btn-startup-primary{background:var(--gold);color:var(--navy)}
-.btn-startup-primary:hover{background:#dbb84a;transform:translateY(-1px)}
-.btn-startup-secondary{background:rgba(255,255,255,.06);color:var(--cream);border:1px solid rgba(255,255,255,.1)}
-.btn-startup-secondary:hover{background:rgba(255,255,255,.1);transform:translateY(-1px)}
-.btn-startup-resume{background:rgba(201,168,76,.12);color:var(--gold);border:1px solid rgba(201,168,76,.25)}
-.btn-startup-resume:hover{background:rgba(201,168,76,.2);transform:translateY(-1px)}
-.btn-startup-icon{font-size:1.3rem;flex-shrink:0}
-.btn-startup-text strong{display:block;font-size:.88rem}
-.btn-startup-text span{font-size:.76rem;font-weight:400;opacity:.7}
+.startup-modal{background:var(--navy2);border:1px solid var(--border);border-radius:24px;padding:2.2rem 2.4rem 2.4rem;max-width:600px;width:100%;box-shadow:0 40px 120px rgba(0,0,0,.9);transform:translateY(16px) scale(.97);transition:transform .35s cubic-bezier(.2,.8,.3,1);max-height:90vh;overflow-y:auto}
+.startup-overlay.open .startup-modal{transform:translateY(0) scale(1)}
+
+/* Wizard header */
+.sw-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.8rem}
+.sw-logo{font-family:'Ubuntu',sans-serif;font-size:1.4rem;font-weight:700;color:var(--gold);letter-spacing:.06em}
+.sw-logo span{color:var(--muted);font-size:.72rem;font-style:italic;font-weight:300;margin-left:6px;letter-spacing:.04em}
+
+/* Step dots */
+.sw-stepper{display:flex;align-items:center;gap:6px}
+.sw-dot{width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(201,168,76,.25);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:600;color:var(--muted);transition:all .3s}
+.sw-dot.active{border-color:var(--gold);background:var(--gold);color:var(--navy)}
+.sw-dot.done{border-color:var(--gold);color:var(--gold)}
+.sw-line{width:24px;height:1px;background:var(--border);transition:background .3s}
+.sw-line.done{background:rgba(201,168,76,.4)}
+
+/* Panel */
+.sw-panel{animation:fadeSlide .25s ease both}
+.sw-panel.hidden{display:none}
+.sw-step-label{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:.35rem}
+.sw-step-title{font-family:'Ubuntu',sans-serif;font-size:1.5rem;font-weight:700;color:var(--cream);line-height:1.15;margin-bottom:.35rem}
+.sw-step-desc{font-size:.82rem;color:var(--muted);line-height:1.6;margin-bottom:1.5rem}
+
+/* Resume */
+.sw-resume-btn{display:flex;align-items:center;gap:.85rem;background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.22);border-radius:12px;padding:.9rem 1.2rem;cursor:pointer;width:100%;margin-bottom:.9rem;transition:all .22s;font-family:'Roboto',sans-serif;text-align:left}
+.sw-resume-btn:hover{background:rgba(201,168,76,.14);border-color:var(--gold)}
+.sw-resume-icon{font-size:1.3rem;flex-shrink:0}
+.sw-resume-text strong{display:block;font-size:.88rem;color:var(--gold2);font-weight:600;margin-bottom:.1rem}
+.sw-resume-text span{font-size:.74rem;color:var(--muted)}
+.sw-divider{display:flex;align-items:center;gap:.7rem;margin-bottom:.9rem}
+.sw-divider::before,.sw-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.sw-divider-txt{font-size:.68rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+
+/* Data source cards */
+.sw-datasrc-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:.4rem}
+@media(max-width:500px){.sw-datasrc-grid{grid-template-columns:1fr}}
+.sw-card{background:rgba(255,255,255,.03);border:1.5px solid rgba(201,168,76,.15);border-radius:var(--radius);padding:1.1rem 1.2rem;cursor:pointer;transition:all .25s;display:flex;align-items:flex-start;gap:.85rem}
+.sw-card:hover{border-color:rgba(201,168,76,.45);background:rgba(201,168,76,.05)}
+.sw-card.selected{border-color:var(--gold);background:rgba(201,168,76,.1);box-shadow:0 0 22px rgba(201,168,76,.13)}
+.sw-card-icon{font-size:1.5rem;flex-shrink:0;margin-top:.05rem}
+.sw-card-title{font-family:'Ubuntu',sans-serif;font-size:.95rem;font-weight:700;color:var(--cream);margin-bottom:.2rem}
+.sw-card-desc{font-size:.74rem;color:var(--muted);line-height:1.4}
+
+/* Size grid */
+.sw-size-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem;margin-bottom:.4rem}
+@media(max-width:500px){.sw-size-grid{grid-template-columns:1fr}}
+.sw-size-card{background:rgba(255,255,255,.03);border:1.5px solid rgba(201,168,76,.15);border-radius:var(--radius);padding:1.1rem 1rem;cursor:pointer;transition:all .25s;display:flex;flex-direction:column;gap:.25rem;text-align:center;align-items:center}
+.sw-size-card:hover{border-color:rgba(201,168,76,.45);background:rgba(201,168,76,.05)}
+.sw-size-card.selected{border-color:var(--gold);background:rgba(201,168,76,.1);box-shadow:0 0 22px rgba(201,168,76,.13)}
+.sw-size-badge{font-family:'Ubuntu',sans-serif;font-size:2rem;font-weight:700;color:var(--gold2);line-height:1}
+.sw-size-name{font-family:'Ubuntu',sans-serif;font-size:.88rem;font-weight:700;color:var(--cream)}
+.sw-size-pages{font-size:.68rem;color:var(--gold);font-weight:500;opacity:.8}
+.sw-size-desc{font-size:.72rem;color:var(--muted);line-height:1.4;margin-top:.15rem}
+
+/* Method cards (multi-select) */
+.sw-method-grid{display:flex;flex-direction:column;gap:.55rem;margin-bottom:.4rem}
+.sw-method-card{background:rgba(255,255,255,.03);border:1.5px solid rgba(201,168,76,.15);border-radius:var(--radius);padding:.9rem 1.1rem;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:.85rem}
+.sw-method-card:hover{border-color:rgba(201,168,76,.45);background:rgba(201,168,76,.05)}
+.sw-method-card.selected{border-color:var(--gold);background:rgba(201,168,76,.08)}
+.sw-method-icon{font-size:1.4rem;flex-shrink:0}
+.sw-method-body{flex:1;min-width:0}
+.sw-method-title{font-family:'Ubuntu',sans-serif;font-size:.9rem;font-weight:700;color:var(--cream);margin-bottom:.12rem}
+.sw-method-desc{font-size:.73rem;color:var(--muted);line-height:1.4}
+.sw-method-check{width:22px;height:22px;border-radius:50%;border:1.5px solid rgba(201,168,76,.3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:transparent;transition:all .25s}
+.sw-method-card.selected .sw-method-check{border-color:var(--gold);background:var(--gold);color:var(--navy)}
+
+/* File upload area */
+.sw-file-zone{border:2px dashed rgba(201,168,76,.28);border-radius:var(--radius);padding:1.4rem;text-align:center;cursor:pointer;transition:all .3s;background:rgba(255,255,255,.02);margin-top:.5rem;display:none}
+.sw-file-zone.visible{display:block}
+.sw-file-zone:hover,.sw-file-zone.dragover{border-color:var(--gold);background:rgba(201,168,76,.05)}
+.sw-file-zone-icon{font-size:2rem;opacity:.5;margin-bottom:.4rem}
+.sw-file-zone-text{font-size:.82rem;color:var(--muted);margin-bottom:.3rem}
+.sw-file-zone-sub{font-size:.68rem;color:rgba(201,168,76,.5)}
+.sw-uploaded-files{margin-top:.6rem;display:flex;flex-direction:column;gap:.3rem}
+.sw-file-item{display:flex;align-items:center;gap:.55rem;background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.2);border-radius:7px;padding:.4rem .9rem;font-size:.78rem;color:var(--text)}
+.sw-file-item-icon{font-size:1rem;flex-shrink:0}
+.sw-file-item-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sw-file-item-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:0 .1rem;line-height:1;transition:color .2s}
+.sw-file-item-del:hover{color:#e05555}
+
+/* Nav */
+.sw-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.6rem;padding-top:1.2rem;border-top:1px solid var(--border);gap:.8rem}
+.sw-back-btn{background:transparent;border:1px solid rgba(201,168,76,.22);border-radius:8px;color:var(--muted);font-family:'Roboto',sans-serif;font-size:.82rem;font-weight:500;padding:.65rem 1.4rem;cursor:pointer;transition:all .22s}
+.sw-back-btn:hover{border-color:var(--gold);color:var(--gold)}
+.sw-next-btn,.sw-start-btn{background:var(--gold);border:none;border-radius:8px;color:var(--navy);font-family:'Roboto',sans-serif;font-size:.85rem;font-weight:700;padding:.75rem 2rem;cursor:pointer;transition:all .25s;letter-spacing:.04em}
+.sw-next-btn:hover,.sw-start-btn:hover{background:var(--gold2);transform:translateY(-1px);box-shadow:0 4px 18px rgba(201,168,76,.35)}
+.sw-error{font-size:.75rem;color:#e07070;margin-top:.4rem;display:none}
+.sw-error.show{display:block}
+
+/* Legacy buttons still referenced elsewhere – keep stubs */
+.btn-startup{display:none}
+.startup-logo{display:none}
+.startup-tagline{display:none}
+.startup-options{display:none}
 
 /* ══════════════════════════════════════════════════════
    MODALS
@@ -665,6 +748,69 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
   font-size: .85rem;
   color: var(--gold2);
 }
+
+/* ══════════════════════════════════════════════════════
+   FILE ANALYSIS MODAL
+══════════════════════════════════════════════════════ */
+.fa-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:4000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+.fa-overlay.open{opacity:1;pointer-events:all}
+.fa-modal{background:var(--navy2);border:1px solid var(--border);border-radius:20px;padding:2.4rem 2.6rem;max-width:440px;width:92%;box-shadow:0 32px 80px rgba(0,0,0,.8);text-align:center}
+.fa-icon{font-size:2.8rem;margin-bottom:1rem}
+.fa-title{font-family:'Ubuntu',sans-serif;font-size:1.3rem;font-weight:700;color:var(--cream);margin-bottom:.5rem}
+.fa-status{font-size:.88rem;color:var(--muted);min-height:1.4em;margin-bottom:1.6rem;line-height:1.5}
+/* Spinner */
+.fa-spinner{display:flex;justify-content:center;gap:6px;margin-bottom:1.6rem}
+.fa-spinner span{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:faBounce 1.2s ease-in-out infinite}
+.fa-spinner span:nth-child(1){animation-delay:0s}
+.fa-spinner span:nth-child(2){animation-delay:.2s}
+.fa-spinner span:nth-child(3){animation-delay:.4s}
+@keyframes faBounce{0%,80%,100%{transform:scale(.4);opacity:.4}40%{transform:scale(1);opacity:1}}
+/* Progress log */
+.fa-log{text-align:left;background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:8px;padding:.7rem 1rem;max-height:140px;overflow-y:auto;margin-bottom:1.4rem;display:none}
+.fa-log.show{display:block}
+.fa-log-item{font-size:.75rem;color:var(--muted);padding:.18rem 0;display:flex;align-items:flex-start;gap:.5rem;line-height:1.4}
+.fa-log-item.done{color:var(--gold)}
+.fa-log-item.err{color:#e07070}
+.fa-log-icon{flex-shrink:0;width:14px}
+/* Result summary */
+.fa-result{background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.22);border-radius:10px;padding:1rem 1.2rem;margin-bottom:1.4rem;text-align:left;display:none}
+.fa-result.show{display:block}
+.fa-result-title{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:.6rem}
+.fa-result-row{font-size:.8rem;color:var(--text);display:flex;gap:.5rem;padding:.15rem 0}
+.fa-result-row span:first-child{color:var(--muted);min-width:90px}
+.fa-close-btn{background:var(--gold);border:none;border-radius:8px;color:var(--navy);font-family:'Roboto',sans-serif;font-size:.85rem;font-weight:700;padding:.75rem 2rem;cursor:pointer;transition:all .25s;display:none}
+.fa-close-btn.show{display:inline-block}
+.fa-close-btn:hover{background:var(--gold2);transform:translateY(-1px);box-shadow:0 4px 18px rgba(201,168,76,.35)}
+/* Weitere Medien Modal */
+.media-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:4000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;padding:2rem}
+.media-overlay.open{opacity:1;pointer-events:all}
+.media-modal{position:relative;background:var(--navy2);border:1px solid var(--border);border-radius:20px;padding:2.4rem 2.6rem 2.6rem;max-width:880px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,.8)}
+.media-close{position:absolute;top:1rem;right:1.3rem;background:none;border:none;color:var(--muted);font-size:1.8rem;cursor:pointer;line-height:1;transition:color .2s}
+.media-close:hover{color:var(--gold)}
+.media-head{text-align:center;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
+.media-kicker{font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:.5rem}
+.media-title{font-family:'Ubuntu',sans-serif;font-size:1.5rem;font-weight:700;color:var(--cream);margin-bottom:.4rem}
+.media-sub{font-size:.85rem;color:var(--muted);line-height:1.5;max-width:480px;margin:0 auto}
+.media-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem}
+.media-card{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:14px;padding:1.5rem 1.3rem;display:flex;flex-direction:column;transition:border-color .25s,transform .25s,background .25s}
+.media-card:not(.soon):hover{border-color:var(--gold);background:rgba(201,168,76,.05);transform:translateY(-2px)}
+.media-card.soon{opacity:.55}
+.media-icon{font-size:1.8rem;margin-bottom:.9rem}
+.media-card-title{font-family:'Ubuntu',sans-serif;font-size:1rem;font-weight:700;color:var(--cream);margin-bottom:.4rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.soon-badge{font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;background:rgba(201,168,76,.15);color:var(--gold);padding:.15rem .5rem;border-radius:4px;font-weight:600}
+.media-card-desc{font-size:.8rem;color:var(--muted);line-height:1.5;margin-bottom:1.2rem;flex-grow:1}
+.media-card-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+.media-btn{flex:1;min-width:90px;background:transparent;border:1px solid var(--border);color:var(--text);font-family:'Roboto',sans-serif;font-size:.78rem;font-weight:500;padding:.6rem .8rem;border-radius:7px;cursor:pointer;transition:all .2s}
+.media-btn:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
+.media-btn.primary{background:var(--gold);border-color:var(--gold);color:var(--navy);font-weight:700}
+.media-btn.primary:hover{background:var(--gold2);border-color:var(--gold2);color:var(--navy)}
+.media-btn:disabled{cursor:not-allowed;opacity:.6}
+.media-warn{background:rgba(224,112,112,.08);border:1px solid rgba(224,112,112,.35);border-radius:10px;padding:1rem 1.2rem;margin-bottom:1.5rem}
+.media-warn-title{font-size:.85rem;font-weight:700;color:#e07070;margin-bottom:.5rem;letter-spacing:.02em}
+.media-warn-body{font-size:.8rem;color:var(--text);line-height:1.55}
+.media-warn-body code{background:rgba(0,0,0,.3);padding:.1rem .4rem;border-radius:4px;font-size:.76rem;font-family:'SF Mono',Monaco,monospace;color:var(--gold)}
+.media-warn-code{margin-top:.7rem;padding:.6rem .9rem;background:rgba(0,0,0,.35);border-left:2px solid var(--gold);border-radius:4px;font-family:'SF Mono',Monaco,monospace;font-size:.74rem;color:var(--gold);overflow-x:auto;white-space:nowrap}
+@media print{.media-overlay{display:none!important}}
 </style>
 </head>
 <body>
@@ -1164,7 +1310,55 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
       <div id="preview-output"></div>
       <div class="preview-actions" style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.5rem">
         <button class="btn btn-next" onclick="window.print()" style="background:var(--gold)">⎙ Als PDF drucken / speichern</button>
+        <button class="btn btn-next" onclick="openMediaModal()" style="background:transparent;border:1px solid var(--gold);color:var(--gold)">✦ Weitere Medien</button>
         <button class="btn btn-back" onclick="openConfirmAll()">↺ Von vorne beginnen</button>
+      </div>
+    </div>
+
+    <!-- Weitere Medien Modal -->
+    <div class="media-overlay" id="mediaOverlay" onclick="if(event.target===this)closeMediaModal()">
+      <div class="media-modal">
+        <button class="media-close" onclick="closeMediaModal()" aria-label="Schließen">×</button>
+        <div class="media-head">
+          <div class="media-kicker">Marketing-Assets</div>
+          <h3 class="media-title">Weitere Medien erstellen</h3>
+          <p class="media-sub">Generieren Sie aus den eingetragenen Daten zusätzliche Vermarktungs-Materialien.</p>
+        </div>
+        <div id="mediaFileWarning" class="media-warn" style="display:none">
+          <div class="media-warn-title">⚠ Bilder können nicht eingebettet werden</div>
+          <div class="media-warn-body">Sie haben <code>index.html</code> per Doppelklick geöffnet. Chrome blockiert in diesem Modus das Laden lokaler Bilder. Für eingebettete Bilder bitte über einen lokalen Server öffnen:</div>
+          <div class="media-warn-code">cd "$(dirname "$(find ~ -name expogen-index.html 2>/dev/null | head -1)")" &amp;&amp; python3 -m http.server 8000</div>
+          <div class="media-warn-body" style="margin-top:.6rem">Einfacher Weg: VS Code mit Live-Server-Extension öffnen und „Go Live" klicken. Alternativ im Terminal im Expogen-Ordner: <code>python3 -m http.server</code> → dann <code>http://localhost:8000</code> aufrufen.</div>
+        </div>
+        <div class="media-grid">
+          <div class="media-card">
+            <div class="media-icon">🌐</div>
+            <div class="media-card-title">Landing Page</div>
+            <div class="media-card-desc">Eigenständige, moderne HTML-Seite zum Teilen per Link oder E-Mail.</div>
+            <div class="media-card-actions">
+              <button class="media-btn primary" onclick="previewLandingPage(data, photos)">Vorschau</button>
+              <button class="media-btn" onclick="downloadLandingPage(data, photos)">Download</button>
+            </div>
+          </div>
+          <div class="media-card soon">
+            <div class="media-icon">📄</div>
+            <div class="media-card-title">Flyer <span class="soon-badge">bald</span></div>
+            <div class="media-card-desc">Kompakter A5-Flyer, druckfertig für Postwurf und Auslage.</div>
+            <div class="media-card-actions"><button class="media-btn" disabled>In Vorbereitung</button></div>
+          </div>
+          <div class="media-card soon">
+            <div class="media-icon">🪧</div>
+            <div class="media-card-title">Plakat <span class="soon-badge">bald</span></div>
+            <div class="media-card-desc">Großformat A2/A1 für Schaufenster und Aushänge.</div>
+            <div class="media-card-actions"><button class="media-btn" disabled>In Vorbereitung</button></div>
+          </div>
+          <div class="media-card soon">
+            <div class="media-icon">🏗️</div>
+            <div class="media-card-title">Bauzaunbanner <span class="soon-badge">bald</span></div>
+            <div class="media-card-desc">Großflächiges PVC-Mesh-Banner für Baustellenabsperrungen bei Neubau-Projekten.</div>
+            <div class="media-card-actions"><button class="media-btn" disabled>In Vorbereitung</button></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1192,11 +1386,135 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
 <!-- Startup Modal -->
 <div class="startup-overlay" id="startupOverlay">
   <div class="startup-modal">
-    <div class="startup-logo">EXPOGEN</div>
-    <div class="startup-tagline">Professionelle Exposés in Minuten</div>
-    <div class="startup-options" id="startupOptions">
-      <!-- buttons rendered by JS -->
+
+    <!-- Header with logo + step dots -->
+    <div class="sw-header">
+      <div class="sw-logo">EXPOGEN <span>Exposé Generator</span></div>
+      <div class="sw-stepper">
+        <div class="sw-dot active" id="swDot1">1</div>
+        <div class="sw-line" id="swLine1"></div>
+        <div class="sw-dot" id="swDot2">2</div>
+        <div class="sw-line" id="swLine2"></div>
+        <div class="sw-dot" id="swDot3">3</div>
+      </div>
     </div>
+
+    <!-- ── STEP 1: Datenbasis ── -->
+    <div class="sw-panel" id="swPanel1">
+      <div class="sw-step-label">Schritt 1 von 3</div>
+      <div class="sw-step-title">Womit möchten Sie starten?</div>
+      <div class="sw-step-desc">Laden Sie Testdaten oder beginnen Sie mit leeren Feldern.</div>
+
+      <div id="swResumeArea"><!-- JS füllt ggf. "Fortsetzen"-Button ein --></div>
+
+      <div class="sw-datasrc-grid">
+        <div class="sw-card selected" id="swCardEmpty" onclick="swSelectDataSrc('empty')">
+          <div class="sw-card-icon">○</div>
+          <div>
+            <div class="sw-card-title">Leere Felder</div>
+            <div class="sw-card-desc">Eigene Daten – alle Felder sind leer</div>
+          </div>
+        </div>
+        <div class="sw-card" id="swCardDemo" onclick="swSelectDataSrc('demo')">
+          <div class="sw-card-icon">★</div>
+          <div>
+            <div class="sw-card-title">Testdaten laden</div>
+            <div class="sw-card-desc">Beispielobjekt – sofort vorschaubereit</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sw-nav" style="justify-content:flex-end;border-top:none;margin-top:1.2rem;padding-top:0">
+        <button class="sw-next-btn" onclick="swGoStep(2)">Weiter →</button>
+      </div>
+    </div>
+
+    <!-- ── STEP 2: Exposé-Größe ── -->
+    <div class="sw-panel hidden" id="swPanel2">
+      <div class="sw-step-label">Schritt 2 von 3</div>
+      <div class="sw-step-title">Wie groß soll das Exposé sein?</div>
+      <div class="sw-step-desc">Der Umfang bestimmt, welche Inhaltsseiten erstellt werden.</div>
+
+      <div class="sw-size-grid">
+        <div class="sw-size-card" data-size="S" onclick="swSelectSize(this)">
+          <div class="sw-size-badge">S</div>
+          <div class="sw-size-name">Kompakt</div>
+          <div class="sw-size-pages">1 – 2 Seiten</div>
+          <div class="sw-size-desc">Mietwohnungen, einfache Objekte, schnelle Vermarktung</div>
+        </div>
+        <div class="sw-size-card selected" data-size="M" onclick="swSelectSize(this)">
+          <div class="sw-size-badge">M</div>
+          <div class="sw-size-name">Standard</div>
+          <div class="sw-size-pages">3 – 5 Seiten</div>
+          <div class="sw-size-desc">Kaufobjekte, Eigentumswohnungen, Häuser</div>
+        </div>
+        <div class="sw-size-card" data-size="L" onclick="swSelectSize(this)">
+          <div class="sw-size-badge">L</div>
+          <div class="sw-size-name">Premium</div>
+          <div class="sw-size-pages">6 – 10 Seiten</div>
+          <div class="sw-size-desc">Neubauprojekte, Kapitalanlagen, Exklusivobjekte</div>
+        </div>
+      </div>
+      <p class="sw-error" id="swErrSize">Bitte wählen Sie eine Größe aus.</p>
+
+      <div class="sw-nav">
+        <button class="sw-back-btn" onclick="swGoStep(1)">← Zurück</button>
+        <button class="sw-next-btn" onclick="swGoStep(3)">Weiter →</button>
+      </div>
+    </div>
+
+    <!-- ── STEP 3: Eingabemethode ── -->
+    <div class="sw-panel hidden" id="swPanel3">
+      <div class="sw-step-label">Schritt 3 von 3</div>
+      <div class="sw-step-title">Wie möchten Sie die Daten eingeben?</div>
+      <div class="sw-step-desc">Mehrfachauswahl möglich – kombinieren Sie beliebig.</div>
+
+      <div class="sw-method-grid">
+        <div class="sw-method-card selected" data-method="manual" onclick="swToggleMethod(this)">
+          <div class="sw-method-icon">✏️</div>
+          <div class="sw-method-body">
+            <div class="sw-method-title">Selbst ausfüllen</div>
+            <div class="sw-method-desc">Alle Felder manuell eingeben – Schritt für Schritt durch das Formular</div>
+          </div>
+          <div class="sw-method-check">✓</div>
+        </div>
+        <div class="sw-method-card" data-method="voice" onclick="swToggleMethod(this)">
+          <div class="sw-method-icon">🎙</div>
+          <div class="sw-method-body">
+            <div class="sw-method-title">Einsprechen</div>
+            <div class="sw-method-desc">Gehen Sie durch die Immobilie und beschreiben Sie – die KI erstellt die Texte</div>
+          </div>
+          <div class="sw-method-check">✓</div>
+        </div>
+        <div class="sw-method-card" data-method="files" onclick="swToggleMethod(this)">
+          <div class="sw-method-icon">📁</div>
+          <div class="sw-method-body">
+            <div class="sw-method-title">Dateien hochladen</div>
+            <div class="sw-method-desc">Baubeschreibung, Notizen, altes Exposé oder ausgefülltes EXPOGEN-Formular</div>
+          </div>
+          <div class="sw-method-check">✓</div>
+        </div>
+      </div>
+
+      <!-- File upload zone (shown when "files" selected) -->
+      <div class="sw-file-zone" id="swFileZone"
+           onclick="document.getElementById('swFileInput').click()"
+           ondragover="swFileDragOver(event)" ondragleave="swFileDragLeave(event)" ondrop="swFileDrop(event)">
+        <div class="sw-file-zone-icon">📂</div>
+        <div class="sw-file-zone-text">Dateien hier ablegen oder klicken zum Auswählen</div>
+        <div class="sw-file-zone-sub">PDF · Word (.docx) · Bilder (JPG, PNG) · Text (.txt)</div>
+      </div>
+      <input type="file" id="swFileInput" multiple accept=".pdf,.docx,.doc,.txt,.jpg,.jpeg,.png" style="display:none" onchange="swHandleFileInput(this)">
+      <div class="sw-uploaded-files" id="swUploadedFiles"></div>
+
+      <p class="sw-error" id="swErrMethod">Bitte wählen Sie mindestens eine Methode.</p>
+
+      <div class="sw-nav">
+        <button class="sw-back-btn" onclick="swGoStep(2)">← Zurück</button>
+        <button class="sw-start-btn" onclick="swStart()">Exposé erstellen →</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1265,6 +1583,22 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
   </div>
 </div>
 
+<!-- File Analysis Modal -->
+<div class="fa-overlay" id="faOverlay">
+  <div class="fa-modal">
+    <div class="fa-icon">📂</div>
+    <div class="fa-title">Dateien werden verarbeitet</div>
+    <div class="fa-status" id="faStatus">Vorbereitung…</div>
+    <div class="fa-spinner"><span></span><span></span><span></span></div>
+    <div class="fa-log" id="faLog"></div>
+    <div class="fa-result" id="faResult">
+      <div class="fa-result-title">Ergebnis</div>
+      <div id="faResultRows"></div>
+    </div>
+    <button class="fa-close-btn" id="faCloseBtn" onclick="closeFaModal()">Weiter zum Formular →</button>
+  </div>
+</div>
+
 <script src="template-a.js"></script>
 <script src="template-b.js"></script>
 <script src="template-c.js"></script>
@@ -1272,6 +1606,7 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
 <script src="template-e.js"></script>
 <script src="template-f.js"></script>
 <script src="template-g.js"></script>
+<script src="landingpage-template.js"></script>
 <script>
 // ══════════════════════════════════════════════════════
 // STEP DEFINITIONS
@@ -1359,28 +1694,30 @@ function init() {
   showStartupModal();
 }
 
+// ══════════════════════════════════════════════════════
+// STARTUP WIZARD STATE
+// ══════════════════════════════════════════════════════
+const swState = { dataSrc: 'empty', size: 'M', methods: new Set(['manual']), files: [] };
+let swCurrentStep = 1;
+
 function showStartupModal() {
+  // Show "Resume" button if saved data exists
   const hasSaved = !!localStorage.getItem('expogen_data');
-  const opts = document.getElementById('startupOptions');
-  opts.innerHTML = '';
-
+  const resumeArea = document.getElementById('swResumeArea');
   if (hasSaved) {
-    opts.innerHTML += `
-      <button class="btn-startup btn-startup-resume" onclick="startupResume()">
-        <span class="btn-startup-icon">↩</span>
-        <span class="btn-startup-text"><strong>Letzten Stand fortsetzen</strong><span>Gespeicherte Eingaben laden</span></span>
-      </button>`;
+    resumeArea.innerHTML = `
+      <button class="sw-resume-btn" onclick="swResume()">
+        <span class="sw-resume-icon">↩</span>
+        <div class="sw-resume-text">
+          <strong>Letzten Stand fortsetzen</strong>
+          <span>Gespeicherte Eingaben laden</span>
+        </div>
+      </button>
+      <div class="sw-divider"><span class="sw-divider-txt">oder neu starten</span></div>`;
+  } else {
+    resumeArea.innerHTML = '';
   }
-  opts.innerHTML += `
-    <button class="btn-startup btn-startup-primary" onclick="startupDemo()">
-      <span class="btn-startup-icon">★</span>
-      <span class="btn-startup-text"><strong>Mit Demodaten starten</strong><span>Beispielobjekt – sofort loslegen</span></span>
-    </button>
-    <button class="btn-startup btn-startup-secondary" onclick="startupEmpty()">
-      <span class="btn-startup-icon">○</span>
-      <span class="btn-startup-text"><strong>Leer starten</strong><span>Alle Felder leer – eigene Daten eingeben</span></span>
-    </button>`;
-
+  swGoStep(1, true);
   document.getElementById('startupOverlay').classList.add('open');
 }
 
@@ -1388,24 +1725,479 @@ function closeStartupModal() {
   document.getElementById('startupOverlay').classList.remove('open');
 }
 
-function startupResume() {
+function swGoStep(n, silent) {
+  // Hide errors
+  ['swErrSize','swErrMethod'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('show');
+  });
+  // Validate before leaving current step
+  if (!silent && n > swCurrentStep) {
+    if (swCurrentStep === 2) {
+      if (!swState.size) {
+        document.getElementById('swErrSize').classList.add('show');
+        return;
+      }
+    }
+    if (swCurrentStep === 3) {
+      if (swState.methods.size === 0) {
+        document.getElementById('swErrMethod').classList.add('show');
+        return;
+      }
+    }
+  }
+  swCurrentStep = n;
+  // Show/hide panels
+  [1,2,3].forEach(i => {
+    const p = document.getElementById('swPanel' + i);
+    if (p) p.classList.toggle('hidden', i !== n);
+  });
+  // Update dots
+  [1,2,3].forEach(i => {
+    const dot = document.getElementById('swDot' + i);
+    if (!dot) return;
+    dot.classList.toggle('active', i === n);
+    dot.classList.toggle('done', i < n);
+  });
+  [1,2].forEach(i => {
+    const line = document.getElementById('swLine' + i);
+    if (line) line.classList.toggle('done', i < n);
+  });
+}
+
+function swSelectDataSrc(src) {
+  swState.dataSrc = src;
+  document.getElementById('swCardEmpty').classList.toggle('selected', src === 'empty');
+  document.getElementById('swCardDemo').classList.toggle('selected', src === 'demo');
+}
+
+function swSelectSize(card) {
+  document.querySelectorAll('.sw-size-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  swState.size = card.dataset.size;
+  const errEl = document.getElementById('swErrSize');
+  if (errEl) errEl.classList.remove('show');
+}
+
+function swToggleMethod(card) {
+  const m = card.dataset.method;
+  if (swState.methods.has(m)) {
+    swState.methods.delete(m);
+    card.classList.remove('selected');
+  } else {
+    swState.methods.add(m);
+    card.classList.add('selected');
+  }
+  // Show/hide file zone
+  const zone = document.getElementById('swFileZone');
+  if (zone) zone.classList.toggle('visible', swState.methods.has('files'));
+  const errEl = document.getElementById('swErrMethod');
+  if (errEl) errEl.classList.remove('show');
+}
+
+// File handling
+function swFileDragOver(e) { e.preventDefault(); document.getElementById('swFileZone').classList.add('dragover'); }
+function swFileDragLeave(e) { document.getElementById('swFileZone').classList.remove('dragover'); }
+function swFileDrop(e) {
+  e.preventDefault();
+  document.getElementById('swFileZone').classList.remove('dragover');
+  swAddFiles([...e.dataTransfer.files]);
+}
+function swHandleFileInput(input) { swAddFiles([...input.files]); input.value = ''; }
+function swAddFiles(fileList) {
+  fileList.forEach(f => {
+    if (!swState.files.find(x => x.name === f.name && x.size === f.size)) {
+      swState.files.push(f);
+    }
+  });
+  swRenderFiles();
+}
+function swRemoveFile(idx) { swState.files.splice(idx, 1); swRenderFiles(); }
+function swFileIcon(name) {
+  const ext = name.split('.').pop().toLowerCase();
+  if (ext === 'pdf') return '📄';
+  if (['doc','docx'].includes(ext)) return '📝';
+  if (['jpg','jpeg','png','gif','webp'].includes(ext)) return '🖼';
+  return '📎';
+}
+function swRenderFiles() {
+  const wrap = document.getElementById('swUploadedFiles');
+  if (!wrap) return;
+  wrap.innerHTML = swState.files.map((f,i) => `
+    <div class="sw-file-item">
+      <span class="sw-file-item-icon">${swFileIcon(f.name)}</span>
+      <span class="sw-file-item-name">${f.name}</span>
+      <button class="sw-file-item-del" onclick="swRemoveFile(${i})" title="Entfernen">✕</button>
+    </div>`).join('');
+}
+
+function swResume() {
   closeStartupModal();
   loadFromStorage();
   showStep(current);
   updateNav();
 }
 
-function startupDemo() {
+function swStart() {
+  // Validate step 3
+  if (swState.methods.size === 0) {
+    document.getElementById('swErrMethod').classList.add('show');
+    return;
+  }
+
   closeStartupModal();
-  loadDemo();
+
+  // Apply chosen size to the main form
+  const size = swState.size || 'M';
+  const sizeCard = document.querySelector(`.groesse-card[data-size="${size}"]`);
+  if (sizeCard) {
+    document.querySelectorAll('.groesse-card').forEach(c => c.classList.remove('selected'));
+    sizeCard.classList.add('selected');
+  }
+  data.size = size;
+
+  if (swState.dataSrc === 'demo') {
+    // Load demo but then override size with wizard choice
+    loadDemo();
+    data.size = size;
+    const sc = document.querySelector(`.groesse-card[data-size="${size}"]`);
+    if (sc) { document.querySelectorAll('.groesse-card').forEach(c=>c.classList.remove('selected')); sc.classList.add('selected'); }
+    buildStepper();
+    // Jump past step 1 (size already set) to step 2
+    const eligible = getActiveStepIds();
+    current = eligible[1] || eligible[0];
+    showStep(current);
+    updateNav();
+  } else {
+    // Empty start: skip step 1 (size done), go to step 2 (Typ)
+    buildStepper();
+    const eligible = getActiveStepIds();
+    current = eligible[1] || eligible[0];
+    showStep(current);
+    updateNav();
+  }
+
+  // Handle input methods – files take priority (open analysis modal first)
+  if (swState.methods.has('files') && swState.files.length > 0) {
+    window.swPendingFiles = swState.files.slice();
+    setTimeout(() => swOpenFileAnalysis(), 300);
+  } else if (swState.methods.has('voice')) {
+    // Voice: open voice modal (but only if no files to process)
+    setTimeout(() => openVoiceModal(), 350);
+  }
 }
 
-function startupEmpty() {
-  closeStartupModal();
-  current = 1;
-  showStep(current);
-  updateNav();
+// ══════════════════════════════════════════════════════
+// FILE ANALYSIS – text extraction + AI parsing
+// ══════════════════════════════════════════════════════
+
+// Modal helpers
+function openFaModal() {
+  // Reset state
+  document.getElementById('faStatus').textContent = 'Vorbereitung…';
+  document.getElementById('faLog').innerHTML = '';
+  document.getElementById('faLog').classList.remove('show');
+  document.getElementById('faResult').classList.remove('show');
+  document.getElementById('faResultRows').innerHTML = '';
+  document.getElementById('faCloseBtn').classList.remove('show');
+  const spinner = document.querySelector('.fa-spinner');
+  if (spinner) spinner.style.display = '';
+  document.getElementById('faOverlay').classList.add('open');
 }
+function closeFaModal() {
+  document.getElementById('faOverlay').classList.remove('open');
+  // applyVoiceData() already navigated if AI ran; otherwise stay on current step
+}
+function openMediaModal() {
+  const el = document.getElementById('mediaOverlay');
+  if (el) el.classList.add('open');
+  // Warn if opened via file:// – images won't embed in Chrome
+  const warn = document.getElementById('mediaFileWarning');
+  if (warn) warn.style.display = (location.protocol === 'file:') ? 'block' : 'none';
+}
+function closeMediaModal() {
+  const el = document.getElementById('mediaOverlay');
+  if (el) el.classList.remove('open');
+}
+function faSetStatus(txt) {
+  const el = document.getElementById('faStatus');
+  if (el) el.textContent = txt;
+}
+function faLog(msg, type) {
+  const log = document.getElementById('faLog');
+  if (!log) return;
+  log.classList.add('show');
+  const icon = type === 'done' ? '✓' : type === 'err' ? '✕' : '·';
+  const item = document.createElement('div');
+  item.className = 'fa-log-item ' + (type || '');
+  item.innerHTML = `<span class="fa-log-icon">${icon}</span><span>${msg}</span>`;
+  log.appendChild(item);
+  log.scrollTop = log.scrollHeight;
+}
+
+// Read a File as ArrayBuffer
+function fileToArrayBuffer(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+// Read a File as text
+function fileToText(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = reject;
+    reader.readAsText(file, 'UTF-8');
+  });
+}
+
+// Read a File as dataURL (for images)
+function fileToDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// Extract text from PDF using pdf.js
+// Reads BOTH regular text AND filled form field values (getAnnotations)
+async function extractPdfText(file) {
+  const pdfjsLib = window.pdfjsLib;
+  if (!pdfjsLib) throw new Error('pdf.js nicht geladen – Internetverbindung prüfen');
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+  const buf = await fileToArrayBuffer(file);
+  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+  let text = '';
+
+  for (let i = 1; i <= Math.min(pdf.numPages, 20); i++) {
+    const page = await pdf.getPage(i);
+
+    // 1. Regular visible text (labels, headings, static content)
+    const content = await page.getTextContent();
+    const pageText = content.items.map(s => s.str).filter(s => s.trim()).join(' ');
+    if (pageText) text += pageText + '\n';
+
+    // 2. Filled form field values – critical for ausfüllbare PDF-Formulare
+    try {
+      const annotations = await page.getAnnotations();
+      const formFields = annotations
+        .filter(a => a.subtype === 'Widget' && a.fieldValue !== undefined && a.fieldValue !== '')
+        .map(a => {
+          const label = (a.alternativeText || a.fieldName || '').trim();
+          const value = Array.isArray(a.fieldValue)
+            ? a.fieldValue.join(', ')
+            : String(a.fieldValue).trim();
+          if (!value) return null;
+          return label ? `${label}: ${value}` : value;
+        })
+        .filter(Boolean);
+      if (formFields.length) text += formFields.join('\n') + '\n';
+    } catch(e) { /* annotations not available on this page */ }
+
+    text += '\n';
+  }
+  return text.trim();
+}
+
+// Extract text from .docx using mammoth.js
+async function extractDocxText(file) {
+  try {
+    if (!window.mammoth) throw new Error('mammoth.js nicht geladen');
+    const buf = await fileToArrayBuffer(file);
+    const result = await window.mammoth.extractRawText({ arrayBuffer: buf });
+    return result.value.trim();
+  } catch (e) {
+    return '';
+  }
+}
+
+// Main file analysis entry point
+async function swOpenFileAnalysis() {
+  const files = window.swPendingFiles || [];
+  if (!files.length) return;
+
+  openFaModal();
+  faSetStatus('Dateien werden analysiert…');
+
+  const imageFiles = files.filter(f => f.type.startsWith('image/'));
+  const docFiles   = files.filter(f => !f.type.startsWith('image/'));
+  let imagesAdded = 0;
+  let textChunks  = [];
+
+  // ── 1. Insert images into photo grid ──────────────────
+  if (imageFiles.length) {
+    faSetStatus(`${imageFiles.length} Bild${imageFiles.length > 1 ? 'er werden' : ' wird'} eingefügt…`);
+    for (const f of imageFiles) {
+      try {
+        const dataUrl = await fileToDataURL(f);
+        photos.push({ src: dataUrl, caption: '' });
+        imagesAdded++;
+        faLog(`Bild eingefügt: ${f.name}`, 'done');
+      } catch(e) {
+        faLog(`Bild fehlgeschlagen: ${f.name}`, 'err');
+      }
+    }
+    if (imagesAdded) renderPhotoGrid();
+  }
+
+  // ── 2. Extract text from documents ────────────────────
+  for (const f of docFiles) {
+    faSetStatus(`Text wird extrahiert: ${f.name}`);
+    let text = '';
+    const ext = f.name.split('.').pop().toLowerCase();
+    try {
+      if (ext === 'pdf') {
+        text = await extractPdfText(f);
+      } else if (['doc','docx'].includes(ext)) {
+        text = await extractDocxText(f);
+      } else if (ext === 'txt') {
+        text = await fileToText(f);
+      } else {
+        faLog(`Format nicht unterstützt: ${f.name}`, 'err');
+        continue;
+      }
+      if (text && text.length > 10) {
+        textChunks.push(`=== ${f.name} ===\n${text}`);
+        faLog(`Text extrahiert: ${f.name} (${text.length} Zeichen)`, 'done');
+      } else {
+        faLog(`Kein lesbarer Text in: ${f.name} – ggf. gescanntes PDF?`, 'err');
+      }
+    } catch(e) {
+      console.error('File extract error:', e);
+      faLog(`Fehler bei ${f.name}: ${e.message}`, 'err');
+    }
+  }
+
+  // ── 3. AI parsing ──────────────────────────────────────
+  if (textChunks.length) {
+    faSetStatus('KI analysiert den Inhalt…');
+    const combinedText = textChunks.join('\n\n').slice(0, 12000); // cap for API
+
+    const systemPrompt = `Du bist ein Assistent für Immobilien-Exposés. Analysiere den folgenden Text und extrahiere alle Immobilien-relevanten Informationen – egal ob strukturierter Fragebogen, Baubeschreibung, freier Text, Notizen oder altes Exposé.
+
+Falls der Text dem EXPOGEN-Kundenfragebogen entspricht, erkennst du diese Feldbeschriftungen:
+- "Objekttitel / Projektname" → titel | "Untertitel / Tagline" → untertitel | "Objekttyp" → type
+- "Straße und Hausnummer" + "PLZ" + "Ort" + "Stadtteil" → zu einer adresse zusammenführen
+- "Baujahr / Fertigstellung" → baujahr | "Zustand" → zustand | "Verfügbarkeit / Bezugstermin" → verfuegbar
+- "Wohnfläche" → wohnflaeche | "Gesamtfläche" → gesamtflaeche | "Anzahl Zimmer" → zimmer | "Anzahl Wohneinheiten" → einheitenAnz
+- "Kaufpreis / Preis ab" → preis | "Hausgeld / Nebenkosten" → hausgeld | "Käuferprovision" → kaeuferp | "Weitere Kosten" → weitereKosten
+- "Objektbeschreibung" → beschreibung | "Lagebeschreibung" → lage | "Beschreibung der Stadt" → stadtbeschr | "Ausstattung (Fließtext)" → ausstattung
+- "Ausstattungsmerkmale (Liste)" → ausstattungList | "Highlights / Besondere Verkaufsargumente" → highlights | "Investment-Highlights" → investHighlights
+- "Energiestandard" → energiestandard | "Energieklasse" → energieklasse | "Energiekennwert" → energiekennwert | "Heizungsart" → heizung | "Heizungssystem" → heizungsart | "Energieausweistyp" → energieausweisTyp
+- "Denkmalschutz" → denkmal | "Investment-Beschreibung" → investment
+
+Bei freiem Text oder Baubeschreibungen: extrahiere sinngemäß, was du findest – fehlende Felder bleiben leer.
+Für den Typ: mappe auf Eigentumswohnung, Haus, Neubau-Projekt, Gewerbe, Grundstück oder Sonstiges.
+Für size: S wenn nur Basisdaten, M wenn auch Beschreibungstexte, L wenn Einheiten oder Investment vorhanden.
+Antworte NUR mit einem validen JSON-Objekt – keine Erklärungen, kein Markdown.`;
+
+    const schema = `{
+  "type": "",
+  "size": "S/M/L",
+  "titel": "",
+  "untertitel": "",
+  "adresse": "",
+  "preis": "",
+  "preisDetail": "",
+  "baujahr": "",
+  "zustand": "",
+  "verfuegbar": "",
+  "wohnflaeche": "",
+  "gesamtflaeche": "",
+  "zimmer": "",
+  "einheitenAnz": "",
+  "energiestandard": "",
+  "heizung": "",
+  "heizungsart": "",
+  "energieausweis": "",
+  "energieklasse": "",
+  "energiekennwert": "",
+  "energieausweisTyp": "",
+  "hausgeld": "",
+  "denkmal": "",
+  "kaeuferp": "",
+  "weitereKosten": "",
+  "beschreibung": "",
+  "highlights": [],
+  "lage": "",
+  "stadtbeschr": "",
+  "ausstattung": "",
+  "ausstattungList": [],
+  "investment": "",
+  "investHighlights": []
+}`;
+
+    const userMsg = `Dokument-Inhalt:\n${combinedText}\n\nFülle das JSON-Schema mit den extrahierten Werten:\n${schema}`;
+
+    try {
+      const res = await fetch('https://text.pollinations.ai/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user',   content: userMsg }
+          ],
+          model: 'openai',
+          seed: Math.floor(Math.random() * 9999)
+        })
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      let raw = await res.text();
+      raw = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+      const parsed = JSON.parse(raw);
+
+      // Apply data (reuse voice function – same schema)
+      applyVoiceData(parsed);
+      faLog('KI-Analyse abgeschlossen', 'done');
+
+      // Show result summary
+      const filledFields = Object.keys(parsed).filter(k => {
+        const v = parsed[k];
+        return v && (typeof v === 'string' ? v.length > 0 : Array.isArray(v) ? v.length > 0 : false);
+      });
+      const resultEl = document.getElementById('faResult');
+      const rowsEl   = document.getElementById('faResultRows');
+      if (resultEl && rowsEl) {
+        resultEl.classList.add('show');
+        const summary = [
+          imagesAdded  ? `${imagesAdded} Bild${imagesAdded !== 1 ? 'er' : ''}` : null,
+          docFiles.length ? `${docFiles.length} Dokument${docFiles.length !== 1 ? 'e' : ''} analysiert` : null,
+          `${filledFields.length} Felder ausgefüllt`,
+        ].filter(Boolean);
+        rowsEl.innerHTML = summary.map(s =>
+          `<div class="fa-result-row"><span>·</span><span>${s}</span></div>`
+        ).join('');
+      }
+      faSetStatus('Fertig – alle verfügbaren Daten wurden übernommen.');
+    } catch(e) {
+      console.error('AI parse error:', e);
+      faLog('KI-Fehler: ' + e.message, 'err');
+      faSetStatus('KI-Analyse fehlgeschlagen – Bilder wurden trotzdem eingefügt.');
+    }
+  } else if (imagesAdded) {
+    faSetStatus(`${imagesAdded} Bild${imagesAdded !== 1 ? 'er wurden' : ' wurde'} ins Foto-Grid eingefügt.`);
+  } else {
+    faSetStatus('Keine verwertbaren Inhalte gefunden.');
+  }
+
+  // Hide spinner, show close button
+  const spinner = document.querySelector('.fa-spinner');
+  if (spinner) spinner.style.display = 'none';
+  const closeBtn = document.getElementById('faCloseBtn');
+  if (closeBtn) closeBtn.classList.add('show');
+}
+
+// Legacy shims so existing code still works
+function startupResume() { swResume(); }
+function startupDemo()   { swState.dataSrc='demo'; swStart(); }
+function startupEmpty()  { swState.dataSrc='empty'; swStart(); }
 
 // ══════════════════════════════════════════════════════
 // STEPPER
