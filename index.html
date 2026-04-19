@@ -2144,7 +2144,30 @@ type, size, titel, untertitel, adresse, preis, preisDetail, baujahr, zustand, ve
 
     const userMsg = `DOKUMENT-INHALT:\n---\n${combinedText}\n---\n\nExtrahiere jetzt ALLE Immobilien-Daten aus dem Dokument in das JSON-Objekt. Denk daran: vollständige Texte wörtlich übernehmen, Adresse zusammenbauen, Listen als Arrays, alle Felder ausfüllen, für die das Dokument Informationen liefert.`;
 
-    async function callPollinations(model, attempt) {
+    async function callLLM7(model) {
+      const res = await fetch('https://api.llm7.io/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer unused'
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user',   content: userMsg }
+          ],
+          temperature: 0.2
+        })
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      const content = data?.choices?.[0]?.message?.content;
+      if (!content || !content.trim()) throw new Error('leere Antwort');
+      return content;
+    }
+
+    async function callPollinations(model) {
       const res = await fetch('https://text.pollinations.ai/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2205,27 +2228,33 @@ type, size, titel, untertitel, adresse, preis, preisDetail, baujahr, zustand, ve
     }
 
     try {
-      // mistral & claude first — they return direct chat content.
-      // openai currently routes to a reasoning model that hides the answer
-      // inside reasoning_content and often truncates before emitting content.
-      const modelChain = ['mistral', 'claude', 'openai', 'deepseek'];
+      // LLM7.io is the primary provider — OpenAI-compatible, no-auth allowed
+      // with "Bearer unused", reliable direct chat output. Pollinations stays
+      // as emergency fallback because its default route uses a reasoning
+      // model that hides the answer in reasoning_content.
+      const providers = [
+        { name: 'LLM7 (default)',      call: () => callLLM7('default') },
+        { name: 'LLM7 (gpt-oss-20b)',  call: () => callLLM7('gpt-oss-20b') },
+        { name: 'Pollinations (openai)', call: () => callPollinations('openai') },
+        { name: 'Pollinations (deepseek)', call: () => callPollinations('deepseek') },
+      ];
       let parsed = null;
       let lastErr = null;
-      outer: for (const model of modelChain) {
+      outer: for (const p of providers) {
         for (let attempt = 1; attempt <= 2; attempt++) {
           try {
-            faSetStatus(`KI analysiert den Inhalt (${model}, Versuch ${attempt})…`);
-            const raw = await callPollinations(model, attempt);
-            console.log(`[Expogen] Raw (${model}):`, raw);
+            faSetStatus(`KI analysiert den Inhalt (${p.name}, Versuch ${attempt})…`);
+            const raw = await p.call();
+            console.log(`[Expogen] Raw (${p.name}):`, raw);
             parsed = tryParseSchema(raw);
             if (parsed) {
-              faLog(`Brauchbare Antwort erhalten (${model})`, 'done');
+              faLog(`Brauchbare Antwort erhalten (${p.name})`, 'done');
               break outer;
             }
-            faLog(`${model}: Antwort ohne Schema – Fallback`, 'err');
+            faLog(`${p.name}: Antwort ohne Schema – Fallback`, 'err');
           } catch(e) {
             lastErr = e;
-            faLog(`${model} Versuch ${attempt}: ${e.message}`, 'err');
+            faLog(`${p.name} Versuch ${attempt}: ${e.message}`, 'err');
           }
           await new Promise(r => setTimeout(r, 500 * attempt));
         }
