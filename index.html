@@ -44,9 +44,15 @@ header{width:100%;max-width:1180px;margin:0 auto;padding:2rem 2.5rem 0;display:f
 .logo span{color:var(--text);opacity:.4;font-style:italic;font-size:.9rem;letter-spacing:.05em;margin-left:8px;font-weight:300}
 .btn-header-reset{background:transparent;border:1px solid rgba(224,85,85,.3);border-radius:20px;color:rgba(224,85,85,.7);font-family:'Roboto',sans-serif;font-size:.72rem;font-weight:500;letter-spacing:.06em;padding:.35rem 1rem;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:.4rem}
 .btn-header-reset:hover{border-color:#e05555;color:#e05555;background:rgba(224,85,85,.08)}
-.header-actions{display:flex;align-items:center;gap:.55rem}
+.header-actions{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;justify-content:flex-end}
 .btn-header-upload{background:transparent;border:1px solid rgba(201,168,76,.3);border-radius:20px;color:var(--gold);font-family:'Roboto',sans-serif;font-size:.72rem;font-weight:500;letter-spacing:.06em;padding:.35rem 1rem;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:.4rem}
 .btn-header-upload:hover{border-color:var(--gold);background:rgba(201,168,76,.08)}
+.header-size-switch{display:inline-flex;border:1px solid rgba(201,168,76,.25);border-radius:20px;overflow:hidden;background:rgba(0,0,0,.25)}
+.header-size-switch-label{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:.35rem .75rem .35rem .9rem;align-self:center;border-right:1px solid rgba(201,168,76,.15);background:rgba(255,255,255,.02)}
+.header-size-btn{background:transparent;border:none;color:var(--muted);font-family:'Ubuntu',sans-serif;font-size:.78rem;font-weight:700;padding:.3rem .85rem;cursor:pointer;transition:all .2s;border-right:1px solid rgba(201,168,76,.12);min-width:34px}
+.header-size-btn:last-child{border-right:none}
+.header-size-btn:hover{color:var(--gold);background:rgba(201,168,76,.06)}
+.header-size-btn.active{background:var(--gold);color:var(--navy)}
 
 /* ── Main Layout ── */
 .main-layout{width:100%;max-width:1180px;margin:2rem auto 0;padding:0 2.5rem;display:flex;gap:2.5rem;align-items:flex-start}
@@ -498,6 +504,7 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
   .btn-header-reset,
   .btn-header-upload,
   .header-actions,
+  .header-size-switch,
   .confirm-overlay,
   .ai-modal-overlay,
   .preview-actions,
@@ -825,6 +832,12 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
 <header>
   <div class="logo">EXPOGEN <span>Exposé Generator</span></div>
   <div class="header-actions">
+    <div class="header-size-switch" id="headerSizeSwitch" title="Exposé-Größe wechseln – Daten bleiben erhalten">
+      <span class="header-size-switch-label">Größe</span>
+      <button class="header-size-btn" data-size="S" onclick="switchSize('S')">S</button>
+      <button class="header-size-btn" data-size="M" onclick="switchSize('M')">M</button>
+      <button class="header-size-btn" data-size="L" onclick="switchSize('L')">L</button>
+    </div>
     <button class="btn-header-upload" onclick="openUploadModal()" title="Dateien hochladen &amp; automatisch Felder füllen">📁 Dateien hochladen</button>
     <button class="btn-header-reset" onclick="openConfirmAll()">↺ Alles zurücksetzen</button>
   </div>
@@ -1914,6 +1927,8 @@ function swStart() {
     updateNav();
   }
 
+  updateHeaderSizeSwitch();
+
   // Handle input methods – files take priority (open analysis modal first)
   if (swState.methods.has('files') && swState.files.length > 0) {
     window.swPendingFiles = swState.files.slice();
@@ -2640,6 +2655,30 @@ function selectGroesse(card) {
   card.classList.add('selected');
   data.size = card.dataset.size;
   buildStepper(); clearErrors();
+  updateHeaderSizeSwitch();
+  saveToStorage();
+}
+
+function switchSize(s) {
+  if (!['S','M','L'].includes(s) || data.size === s) return;
+  collectStep(current);
+  data.size = s;
+  document.querySelectorAll('.groesse-card').forEach(c => c.classList.toggle('selected', c.dataset.size === s));
+  buildStepper();
+  updateHeaderSizeSwitch();
+  saveToStorage();
+  const active = getActiveStepIds();
+  if (!active.includes(current)) {
+    current = active[0];
+    showStep(current);
+  }
+  updateNav();
+}
+
+function updateHeaderSizeSwitch() {
+  document.querySelectorAll('.header-size-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.size === data.size);
+  });
 }
 
 function selectType(card) {
@@ -3222,6 +3261,7 @@ function loadFromStorage() {
       if(!data.kaeuferp){ const def=localStorage.getItem('expogen_default_provision'); if(def){ setVal('f-kaeuferp',def); data.kaeuferp=def; } }
     }
     if(s) current=parseInt(s)||1;
+    updateHeaderSizeSwitch();
   } catch(e){}
 }
 
@@ -3599,6 +3639,7 @@ function applyVoiceData(d) {
   }
 
   saveToStorage();
+  updateHeaderSizeSwitch();
   if (!merge) navigateToStep(14);
   else showStep(current);
 }
