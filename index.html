@@ -2163,50 +2163,27 @@ type, size, titel, untertitel, adresse, preis, preisDetail, baujahr, zustand, ve
       return t;
     }
 
-    try {
-      const modelChain = ['openai', 'mistral', 'deepseek'];
-      let raw = '';
-      let lastErr = null;
-      outer: for (const model of modelChain) {
-        for (let attempt = 1; attempt <= 2; attempt++) {
-          try {
-            faSetStatus(`KI analysiert den Inhalt (${model}, Versuch ${attempt})…`);
-            raw = await callPollinations(model, attempt);
-            faLog(`Antwort erhalten (${model})`, 'done');
-            break outer;
-          } catch(e) {
-            lastErr = e;
-            faLog(`${model} Versuch ${attempt}: ${e.message}`, 'err');
-            await new Promise(r => setTimeout(r, 600 * attempt));
-          }
-        }
-      }
-      if (!raw) throw lastErr || new Error('Alle KI-Modelle nicht erreichbar');
-      console.log('[Expogen] Pollinations raw response:', raw);
-      if (!raw || !raw.trim()) throw new Error('KI lieferte leere Antwort');
+    const hasSchemaKeys = o => o && typeof o === 'object' && !Array.isArray(o)
+      && (o.titel !== undefined || o.type !== undefined || o.adresse !== undefined
+       || o.beschreibung !== undefined || o.preis !== undefined);
 
-      // Strip markdown fences, then extract the outermost JSON object if prose wraps it
-      let jsonStr = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-      const first = jsonStr.indexOf('{');
-      const last  = jsonStr.lastIndexOf('}');
-      if (first !== -1 && last !== -1 && last > first) {
-        jsonStr = jsonStr.slice(first, last + 1);
-      }
-      let parsed;
-      try {
-        parsed = JSON.parse(jsonStr);
-      } catch (parseErr) {
-        const preview = raw.slice(0, 220).replace(/\s+/g, ' ');
-        throw new Error(`JSON-Parsing fehlgeschlagen. Antwort-Anfang: "${preview}…"`);
-      }
+    function tryParseSchema(raw) {
+      if (!raw || !raw.trim()) return null;
 
-      // Unwrap OpenAI-style response envelopes – walk every string value
-      // in the response looking for a JSON block containing our schema keys.
-      const hasSchemaKeys = o => o && typeof o === 'object' && !Array.isArray(o)
-        && (o.titel !== undefined || o.type !== undefined || o.adresse !== undefined
-         || o.beschreibung !== undefined || o.preis !== undefined);
+      // Try whole string: strip fences, slice to outer braces
+      const tryOne = (s) => {
+        let str = s.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+        const f = str.indexOf('{'), l = str.lastIndexOf('}');
+        if (f === -1 || l === -1 || l <= f) return null;
+        str = str.slice(f, l + 1);
+        try { return JSON.parse(str); } catch(_) { return null; }
+      };
 
-      if (parsed && !hasSchemaKeys(parsed)) {
+      let parsed = tryOne(raw);
+      if (hasSchemaKeys(parsed)) return parsed;
+
+      // If parsed is an envelope, walk every string value for embedded JSON
+      if (parsed && typeof parsed === 'object') {
         const strings = [];
         const seen = new Set();
         (function walk(v) {
@@ -2219,18 +2196,42 @@ type, size, titel, untertitel, adresse, preis, preisDetail, baujahr, zustand, ve
             else Object.values(v).forEach(walk);
           }
         })(parsed);
-
         for (const s of strings) {
-          let str = s.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-          const f2 = str.indexOf('{'), l2 = str.lastIndexOf('}');
-          if (f2 === -1 || l2 === -1 || l2 <= f2) continue;
-          str = str.slice(f2, l2 + 1);
-          try {
-            const inner = JSON.parse(str);
-            if (hasSchemaKeys(inner)) { parsed = inner; break; }
-          } catch(_) { /* keep searching */ }
+          const inner = tryOne(s);
+          if (hasSchemaKeys(inner)) return inner;
         }
       }
+      return null;
+    }
+
+    try {
+      // mistral & claude first — they return direct chat content.
+      // openai currently routes to a reasoning model that hides the answer
+      // inside reasoning_content and often truncates before emitting content.
+      const modelChain = ['mistral', 'claude', 'openai', 'deepseek'];
+      let parsed = null;
+      let lastErr = null;
+      outer: for (const model of modelChain) {
+        for (let attempt = 1; attempt <= 2; attempt++) {
+          try {
+            faSetStatus(`KI analysiert den Inhalt (${model}, Versuch ${attempt})…`);
+            const raw = await callPollinations(model, attempt);
+            console.log(`[Expogen] Raw (${model}):`, raw);
+            parsed = tryParseSchema(raw);
+            if (parsed) {
+              faLog(`Brauchbare Antwort erhalten (${model})`, 'done');
+              break outer;
+            }
+            faLog(`${model}: Antwort ohne Schema – Fallback`, 'err');
+          } catch(e) {
+            lastErr = e;
+            faLog(`${model} Versuch ${attempt}: ${e.message}`, 'err');
+          }
+          await new Promise(r => setTimeout(r, 500 * attempt));
+        }
+      }
+      if (!parsed) throw lastErr || new Error('Kein KI-Modell lieferte ein brauchbares Schema');
+
       console.log('[Expogen] Parsed JSON:', parsed);
       const nonEmptyKeys = Object.keys(parsed).filter(k => {
         const v = parsed[k];
