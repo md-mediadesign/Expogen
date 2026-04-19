@@ -2144,7 +2144,7 @@ type, size, titel, untertitel, adresse, preis, preisDetail, baujahr, zustand, ve
 
     const userMsg = `DOKUMENT-INHALT:\n---\n${combinedText}\n---\n\nExtrahiere jetzt ALLE Immobilien-Daten aus dem Dokument in das JSON-Objekt. Denk daran: vollständige Texte wörtlich übernehmen, Adresse zusammenbauen, Listen als Arrays, alle Felder ausfüllen, für die das Dokument Informationen liefert.`;
 
-    try {
+    async function callPollinations(model, attempt) {
       const res = await fetch('https://text.pollinations.ai/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2153,12 +2153,35 @@ type, size, titel, untertitel, adresse, preis, preisDetail, baujahr, zustand, ve
             { role: 'system', content: systemPrompt },
             { role: 'user',   content: userMsg }
           ],
-          model: 'openai',
-          seed: Math.floor(Math.random() * 9999)
+          model,
+          seed: Math.floor(Math.random() * 99999)
         })
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      let raw = await res.text();
+      const t = await res.text();
+      if (!t || !t.trim()) throw new Error('leere Antwort');
+      return t;
+    }
+
+    try {
+      const modelChain = ['openai', 'mistral', 'deepseek'];
+      let raw = '';
+      let lastErr = null;
+      outer: for (const model of modelChain) {
+        for (let attempt = 1; attempt <= 2; attempt++) {
+          try {
+            faSetStatus(`KI analysiert den Inhalt (${model}, Versuch ${attempt})…`);
+            raw = await callPollinations(model, attempt);
+            faLog(`Antwort erhalten (${model})`, 'done');
+            break outer;
+          } catch(e) {
+            lastErr = e;
+            faLog(`${model} Versuch ${attempt}: ${e.message}`, 'err');
+            await new Promise(r => setTimeout(r, 600 * attempt));
+          }
+        }
+      }
+      if (!raw) throw lastErr || new Error('Alle KI-Modelle nicht erreichbar');
       console.log('[Expogen] Pollinations raw response:', raw);
       if (!raw || !raw.trim()) throw new Error('KI lieferte leere Antwort');
 
