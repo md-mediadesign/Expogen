@@ -44,6 +44,9 @@ header{width:100%;max-width:1180px;margin:0 auto;padding:2rem 2.5rem 0;display:f
 .logo span{color:var(--text);opacity:.4;font-style:italic;font-size:.9rem;letter-spacing:.05em;margin-left:8px;font-weight:300}
 .btn-header-reset{background:transparent;border:1px solid rgba(224,85,85,.3);border-radius:20px;color:rgba(224,85,85,.7);font-family:'Roboto',sans-serif;font-size:.72rem;font-weight:500;letter-spacing:.06em;padding:.35rem 1rem;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:.4rem}
 .btn-header-reset:hover{border-color:#e05555;color:#e05555;background:rgba(224,85,85,.08)}
+.header-actions{display:flex;align-items:center;gap:.55rem}
+.btn-header-upload{background:transparent;border:1px solid rgba(201,168,76,.3);border-radius:20px;color:var(--gold);font-family:'Roboto',sans-serif;font-size:.72rem;font-weight:500;letter-spacing:.06em;padding:.35rem 1rem;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:.4rem}
+.btn-header-upload:hover{border-color:var(--gold);background:rgba(201,168,76,.08)}
 
 /* ── Main Layout ── */
 .main-layout{width:100%;max-width:1180px;margin:2rem auto 0;padding:0 2.5rem;display:flex;gap:2.5rem;align-items:flex-start}
@@ -434,6 +437,8 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
 .sw-back-btn:hover{border-color:var(--gold);color:var(--gold)}
 .sw-next-btn,.sw-start-btn{background:var(--gold);border:none;border-radius:8px;color:var(--navy);font-family:'Roboto',sans-serif;font-size:.85rem;font-weight:700;padding:.75rem 2rem;cursor:pointer;transition:all .25s;letter-spacing:.04em}
 .sw-next-btn:hover,.sw-start-btn:hover{background:var(--gold2);transform:translateY(-1px);box-shadow:0 4px 18px rgba(201,168,76,.35)}
+.sw-start-btn:disabled,.sw-next-btn:disabled{background:rgba(201,168,76,.25);color:rgba(26,26,46,.5);cursor:not-allowed;transform:none;box-shadow:none}
+.sw-start-btn:disabled:hover,.sw-next-btn:disabled:hover{background:rgba(201,168,76,.25);transform:none;box-shadow:none}
 .sw-error{font-size:.75rem;color:#e07070;margin-top:.4rem;display:none}
 .sw-error.show{display:block}
 
@@ -491,6 +496,8 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
   .nav-row,
   .btn-step-reset,
   .btn-header-reset,
+  .btn-header-upload,
+  .header-actions,
   .confirm-overlay,
   .ai-modal-overlay,
   .preview-actions,
@@ -817,7 +824,10 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
 
 <header>
   <div class="logo">EXPOGEN <span>Exposé Generator</span></div>
-  <button class="btn-header-reset" onclick="openConfirmAll()">↺ Alles zurücksetzen</button>
+  <div class="header-actions">
+    <button class="btn-header-upload" onclick="openUploadModal()" title="Dateien hochladen &amp; automatisch Felder füllen">📁 Dateien hochladen</button>
+    <button class="btn-header-reset" onclick="openConfirmAll()">↺ Alles zurücksetzen</button>
+  </div>
 </header>
 
 <div class="main-layout">
@@ -1583,6 +1593,33 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
   </div>
 </div>
 
+<!-- Upload Modal (accessible from header anytime) -->
+<div class="startup-overlay" id="uploadOverlay" onclick="closeUploadOnBg(event)">
+  <div class="startup-modal" style="max-width:560px">
+    <div class="sw-header" style="margin-bottom:1.2rem">
+      <div class="sw-logo">📁 Dateien hochladen</div>
+      <button class="drawer-close-x" style="display:flex" onclick="closeUploadModal()">✕</button>
+    </div>
+    <div class="sw-step-title" style="font-size:1.2rem">Weitere Dokumente analysieren</div>
+    <div class="sw-step-desc">Laden Sie Baubeschreibung, Notizen, ein altes Exposé oder Bilder hoch – bestehende Felder bleiben erhalten, leere Felder werden ergänzt.</div>
+
+    <div class="sw-file-zone visible" id="upFileZone"
+         onclick="document.getElementById('upFileInput').click()"
+         ondragover="upFileDragOver(event)" ondragleave="upFileDragLeave(event)" ondrop="upFileDrop(event)">
+      <div class="sw-file-zone-icon">📂</div>
+      <div class="sw-file-zone-text">Dateien hier ablegen oder klicken zum Auswählen</div>
+      <div class="sw-file-zone-sub">PDF · Word (.docx) · Bilder (JPG, PNG) · Text (.txt)</div>
+    </div>
+    <input type="file" id="upFileInput" multiple accept=".pdf,.docx,.doc,.txt,.jpg,.jpeg,.png" style="display:none" onchange="upHandleFileInput(this)">
+    <div class="sw-uploaded-files" id="upUploadedFiles"></div>
+
+    <div class="sw-nav" style="display:flex;justify-content:space-between;margin-top:1.4rem;padding-top:1rem;border-top:1px solid var(--border)">
+      <button class="sw-back-btn" onclick="closeUploadModal()">Abbrechen</button>
+      <button class="sw-start-btn" id="upAnalyzeBtn" onclick="upStartAnalysis()" disabled>✦ Analysieren</button>
+    </div>
+  </div>
+</div>
+
 <!-- File Analysis Modal -->
 <div class="fa-overlay" id="faOverlay">
   <div class="fa-modal">
@@ -1906,6 +1943,7 @@ function openFaModal() {
 }
 function closeFaModal() {
   document.getElementById('faOverlay').classList.remove('open');
+  window._upMergeMode = false;
   // applyVoiceData() already navigated if AI ran; otherwise stay on current step
 }
 function openMediaModal() {
@@ -2192,6 +2230,60 @@ Antworte NUR mit einem validen JSON-Objekt – keine Erklärungen, kein Markdown
   if (spinner) spinner.style.display = 'none';
   const closeBtn = document.getElementById('faCloseBtn');
   if (closeBtn) closeBtn.classList.add('show');
+}
+
+// ══════════════════════════════════════════════════════
+// UPLOAD MODAL – reuse file analysis from within main form
+// ══════════════════════════════════════════════════════
+const upState = { files: [] };
+
+function openUploadModal() {
+  upState.files = [];
+  upRenderFiles();
+  document.getElementById('uploadOverlay').classList.add('open');
+}
+function closeUploadModal() {
+  document.getElementById('uploadOverlay').classList.remove('open');
+}
+function closeUploadOnBg(e) {
+  if (e.target.id === 'uploadOverlay') closeUploadModal();
+}
+function upFileDragOver(e) { e.preventDefault(); document.getElementById('upFileZone').classList.add('dragover'); }
+function upFileDragLeave(e) { document.getElementById('upFileZone').classList.remove('dragover'); }
+function upFileDrop(e) {
+  e.preventDefault();
+  document.getElementById('upFileZone').classList.remove('dragover');
+  upAddFiles([...e.dataTransfer.files]);
+}
+function upHandleFileInput(input) { upAddFiles([...input.files]); input.value = ''; }
+function upAddFiles(fileList) {
+  fileList.forEach(f => {
+    if (!upState.files.find(x => x.name === f.name && x.size === f.size)) {
+      upState.files.push(f);
+    }
+  });
+  upRenderFiles();
+}
+function upRemoveFile(idx) { upState.files.splice(idx, 1); upRenderFiles(); }
+function upRenderFiles() {
+  const wrap = document.getElementById('upUploadedFiles');
+  if (!wrap) return;
+  wrap.innerHTML = upState.files.map((f,i) => `
+    <div class="sw-file-item">
+      <span class="sw-file-item-icon">${swFileIcon(f.name)}</span>
+      <span class="sw-file-item-name">${f.name}</span>
+      <button class="sw-file-item-del" onclick="upRemoveFile(${i})" title="Entfernen">✕</button>
+    </div>`).join('');
+  const btn = document.getElementById('upAnalyzeBtn');
+  if (btn) btn.disabled = upState.files.length === 0;
+}
+function upStartAnalysis() {
+  if (!upState.files.length) return;
+  collectStep(current);
+  window.swPendingFiles = upState.files.slice();
+  window._upMergeMode = true;
+  closeUploadModal();
+  setTimeout(() => swOpenFileAnalysis(), 200);
 }
 
 // Legacy shims so existing code still works
@@ -3389,10 +3481,15 @@ async function processVoiceTranscript() {
 }
 
 function applyVoiceData(d) {
-  if (d.size && ['S','M','L'].includes(d.size)) data.size = d.size;
-  else data.size = 'L';
+  const merge = window._upMergeMode === true;
 
-  if (d.type) data.type = d.type;
+  if (!merge) {
+    if (d.size && ['S','M','L'].includes(d.size)) data.size = d.size;
+    else data.size = 'L';
+    if (d.type) data.type = d.type;
+  } else {
+    if (!data.type && d.type) data.type = d.type;
+  }
 
   const fields = ['titel','untertitel','adresse','preis','preisDetail',
     'baujahr','zustand','verfuegbar','wohnflaeche','gesamtflaeche',
@@ -3402,30 +3499,31 @@ function applyVoiceData(d) {
     'weitereKosten','beschreibung','lage','stadtbeschr','ausstattung','investment'];
 
   fields.forEach(key => {
-    if (d[key]) {
-      data[key] = d[key];
-      setVal('f-'+key, d[key]);
-    }
+    if (!d[key]) return;
+    if (merge && data[key]) return;
+    data[key] = d[key];
+    setVal('f-'+key, d[key]);
   });
 
-  if (Array.isArray(d.highlights) && d.highlights.length) {
+  if (Array.isArray(d.highlights) && d.highlights.length && !(merge && Array.isArray(data.highlights) && data.highlights.length)) {
     data.highlights = d.highlights;
     const list = document.getElementById('highlightList');
     if (list) { list.innerHTML = ''; d.highlights.forEach(v => addHighlight(v)); }
   }
-  if (Array.isArray(d.ausstattungList) && d.ausstattungList.length) {
+  if (Array.isArray(d.ausstattungList) && d.ausstattungList.length && !(merge && Array.isArray(data.ausstattungList) && data.ausstattungList.length)) {
     data.ausstattungList = d.ausstattungList;
     const list = document.getElementById('ausstattungList');
     if (list) { list.innerHTML = ''; d.ausstattungList.forEach(v => addAusstattung(v)); }
   }
-  if (Array.isArray(d.investHighlights) && d.investHighlights.length) {
+  if (Array.isArray(d.investHighlights) && d.investHighlights.length && !(merge && Array.isArray(data.investHighlights) && data.investHighlights.length)) {
     data.investHighlights = d.investHighlights;
     const list = document.getElementById('investList');
     if (list) { list.innerHTML = ''; d.investHighlights.forEach(v => addInvest(v)); }
   }
 
   saveToStorage();
-  navigateToStep(14);
+  if (!merge) navigateToStep(14);
+  else showStep(current);
 }
 
 // ══════════════════════════════════════════════════════
