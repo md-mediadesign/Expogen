@@ -423,6 +423,14 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
 .sw-method-check{width:22px;height:22px;border-radius:50%;border:1.5px solid rgba(201,168,76,.3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.65rem;color:transparent;transition:all .25s}
 .sw-method-card.selected .sw-method-check{border-color:var(--gold);background:var(--gold);color:var(--navy)}
 
+/* Teaser for additional media (visible on all wizard steps) */
+.sw-teaser{margin-top:1.6rem;padding-top:1.2rem;border-top:1px solid var(--border)}
+.sw-teaser-kicker{font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:.8rem}
+.sw-teaser-items{display:flex;flex-wrap:wrap;justify-content:center;gap:.55rem .7rem}
+.sw-teaser-item{display:inline-flex;align-items:center;gap:.4rem;background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.14);border-radius:999px;padding:.28rem .75rem;font-size:.72rem;color:var(--cream);font-weight:500}
+.sw-teaser-icon{font-size:.95rem;line-height:1}
+.sw-teaser-soon{font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,.04);border-radius:4px;padding:.08rem .35rem;margin-left:.2rem;font-weight:600}
+
 /* File upload area */
 .sw-file-zone{border:2px dashed rgba(201,168,76,.28);border-radius:var(--radius);padding:1.4rem;text-align:center;cursor:pointer;transition:all .3s;background:rgba(255,255,255,.02);margin-top:.5rem;display:none}
 .sw-file-zone.visible{display:block}
@@ -1535,6 +1543,17 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
       <div class="sw-nav">
         <button class="sw-back-btn" onclick="swGoStep(2)">← Zurück</button>
         <button class="sw-start-btn" onclick="swStart()">Exposé erstellen →</button>
+      </div>
+    </div>
+
+    <!-- Teaser: weitere Medien nach Dateneingabe -->
+    <div class="sw-teaser">
+      <div class="sw-teaser-kicker">Nach der Dateneingabe mit einem Klick verfügbar</div>
+      <div class="sw-teaser-items">
+        <div class="sw-teaser-item"><span class="sw-teaser-icon">🌐</span><span>Landing Page</span></div>
+        <div class="sw-teaser-item"><span class="sw-teaser-icon">📄</span><span>Flyer <span class="sw-teaser-soon">bald</span></span></div>
+        <div class="sw-teaser-item"><span class="sw-teaser-icon">🪧</span><span>Plakat <span class="sw-teaser-soon">bald</span></span></div>
+        <div class="sw-teaser-item"><span class="sw-teaser-icon">🏗️</span><span>Bauzaunbanner <span class="sw-teaser-soon">bald</span></span></div>
       </div>
     </div>
 
