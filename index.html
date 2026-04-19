@@ -2183,13 +2183,29 @@ Antworte NUR mit einem validen JSON-Objekt – keine Erklärungen, kein Markdown
             { role: 'user',   content: userMsg }
           ],
           model: 'openai',
+          response_format: { type: 'json_object' },
+          jsonMode: true,
           seed: Math.floor(Math.random() * 9999)
         })
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       let raw = await res.text();
-      raw = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-      const parsed = JSON.parse(raw);
+      if (!raw || !raw.trim()) throw new Error('KI lieferte leere Antwort');
+
+      // Strip markdown fences, then extract the outermost JSON object if prose wraps it
+      let jsonStr = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+      const first = jsonStr.indexOf('{');
+      const last  = jsonStr.lastIndexOf('}');
+      if (first !== -1 && last !== -1 && last > first) {
+        jsonStr = jsonStr.slice(first, last + 1);
+      }
+      let parsed;
+      try {
+        parsed = JSON.parse(jsonStr);
+      } catch (parseErr) {
+        const preview = raw.slice(0, 220).replace(/\s+/g, ' ');
+        throw new Error(`JSON-Parsing fehlgeschlagen. Antwort-Anfang: "${preview}…"`);
+      }
 
       // Apply data (reuse voice function – same schema)
       applyVoiceData(parsed);
