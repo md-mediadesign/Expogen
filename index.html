@@ -1751,6 +1751,71 @@ let isRecording = false;
 let voiceTranscript = '';
 
 // ══════════════════════════════════════════════════════
+// AI PROVIDER CHAIN – shared by file upload, voice, field AI
+// ══════════════════════════════════════════════════════
+async function callLLM7Chat(model, systemPrompt, userMsg) {
+  const res = await fetch('https://api.llm7.io/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer unused' },
+    body: JSON.stringify({
+      model,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user',   content: userMsg }
+      ],
+      temperature: 0.4
+    })
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  const content = data?.choices?.[0]?.message?.content;
+  if (!content || !content.trim()) throw new Error('leere Antwort');
+  return content;
+}
+
+async function callPollinationsChat(model, systemPrompt, userMsg) {
+  const res = await fetch('https://text.pollinations.ai/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user',   content: userMsg }
+      ],
+      model,
+      seed: Math.floor(Math.random() * 99999)
+    })
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const t = await res.text();
+  if (!t || !t.trim()) throw new Error('leere Antwort');
+  return t;
+}
+
+async function callAiChat(systemPrompt, userMsg, opts) {
+  const onAttempt = opts?.onAttempt || (() => {});
+  const providers = [
+    { name: 'LLM7 (default)',         call: () => callLLM7Chat('default', systemPrompt, userMsg) },
+    { name: 'LLM7 (gpt-oss-20b)',     call: () => callLLM7Chat('gpt-oss-20b', systemPrompt, userMsg) },
+    { name: 'Pollinations (openai)',  call: () => callPollinationsChat('openai', systemPrompt, userMsg) },
+    { name: 'Pollinations (deepseek)',call: () => callPollinationsChat('deepseek', systemPrompt, userMsg) },
+  ];
+  let lastErr = null;
+  for (const p of providers) {
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        onAttempt(p.name, attempt);
+        return { raw: await p.call(), provider: p.name };
+      } catch(e) {
+        lastErr = e;
+        await new Promise(r => setTimeout(r, 500 * attempt));
+      }
+    }
+  }
+  throw lastErr || new Error('Kein KI-Modell erreichbar');
+}
+
+// ══════════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════════
 function init() {
@@ -2178,48 +2243,6 @@ type, size, titel, untertitel, adresse, preis, preisDetail, baujahr, zustand, ve
 
     const userMsg = `DOKUMENT-INHALT:\n---\n${combinedText}\n---\n\nExtrahiere jetzt ALLE Immobilien-Daten aus dem Dokument in das JSON-Objekt. Denk daran: vollständige Texte wörtlich übernehmen, Adresse zusammenbauen, Listen als Arrays, alle Felder ausfüllen, für die das Dokument Informationen liefert.`;
 
-    async function callLLM7(model) {
-      const res = await fetch('https://api.llm7.io/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer unused'
-        },
-        body: JSON.stringify({
-          model,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user',   content: userMsg }
-          ],
-          temperature: 0.2
-        })
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      const content = data?.choices?.[0]?.message?.content;
-      if (!content || !content.trim()) throw new Error('leere Antwort');
-      return content;
-    }
-
-    async function callPollinations(model) {
-      const res = await fetch('https://text.pollinations.ai/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user',   content: userMsg }
-          ],
-          model,
-          seed: Math.floor(Math.random() * 99999)
-        })
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const t = await res.text();
-      if (!t || !t.trim()) throw new Error('leere Antwort');
-      return t;
-    }
-
     const hasSchemaKeys = o => o && typeof o === 'object' && !Array.isArray(o)
       && (o.titel !== undefined || o.type !== undefined || o.adresse !== undefined
        || o.beschreibung !== undefined || o.preis !== undefined);
@@ -2262,15 +2285,13 @@ type, size, titel, untertitel, adresse, preis, preisDetail, baujahr, zustand, ve
     }
 
     try {
-      // LLM7.io is the primary provider — OpenAI-compatible, no-auth allowed
-      // with "Bearer unused", reliable direct chat output. Pollinations stays
-      // as emergency fallback because its default route uses a reasoning
-      // model that hides the answer in reasoning_content.
+      // Iterate providers directly so "response without schema keys" also
+      // falls through to the next model (not just HTTP errors).
       const providers = [
-        { name: 'LLM7 (default)',      call: () => callLLM7('default') },
-        { name: 'LLM7 (gpt-oss-20b)',  call: () => callLLM7('gpt-oss-20b') },
-        { name: 'Pollinations (openai)', call: () => callPollinations('openai') },
-        { name: 'Pollinations (deepseek)', call: () => callPollinations('deepseek') },
+        { name: 'LLM7 (default)',         call: () => callLLM7Chat('default', systemPrompt, userMsg) },
+        { name: 'LLM7 (gpt-oss-20b)',     call: () => callLLM7Chat('gpt-oss-20b', systemPrompt, userMsg) },
+        { name: 'Pollinations (openai)',  call: () => callPollinationsChat('openai', systemPrompt, userMsg) },
+        { name: 'Pollinations (deepseek)',call: () => callPollinationsChat('deepseek', systemPrompt, userMsg) },
       ];
       let parsed = null;
       let lastErr = null;
@@ -2947,15 +2968,8 @@ async function polishHinweisText() {
 
   const sys = 'Du bist ein professioneller Immobilienmarketing-Texter für Deutschland. Überarbeite die folgenden Hinweisbausteine: Fasse sie sprachlich zusammen, vermeide Wiederholungen, behalte den sachlichen und seriösen Ton bei. Ausgabe: nur der fertige Text, kein Kommentar.';
   try {
-    const res = await fetch('https://text.pollinations.ai/', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: [{ role:'system', content:sys }, { role:'user', content:ta.value.trim() }],
-        model: 'openai', seed: Math.floor(Math.random()*9999)
-      })
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    ta.value = (await res.text()).trim();
+    const { raw } = await callAiChat(sys, ta.value.trim());
+    ta.value = raw.trim();
   } catch(err) {
     alert('KI-Überarbeitung fehlgeschlagen: ' + err.message);
   } finally {
@@ -3223,22 +3237,9 @@ async function runAiGenerate() {
   const userMsg = `Erstelle für ein Immobilien-Exposé: ${aiTargetContext}.\n\nObjekt-Info vom Nutzer: ${prompt}`;
 
   try {
-    const res = await fetch('https://text.pollinations.ai/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user',   content: userMsg }
-        ],
-        model: 'openai',
-        seed: Math.floor(Math.random() * 9999)
-      })
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const text = await res.text();
+    const { raw } = await callAiChat(systemPrompt, userMsg);
     const f = document.getElementById(aiTargetField);
-    if (f) f.value = text.trim();
+    if (f) f.value = raw.trim();
     closeAiModal();
   } catch (err) {
     alert('KI-Generierung fehlgeschlagen: ' + err.message + '\n\nBitte Internetverbindung prüfen.');
@@ -3590,22 +3591,41 @@ async function processVoiceTranscript() {
   const userMsg = `Transkript des Maklers:\n"${transcript}"\n\nFülle dieses JSON-Schema mit den extrahierten Informationen. Generiere für leere Felder sinnvolle Texte auf Basis des Kontexts:\n${schema}`;
 
   try {
-    const res = await fetch('https://text.pollinations.ai/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user',   content: userMsg }
-        ],
-        model: 'openai',
-        seed: Math.floor(Math.random() * 9999)
-      })
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    let raw = await res.text();
-    raw = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-    const parsed = JSON.parse(raw);
+    const providers = [
+      { name: 'LLM7 (default)',         call: () => callLLM7Chat('default', systemPrompt, userMsg) },
+      { name: 'LLM7 (gpt-oss-20b)',     call: () => callLLM7Chat('gpt-oss-20b', systemPrompt, userMsg) },
+      { name: 'Pollinations (openai)',  call: () => callPollinationsChat('openai', systemPrompt, userMsg) },
+    ];
+    const hasSchemaKeys = o => o && typeof o === 'object' && !Array.isArray(o)
+      && (o.titel !== undefined || o.type !== undefined || o.beschreibung !== undefined);
+    const tryParse = (raw) => {
+      const tryOne = (s) => {
+        let str = s.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+        const f = str.indexOf('{'), l = str.lastIndexOf('}');
+        if (f === -1 || l === -1 || l <= f) return null;
+        try { return JSON.parse(str.slice(f, l + 1)); } catch(_) { return null; }
+      };
+      let p = tryOne(raw);
+      if (hasSchemaKeys(p)) return p;
+      if (p && typeof p === 'object') {
+        const strings = [];
+        (function walk(v){ if(typeof v==='string') strings.push(v); else if(v && typeof v==='object') Object.values(v).forEach(walk); })(p);
+        for (const s of strings) { const i = tryOne(s); if (hasSchemaKeys(i)) return i; }
+      }
+      return null;
+    };
+    let parsed = null;
+    let lastErr = null;
+    outer: for (const p of providers) {
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          const raw = await p.call();
+          parsed = tryParse(raw);
+          if (parsed) break outer;
+        } catch(e) { lastErr = e; }
+      }
+    }
+    if (!parsed) throw lastErr || new Error('Kein KI-Modell lieferte ein brauchbares Schema');
     applyVoiceData(parsed);
     closeVoiceModal();
   } catch (err) {
