@@ -2117,61 +2117,32 @@ async function swOpenFileAnalysis() {
     faSetStatus('KI analysiert den Inhalt…');
     const combinedText = textChunks.join('\n\n').slice(0, 12000); // cap for API
 
-    const systemPrompt = `Du bist ein Assistent für Immobilien-Exposés. Analysiere den folgenden Text und extrahiere alle Immobilien-relevanten Informationen – egal ob strukturierter Fragebogen, Baubeschreibung, freier Text, Notizen oder altes Exposé.
+    const systemPrompt = `Du bist ein Extraktions-Assistent für deutsche Immobilien-Exposés. Du bekommst ein Dokument (Fragebogen, Baubeschreibung, freier Text, altes Exposé) und MUSST alle Immobilien-Informationen in ein JSON-Objekt überführen.
 
-Falls der Text dem EXPOGEN-Kundenfragebogen entspricht, erkennst du diese Feldbeschriftungen:
-- "Objekttitel / Projektname" → titel | "Untertitel / Tagline" → untertitel | "Objekttyp" → type
-- "Straße und Hausnummer" + "PLZ" + "Ort" + "Stadtteil" → zu einer adresse zusammenführen
-- "Baujahr / Fertigstellung" → baujahr | "Zustand" → zustand | "Verfügbarkeit / Bezugstermin" → verfuegbar
-- "Wohnfläche" → wohnflaeche | "Gesamtfläche" → gesamtflaeche | "Anzahl Zimmer" → zimmer | "Anzahl Wohneinheiten" → einheitenAnz
-- "Kaufpreis / Preis ab" → preis | "Hausgeld / Nebenkosten" → hausgeld | "Käuferprovision" → kaeuferp | "Weitere Kosten" → weitereKosten
-- "Objektbeschreibung" → beschreibung | "Lagebeschreibung" → lage | "Beschreibung der Stadt" → stadtbeschr | "Ausstattung (Fließtext)" → ausstattung
-- "Ausstattungsmerkmale (Liste)" → ausstattungList | "Highlights / Besondere Verkaufsargumente" → highlights | "Investment-Highlights" → investHighlights
-- "Energiestandard" → energiestandard | "Energieklasse" → energieklasse | "Energiekennwert" → energiekennwert | "Heizungsart" → heizung | "Heizungssystem" → heizungsart | "Energieausweistyp" → energieausweisTyp
-- "Denkmalschutz" → denkmal | "Investment-Beschreibung" → investment
+WICHTIGE REGELN:
+1. Du gibst IMMER ein valides JSON-Objekt zurück – kein Markdown, keine Erklärungen.
+2. Fülle JEDES Feld, für das du Informationen findest – sei großzügig, nicht konservativ.
+3. Paraphrasiere nicht und kürze nicht – übernimm längere Texte (Beschreibung, Lage, Ausstattung) vollständig und wörtlich aus dem Dokument.
+4. Für Adressen: setze Straße/Hausnummer, PLZ, Ort und ggf. Stadtteil zu EINEM String zusammen (z. B. "Nibelungenstraße 10, 93182 Duggendorf / Girnitz").
+5. Für type: genau einer von "Eigentumswohnung", "Haus", "Neubau-Projekt", "Gewerbe", "Grundstück", "Sonstiges". Im Zweifel leer lassen.
+6. Für size: "S" (nur Basisdaten), "M" (mit Beschreibungstexten), "L" (mit Einheiten/Investment).
+7. Arrays (highlights, ausstattungList, investHighlights) sind Listen kurzer Strings. Für Aufzählungen im Dokument → jedes Element ein Array-Eintrag.
+8. Nur Felder leer lassen, wenn im Dokument WIRKLICH nichts steht. Im Zweifel lieber einen Wert setzen.
 
-Bei freiem Text oder Baubeschreibungen: extrahiere sinngemäß, was du findest – fehlende Felder bleiben leer.
-Für den Typ: mappe auf Eigentumswohnung, Haus, Neubau-Projekt, Gewerbe, Grundstück oder Sonstiges.
-Für size: S wenn nur Basisdaten, M wenn auch Beschreibungstexte, L wenn Einheiten oder Investment vorhanden.
-Antworte NUR mit einem validen JSON-Objekt – keine Erklärungen, kein Markdown.`;
+Erkennbare Fragebogen-Labels aus EXPOGEN-Kundenfragebogen:
+- "Objekttitel / Projektname" → titel  |  "Untertitel / Tagline" → untertitel  |  "Objekttyp" → type
+- "Baujahr / Fertigstellung" → baujahr  |  "Zustand" → zustand  |  "Verfügbarkeit / Bezugstermin" → verfuegbar
+- "Wohnfläche" → wohnflaeche  |  "Gesamtfläche" → gesamtflaeche  |  "Anzahl Zimmer" → zimmer  |  "Anzahl Wohneinheiten" → einheitenAnz
+- "Kaufpreis / Preis ab" → preis  |  "Hausgeld / Nebenkosten" → hausgeld  |  "Käuferprovision" → kaeuferp  |  "Weitere Kosten" → weitereKosten
+- "Objektbeschreibung" → beschreibung  |  "Lagebeschreibung" → lage  |  "Beschreibung der Stadt" → stadtbeschr  |  "Ausstattung (Fließtext)" → ausstattung
+- "Ausstattungsmerkmale (Liste)" → ausstattungList  |  "Highlights / Besondere Verkaufsargumente" → highlights  |  "Investment-Highlights" → investHighlights
+- "Energiestandard" → energiestandard  |  "Energieklasse" → energieklasse  |  "Energiekennwert" → energiekennwert  |  "Heizungsart" → heizung  |  "Heizungssystem" → heizungsart  |  "Energieausweistyp" → energieausweisTyp
+- "Denkmalschutz" → denkmal  |  "Investment-Beschreibung" → investment
 
-    const schema = `{
-  "type": "",
-  "size": "S/M/L",
-  "titel": "",
-  "untertitel": "",
-  "adresse": "",
-  "preis": "",
-  "preisDetail": "",
-  "baujahr": "",
-  "zustand": "",
-  "verfuegbar": "",
-  "wohnflaeche": "",
-  "gesamtflaeche": "",
-  "zimmer": "",
-  "einheitenAnz": "",
-  "energiestandard": "",
-  "heizung": "",
-  "heizungsart": "",
-  "energieausweis": "",
-  "energieklasse": "",
-  "energiekennwert": "",
-  "energieausweisTyp": "",
-  "hausgeld": "",
-  "denkmal": "",
-  "kaeuferp": "",
-  "weitereKosten": "",
-  "beschreibung": "",
-  "highlights": [],
-  "lage": "",
-  "stadtbeschr": "",
-  "ausstattung": "",
-  "ausstattungList": [],
-  "investment": "",
-  "investHighlights": []
-}`;
+PFLICHT: Gib das JSON mit EXAKT diesen Keys zurück (auch wenn einzelne leer sind):
+type, size, titel, untertitel, adresse, preis, preisDetail, baujahr, zustand, verfuegbar, wohnflaeche, gesamtflaeche, zimmer, einheitenAnz, energiestandard, heizung, heizungsart, energieausweis, energieklasse, energiekennwert, energieausweisTyp, hausgeld, denkmal, kaeuferp, weitereKosten, beschreibung, highlights, lage, stadtbeschr, ausstattung, ausstattungList, investment, investHighlights.`;
 
-    const userMsg = `Dokument-Inhalt:\n${combinedText}\n\nFülle das JSON-Schema mit den extrahierten Werten:\n${schema}`;
+    const userMsg = `DOKUMENT-INHALT:\n---\n${combinedText}\n---\n\nExtrahiere jetzt ALLE Immobilien-Daten aus dem Dokument in das JSON-Objekt. Denk daran: vollständige Texte wörtlich übernehmen, Adresse zusammenbauen, Listen als Arrays, alle Felder ausfüllen, für die das Dokument Informationen liefert.`;
 
     try {
       const res = await fetch('https://text.pollinations.ai/', {
@@ -2190,6 +2161,7 @@ Antworte NUR mit einem validen JSON-Objekt – keine Erklärungen, kein Markdown
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       let raw = await res.text();
+      console.log('[Expogen] Pollinations raw response:', raw);
       if (!raw || !raw.trim()) throw new Error('KI lieferte leere Antwort');
 
       // Strip markdown fences, then extract the outermost JSON object if prose wraps it
@@ -2206,6 +2178,12 @@ Antworte NUR mit einem validen JSON-Objekt – keine Erklärungen, kein Markdown
         const preview = raw.slice(0, 220).replace(/\s+/g, ' ');
         throw new Error(`JSON-Parsing fehlgeschlagen. Antwort-Anfang: "${preview}…"`);
       }
+      console.log('[Expogen] Parsed JSON:', parsed);
+      const nonEmptyKeys = Object.keys(parsed).filter(k => {
+        const v = parsed[k];
+        return v && (typeof v === 'string' ? v.length > 0 : Array.isArray(v) ? v.length > 0 : true);
+      });
+      faLog(`KI lieferte ${nonEmptyKeys.length} befüllte Felder: ${nonEmptyKeys.slice(0,8).join(', ')}${nonEmptyKeys.length>8?'…':''}`, 'done');
 
       // Apply data (reuse voice function – same schema)
       applyVoiceData(parsed);
