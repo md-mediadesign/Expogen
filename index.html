@@ -2177,22 +2177,35 @@ type, size, titel, untertitel, adresse, preis, preisDetail, baujahr, zustand, ve
         throw new Error(`JSON-Parsing fehlgeschlagen. Antwort-Anfang: "${preview}…"`);
       }
 
-      // Unwrap OpenAI-style response envelopes if Pollinations returned one
-      if (parsed && typeof parsed === 'object' && !parsed.titel && !parsed.type) {
-        let inner = null;
-        if (Array.isArray(parsed.choices) && parsed.choices[0]?.message?.content) {
-          inner = parsed.choices[0].message.content;
-        } else if (typeof parsed.content === 'string') {
-          inner = parsed.content;
-        } else if (parsed.message?.content && typeof parsed.message.content === 'string') {
-          inner = parsed.message.content;
-        }
-        if (inner) {
-          let innerStr = inner.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-          const f2 = innerStr.indexOf('{');
-          const l2 = innerStr.lastIndexOf('}');
-          if (f2 !== -1 && l2 !== -1 && l2 > f2) innerStr = innerStr.slice(f2, l2 + 1);
-          try { parsed = JSON.parse(innerStr); } catch(_) {}
+      // Unwrap OpenAI-style response envelopes – walk every string value
+      // in the response looking for a JSON block containing our schema keys.
+      const hasSchemaKeys = o => o && typeof o === 'object' && !Array.isArray(o)
+        && (o.titel !== undefined || o.type !== undefined || o.adresse !== undefined
+         || o.beschreibung !== undefined || o.preis !== undefined);
+
+      if (parsed && !hasSchemaKeys(parsed)) {
+        const strings = [];
+        const seen = new Set();
+        (function walk(v) {
+          if (v === null || v === undefined) return;
+          if (typeof v === 'string') { strings.push(v); return; }
+          if (typeof v === 'object') {
+            if (seen.has(v)) return;
+            seen.add(v);
+            if (Array.isArray(v)) v.forEach(walk);
+            else Object.values(v).forEach(walk);
+          }
+        })(parsed);
+
+        for (const s of strings) {
+          let str = s.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+          const f2 = str.indexOf('{'), l2 = str.lastIndexOf('}');
+          if (f2 === -1 || l2 === -1 || l2 <= f2) continue;
+          str = str.slice(f2, l2 + 1);
+          try {
+            const inner = JSON.parse(str);
+            if (hasSchemaKeys(inner)) { parsed = inner; break; }
+          } catch(_) { /* keep searching */ }
         }
       }
       console.log('[Expogen] Parsed JSON:', parsed);
