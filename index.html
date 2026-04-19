@@ -2154,8 +2154,6 @@ type, size, titel, untertitel, adresse, preis, preisDetail, baujahr, zustand, ve
             { role: 'user',   content: userMsg }
           ],
           model: 'openai',
-          response_format: { type: 'json_object' },
-          jsonMode: true,
           seed: Math.floor(Math.random() * 9999)
         })
       });
@@ -2177,6 +2175,25 @@ type, size, titel, untertitel, adresse, preis, preisDetail, baujahr, zustand, ve
       } catch (parseErr) {
         const preview = raw.slice(0, 220).replace(/\s+/g, ' ');
         throw new Error(`JSON-Parsing fehlgeschlagen. Antwort-Anfang: "${preview}…"`);
+      }
+
+      // Unwrap OpenAI-style response envelopes if Pollinations returned one
+      if (parsed && typeof parsed === 'object' && !parsed.titel && !parsed.type) {
+        let inner = null;
+        if (Array.isArray(parsed.choices) && parsed.choices[0]?.message?.content) {
+          inner = parsed.choices[0].message.content;
+        } else if (typeof parsed.content === 'string') {
+          inner = parsed.content;
+        } else if (parsed.message?.content && typeof parsed.message.content === 'string') {
+          inner = parsed.message.content;
+        }
+        if (inner) {
+          let innerStr = inner.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+          const f2 = innerStr.indexOf('{');
+          const l2 = innerStr.lastIndexOf('}');
+          if (f2 !== -1 && l2 !== -1 && l2 > f2) innerStr = innerStr.slice(f2, l2 + 1);
+          try { parsed = JSON.parse(innerStr); } catch(_) {}
+        }
       }
       console.log('[Expogen] Parsed JSON:', parsed);
       const nonEmptyKeys = Object.keys(parsed).filter(k => {
