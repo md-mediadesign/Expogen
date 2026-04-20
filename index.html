@@ -260,6 +260,39 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
 .btn-next:hover{background:var(--gold2);box-shadow:0 6px 28px rgba(201,168,76,.4);transform:translateY(-1px)}
 .btn-step-reset{background:transparent;border:none;color:var(--muted);font-family:'Roboto',sans-serif;font-size:.75rem;padding:.4rem .8rem;cursor:pointer;transition:color .2s;display:flex;align-items:center;gap:.35rem;border-radius:6px;border:1px solid transparent}
 .btn-step-reset:hover{color:#e05555;border-color:rgba(224,85,85,.2);background:rgba(224,85,85,.05)}
+.nav-center{display:flex;gap:.6rem;align-items:center}
+.btn-save{background:transparent;border:1px solid rgba(201,168,76,.35);border-radius:6px;color:var(--gold);font-family:'Roboto',sans-serif;font-size:.75rem;font-weight:500;letter-spacing:.04em;padding:.4rem .9rem;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:.35rem}
+.btn-save:hover{background:rgba(201,168,76,.1);border-color:var(--gold)}
+.btn-save.saved{border-color:rgba(80,200,120,.5);color:rgba(80,200,120,.9);background:rgba(80,200,120,.08)}
+
+/* ── Projects Modal ── */
+.projects-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:2000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.projects-overlay.open{opacity:1;pointer-events:all}
+.projects-modal{background:var(--navy2);border:1px solid var(--border);border-radius:18px;padding:2rem 2.2rem;max-width:560px;width:94%;max-height:85vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.7);transform:scale(.96);transition:transform .25s}
+.projects-overlay.open .projects-modal{transform:scale(1)}
+.projects-modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.4rem}
+.projects-modal-title{font-family:'Ubuntu',sans-serif;font-size:1.15rem;font-weight:700;color:var(--cream);display:flex;align-items:center;gap:.6rem}
+.projects-badge{background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.35);border-radius:20px;color:var(--gold);font-size:.7rem;font-weight:700;padding:.15rem .6rem;letter-spacing:.04em}
+.projects-close{background:transparent;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;padding:.3rem;line-height:1;transition:color .2s}
+.projects-close:hover{color:var(--text)}
+.projects-new-row{margin-bottom:1.4rem}
+.btn-projects-new{width:100%;background:rgba(201,168,76,.1);border:1px dashed rgba(201,168,76,.4);border-radius:10px;color:var(--gold);font-family:'Roboto',sans-serif;font-size:.85rem;font-weight:600;padding:.75rem 1rem;cursor:pointer;transition:all .25s;letter-spacing:.04em}
+.btn-projects-new:hover{background:rgba(201,168,76,.18);border-color:var(--gold)}
+.projects-grid{display:flex;flex-direction:column;gap:.65rem}
+.proj-card{display:flex;align-items:center;gap:.9rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:.8rem 1rem;transition:border-color .2s}
+.proj-card-active{border-color:rgba(201,168,76,.5);background:rgba(201,168,76,.05)}
+.proj-thumb{width:72px;height:52px;object-fit:cover;border-radius:7px;flex-shrink:0;background:var(--navy3)}
+.proj-thumb-placeholder{width:72px;height:52px;border-radius:7px;flex-shrink:0;background:var(--navy3);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:1.4rem}
+.proj-info{flex:1;min-width:0}
+.proj-name{font-size:.88rem;font-weight:600;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.proj-date{font-size:.72rem;color:var(--muted);margin-top:.15rem}
+.proj-active-badge{display:inline-block;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.35);border-radius:20px;color:var(--gold);font-size:.62rem;font-weight:700;padding:.1rem .45rem;margin-top:.3rem;letter-spacing:.05em}
+.proj-actions{display:flex;gap:.5rem;flex-shrink:0}
+.btn-proj-load{background:var(--gold);border:none;border-radius:7px;color:var(--navy);font-family:'Roboto',sans-serif;font-size:.75rem;font-weight:600;padding:.4rem .9rem;cursor:pointer;transition:all .2s}
+.btn-proj-load:hover{background:var(--gold2)}
+.btn-proj-delete{background:transparent;border:1px solid rgba(224,85,85,.3);border-radius:7px;color:rgba(224,85,85,.6);font-family:'Roboto',sans-serif;font-size:.75rem;padding:.4rem .65rem;cursor:pointer;transition:all .2s}
+.btn-proj-delete:hover{border-color:#e05555;color:#e05555;background:rgba(224,85,85,.08)}
+.projects-empty{color:var(--muted);font-size:.85rem;text-align:center;padding:2rem 1rem;line-height:1.7}
 
 /* ── Template Toggle ── */
 .tmpl-toggle{display:flex;gap:.7rem;margin-bottom:1.5rem;flex-wrap:wrap}
@@ -509,12 +542,14 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
   .stepper-col,
   .nav-row,
   .btn-step-reset,
+  .btn-save,
   .btn-header-reset,
   .btn-header-upload,
   .header-actions,
   .header-size-switch,
   .confirm-overlay,
   .ai-modal-overlay,
+  .projects-overlay,
   .preview-actions,
   .tmpl-toggle,
   .format-tabs,
@@ -1233,9 +1268,9 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
           <div class="cp-desc">Zeitloser Luxus</div>
         </div>
         <div class="color-pair-card" data-pair="2" onclick="selectColorPair(this)">
-          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#b25450"></div><div class="cp-swatch-secondary" style="background:#c5b98a"></div></div>
-          <div class="cp-name">Terrakotta &amp; Sand</div>
-          <div class="cp-desc">Warm &amp; Editorial</div>
+          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#2a2a2a"></div><div class="cp-swatch-secondary" style="background:#8b6538"></div></div>
+          <div class="cp-name">Anthrazit &amp; Cognac</div>
+          <div class="cp-desc">Premium Urban</div>
         </div>
         <div class="color-pair-card" data-pair="3" onclick="selectColorPair(this)">
           <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#2a4a35"></div><div class="cp-swatch-secondary" style="background:#e8dcc0"></div></div>
@@ -1243,64 +1278,64 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
           <div class="cp-desc">Natur &amp; Prestige</div>
         </div>
         <div class="color-pair-card" data-pair="4" onclick="selectColorPair(this)">
-          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#2f2f2f"></div><div class="cp-swatch-secondary" style="background:#c9a97a"></div></div>
-          <div class="cp-name">Anthrazit &amp; Champagner</div>
-          <div class="cp-desc">Modern Urban</div>
+          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#5c1f24"></div><div class="cp-swatch-secondary" style="background:#d4b886"></div></div>
+          <div class="cp-name">Bordeaux &amp; Champagner</div>
+          <div class="cp-desc">Heritage &amp; Luxus</div>
         </div>
         <div class="color-pair-card" data-pair="5" onclick="selectColorPair(this)">
-          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#6e2535"></div><div class="cp-swatch-secondary" style="background:#ede5d5"></div></div>
-          <div class="cp-name">Bordeaux &amp; Elfenbein</div>
-          <div class="cp-desc">Eleganz &amp; Klassik</div>
+          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#1a1a1a"></div><div class="cp-swatch-secondary" style="background:#f0ebe0"></div></div>
+          <div class="cp-name">Onyx &amp; Elfenbein</div>
+          <div class="cp-desc">Editorial Modern</div>
         </div>
         <div class="color-pair-card" data-pair="6" onclick="selectColorPair(this)">
-          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#7c6fa0"></div><div class="cp-swatch-secondary" style="background:#f0eef5"></div></div>
-          <div class="cp-name">Lavendel &amp; Hellgrau</div>
-          <div class="cp-desc">Sanft &amp; Modern</div>
+          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#3a3d42"></div><div class="cp-swatch-secondary" style="background:#a89683"></div></div>
+          <div class="cp-name">Schiefer &amp; Taupe</div>
+          <div class="cp-desc">Skandinavisch</div>
         </div>
         <div class="color-pair-card" data-pair="7" onclick="selectColorPair(this)">
-          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#6b8f71"></div><div class="cp-swatch-secondary" style="background:#fdf9f0"></div></div>
-          <div class="cp-name">Salbei &amp; Warm-Weiß</div>
-          <div class="cp-desc">Frisch &amp; Natürlich</div>
+          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#1a2332"></div><div class="cp-swatch-secondary" style="background:#b87333"></div></div>
+          <div class="cp-name">Midnight &amp; Kupfer</div>
+          <div class="cp-desc">Industrial Chic</div>
         </div>
         <div class="color-pair-card" data-pair="8" onclick="selectColorPair(this)">
-          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#c4878a"></div><div class="cp-swatch-secondary" style="background:#fdf4f0"></div></div>
-          <div class="cp-name">Puderpink &amp; Creme</div>
-          <div class="cp-desc">Feminin &amp; Sanft</div>
+          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#4a5232"></div><div class="cp-swatch-secondary" style="background:#e6dcc8"></div></div>
+          <div class="cp-name">Oliv &amp; Leinen</div>
+          <div class="cp-desc">Landhaus Noble</div>
         </div>
         <div class="color-pair-card" data-pair="9" onclick="selectColorPair(this)">
-          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#3a5f7a"></div><div class="cp-swatch-secondary" style="background:#d8e4ec"></div></div>
-          <div class="cp-name">Stahlblau &amp; Silber</div>
-          <div class="cp-desc">Technisch &amp; Klar</div>
+          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#6b6a66"></div><div class="cp-swatch-secondary" style="background:#d4c4a8"></div></div>
+          <div class="cp-name">Stein &amp; Sand</div>
+          <div class="cp-desc">Minimal Zeitlos</div>
         </div>
         <div class="color-pair-card" data-pair="10" onclick="selectColorPair(this)">
-          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#c4953a"></div><div class="cp-swatch-secondary" style="background:#1a2a4a"></div></div>
-          <div class="cp-name">Ocker &amp; Dunkelblau</div>
-          <div class="cp-desc">Kontrast &amp; Kraft</div>
+          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#1e3a2f"></div><div class="cp-swatch-secondary" style="background:#a88040"></div></div>
+          <div class="cp-name">Tannengrün &amp; Messing</div>
+          <div class="cp-desc">Traditionell</div>
         </div>
         <div class="color-pair-card" data-pair="11" onclick="selectColorPair(this)">
-          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#e2704a"></div><div class="cp-swatch-secondary" style="background:#2d2d2d"></div></div>
-          <div class="cp-name">Koralle &amp; Anthrazit</div>
-          <div class="cp-desc">Lebendig &amp; Modern</div>
+          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#36393f"></div><div class="cp-swatch-secondary" style="background:#d8cfbe"></div></div>
+          <div class="cp-name">Graphit &amp; Warmbeige</div>
+          <div class="cp-desc">Contemporary</div>
         </div>
         <div class="color-pair-card" data-pair="12" onclick="selectColorPair(this)">
-          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#1a6b5e"></div><div class="cp-swatch-secondary" style="background:#d4a843"></div></div>
-          <div class="cp-name">Smaragd &amp; Gold</div>
-          <div class="cp-desc">Edel &amp; Natürlich</div>
+          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#661a1a"></div><div class="cp-swatch-secondary" style="background:#f0e8db"></div></div>
+          <div class="cp-name">Oxblood &amp; Creme</div>
+          <div class="cp-desc">Classic Heritage</div>
         </div>
         <div class="color-pair-card" data-pair="13" onclick="selectColorPair(this)">
-          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#e87a25"></div><div class="cp-swatch-secondary" style="background:#1c2d5e"></div></div>
-          <div class="cp-name">Orange &amp; Tiefblau</div>
-          <div class="cp-desc">Dynamisch &amp; Stark</div>
+          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#1f3b55"></div><div class="cp-swatch-secondary" style="background:#9a7a48"></div></div>
+          <div class="cp-name">Tiefblau &amp; Bronze</div>
+          <div class="cp-desc">Coastal Premium</div>
         </div>
         <div class="color-pair-card" data-pair="14" onclick="selectColorPair(this)">
-          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#8b1a2a"></div><div class="cp-swatch-secondary" style="background:#f0d080"></div></div>
-          <div class="cp-name">Dunkelrot &amp; Hellgold</div>
-          <div class="cp-desc">Kraft &amp; Wärme</div>
+          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#3e2a1e"></div><div class="cp-swatch-secondary" style="background:#e8ddc7"></div></div>
+          <div class="cp-name">Espresso &amp; Sahne</div>
+          <div class="cp-desc">Warm &amp; Edel</div>
         </div>
         <div class="color-pair-card" data-pair="15" onclick="selectColorPair(this)">
-          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#2a6b7a"></div><div class="cp-swatch-secondary" style="background:#e8b4a0"></div></div>
-          <div class="cp-name">Petrol &amp; Rosé</div>
-          <div class="cp-desc">Zeitgemäß &amp; Leicht</div>
+          <div class="cp-swatch"><div class="cp-swatch-accent" style="background:#2f3438"></div><div class="cp-swatch-secondary" style="background:#bfb6a5"></div></div>
+          <div class="cp-name">Schiefer &amp; Greige</div>
+          <div class="cp-desc">Urban Modern</div>
         </div>
       </div>
 
@@ -1396,7 +1431,10 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
     <!-- Nav -->
     <div class="nav-row">
       <button class="btn btn-back" id="btnBack" onclick="goBack()">← Zurück</button>
-      <button class="btn-step-reset" id="btnStepReset" onclick="openConfirmStep()">↺ Seite leeren</button>
+      <div class="nav-center">
+        <button class="btn-step-reset" id="btnStepReset" onclick="openConfirmStep()">↺ Seite leeren</button>
+        <button class="btn-save" id="btnSave" onclick="manualSave()">✓ Speichern</button>
+      </div>
       <button class="btn btn-next" id="btnNext" onclick="goNext()">Weiter →</button>
     </div>
 
@@ -1560,6 +1598,20 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
   </div>
 </div>
 
+<!-- Projects Modal -->
+<div class="projects-overlay" id="projectsModal" onclick="closeProjectsOnBg(event)">
+  <div class="projects-modal">
+    <div class="projects-modal-header">
+      <div class="projects-modal-title">Meine Exposés <span class="projects-badge" id="projectsCount">0 / 5</span></div>
+      <button class="projects-close" onclick="closeProjectsModal()">✕</button>
+    </div>
+    <div class="projects-new-row">
+      <button class="btn-projects-new" onclick="startNewProject()">+ Neues Exposé starten</button>
+    </div>
+    <div class="projects-grid" id="projectsGrid"></div>
+  </div>
+</div>
+
 <!-- Confirm Modal -->
 <div class="confirm-overlay" id="confirmOverlay" onclick="closeConfirmOnBg(event)">
   <div class="confirm-modal">
@@ -1699,21 +1751,21 @@ const ALL_STEP_DEFS = [
   {id:16,label:'Vorschau',     minSize:'S'},
 ];
 const COLOR_PAIRS = [
-  { id:1,  name:'Navy & Gold',            accent:'#0f1d40', secondary:'#c4a43c' },
-  { id:2,  name:'Terrakotta & Sand',      accent:'#b25450', secondary:'#c5b98a' },
-  { id:3,  name:'Waldgrün & Creme',       accent:'#2a4a35', secondary:'#e8dcc0' },
-  { id:4,  name:'Anthrazit & Champagner', accent:'#2f2f2f', secondary:'#c9a97a' },
-  { id:5,  name:'Bordeaux & Elfenbein',   accent:'#6e2535', secondary:'#ede5d5' },
-  { id:6,  name:'Lavendel & Hellgrau',    accent:'#7c6fa0', secondary:'#f0eef5' },
-  { id:7,  name:'Salbei & Warm-Weiß',     accent:'#6b8f71', secondary:'#fdf9f0' },
-  { id:8,  name:'Puderpink & Creme',      accent:'#c4878a', secondary:'#fdf4f0' },
-  { id:9,  name:'Stahlblau & Silber',     accent:'#3a5f7a', secondary:'#d8e4ec' },
-  { id:10, name:'Ocker & Dunkelblau',     accent:'#c4953a', secondary:'#1a2a4a' },
-  { id:11, name:'Koralle & Anthrazit',    accent:'#e2704a', secondary:'#2d2d2d' },
-  { id:12, name:'Smaragd & Gold',         accent:'#1a6b5e', secondary:'#d4a843' },
-  { id:13, name:'Orange & Tiefblau',      accent:'#e87a25', secondary:'#1c2d5e' },
-  { id:14, name:'Dunkelrot & Hellgold',   accent:'#8b1a2a', secondary:'#f0d080' },
-  { id:15, name:'Petrol & Rosé',          accent:'#2a6b7a', secondary:'#e8b4a0' },
+  { id:1,  name:'Navy & Gold',              accent:'#0f1d40', secondary:'#c4a43c' },
+  { id:2,  name:'Anthrazit & Cognac',       accent:'#2a2a2a', secondary:'#8b6538' },
+  { id:3,  name:'Waldgrün & Creme',         accent:'#2a4a35', secondary:'#e8dcc0' },
+  { id:4,  name:'Bordeaux & Champagner',    accent:'#5c1f24', secondary:'#d4b886' },
+  { id:5,  name:'Onyx & Elfenbein',         accent:'#1a1a1a', secondary:'#f0ebe0' },
+  { id:6,  name:'Schiefer & Taupe',         accent:'#3a3d42', secondary:'#a89683' },
+  { id:7,  name:'Midnight & Kupfer',        accent:'#1a2332', secondary:'#b87333' },
+  { id:8,  name:'Oliv & Leinen',            accent:'#4a5232', secondary:'#e6dcc8' },
+  { id:9,  name:'Stein & Sand',             accent:'#6b6a66', secondary:'#d4c4a8' },
+  { id:10, name:'Tannengrün & Messing',     accent:'#1e3a2f', secondary:'#a88040' },
+  { id:11, name:'Graphit & Warmbeige',      accent:'#36393f', secondary:'#d8cfbe' },
+  { id:12, name:'Oxblood & Creme',          accent:'#661a1a', secondary:'#f0e8db' },
+  { id:13, name:'Tiefblau & Bronze',        accent:'#1f3b55', secondary:'#9a7a48' },
+  { id:14, name:'Espresso & Sahne',         accent:'#3e2a1e', secondary:'#e8ddc7' },
+  { id:15, name:'Schiefer & Greige',        accent:'#2f3438', secondary:'#bfb6a5' },
 ];
 const SIZE_ORDER = ['S','M','L'];
 
@@ -1742,6 +1794,8 @@ function isStepEnabled(id) {
 let current = 1;
 let data = {};
 let photos = [];
+let currentProjectId = null;
+const MAX_PROJECTS = 5;
 let dragSrcIndex = null;
 let confirmCallback = null;
 let aiTargetField = null;
@@ -1835,18 +1889,24 @@ const swState = { dataSrc: 'empty', size: 'M', methods: new Set(['manual']), fil
 let swCurrentStep = 1;
 
 function showStartupModal() {
-  // Show "Resume" button if saved data exists
-  const hasSaved = !!localStorage.getItem('expogen_data');
+  const projects = getAllProjects();
   const resumeArea = document.getElementById('swResumeArea');
-  if (hasSaved) {
+  if (projects.length > 0) {
+    const latest = [...projects].sort((a,b) => new Date(b.savedAt) - new Date(a.savedAt))[0];
+    const safeName = (typeof escHtml === 'function') ? escHtml(latest.name) : String(latest.name).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
+    let extraBtn = '';
+    if (projects.length > 1) {
+      extraBtn = `<button class="sw-resume-btn" onclick="closeStartupModal();openProjectsModal()" style="margin-top:.5rem">
+        <span class="sw-resume-icon">▤</span>
+        <div class="sw-resume-text"><strong>Alle Exposés (${projects.length})</strong><span>Gespeicherte Exposés laden oder verwalten</span></div>
+      </button>`;
+    }
     resumeArea.innerHTML = `
       <button class="sw-resume-btn" onclick="swResume()">
         <span class="sw-resume-icon">↩</span>
-        <div class="sw-resume-text">
-          <strong>Letzten Stand fortsetzen</strong>
-          <span>Gespeicherte Eingaben laden</span>
-        </div>
+        <div class="sw-resume-text"><strong>Letztes Exposé fortsetzen</strong><span>${safeName}</span></div>
       </button>
+      ${extraBtn}
       <div class="sw-divider"><span class="sw-divider-txt">oder neu starten</span></div>`;
   } else {
     resumeArea.innerHTML = '';
@@ -1966,7 +2026,13 @@ function swRenderFiles() {
 }
 
 function swResume() {
+  const projects = getAllProjects();
   closeStartupModal();
+  if (projects.length > 0) {
+    const latest = [...projects].sort((a,b) => new Date(b.savedAt) - new Date(a.savedAt))[0];
+    loadProject(latest.id);
+    return;
+  }
   loadFromStorage();
   showStep(current);
   updateNav();
@@ -3167,6 +3233,7 @@ function openConfirmStep() {
 
 function doResetAll() {
   localStorage.removeItem('expogen_data'); localStorage.removeItem('expogen_step'); localStorage.removeItem('expogen_photos');
+  currentProjectId = null;
   data={}; photos=[]; current=1;
   document.querySelectorAll('input:not([type=file]),textarea').forEach(el=>el.value='');
   document.querySelectorAll('.groesse-card,.type-card,.color-pair-card').forEach(c=>c.classList.remove('selected'));
@@ -3255,6 +3322,135 @@ async function runAiGenerate() {
 function saveToStorage() {
   try { localStorage.setItem('expogen_data',JSON.stringify(data)); localStorage.setItem('expogen_step',current); } catch(e){}
   try { localStorage.setItem('expogen_photos',JSON.stringify(photos)); } catch(e){}
+  saveCurrentProject();
+}
+
+function manualSave() {
+  if (typeof collectStep === 'function') collectStep(current);
+  saveToStorage();
+  const btn = document.getElementById('btnSave');
+  if (!btn) return;
+  btn.textContent = '✓ Gespeichert';
+  btn.classList.add('saved');
+  setTimeout(() => { btn.textContent = '✓ Speichern'; btn.classList.remove('saved'); }, 2000);
+}
+
+// ══════════════════════════════════════════════════════
+// MULTI-PROJECT STORAGE
+// ══════════════════════════════════════════════════════
+function getAllProjects() {
+  try { return JSON.parse(localStorage.getItem('expogen_projects') || '[]'); } catch(e) { return []; }
+}
+
+function getProjectName() {
+  if (data.titel) return data.titel;
+  if (data.adresse) return data.adresse;
+  return 'Exposé ' + new Date().toLocaleDateString('de-DE');
+}
+
+function saveCurrentProject() {
+  try {
+    let projects = getAllProjects();
+    const now = new Date().toISOString();
+    const name = getProjectName();
+    const thumb = photos.length > 0 ? photos[0].src : null;
+    if (currentProjectId) {
+      const idx = projects.findIndex(p => p.id === currentProjectId);
+      if (idx !== -1) {
+        projects[idx] = { ...projects[idx], name, savedAt: now, data: JSON.parse(JSON.stringify(data)), photos: JSON.parse(JSON.stringify(photos)), thumb };
+      } else {
+        currentProjectId = null;
+        saveCurrentProject(); return;
+      }
+    } else {
+      const newId = 'proj_' + Date.now();
+      currentProjectId = newId;
+      if (projects.length >= MAX_PROJECTS) {
+        projects.sort((a,b) => new Date(a.savedAt) - new Date(b.savedAt));
+        projects.shift();
+      }
+      projects.push({ id: newId, name, savedAt: now, data: JSON.parse(JSON.stringify(data)), photos: JSON.parse(JSON.stringify(photos)), thumb });
+    }
+    localStorage.setItem('expogen_projects', JSON.stringify(projects));
+  } catch(e) {}
+}
+
+function loadProject(id) {
+  const projects = getAllProjects();
+  const proj = projects.find(p => p.id === id);
+  if (!proj) return;
+  currentProjectId = proj.id;
+  data = proj.data || {};
+  photos = proj.photos || [];
+  current = 1;
+  try { localStorage.setItem('expogen_data', JSON.stringify(data)); localStorage.setItem('expogen_step', current); localStorage.setItem('expogen_photos', JSON.stringify(photos)); } catch(e){}
+  document.querySelectorAll('input:not([type=file]),textarea').forEach(el=>el.value='');
+  document.querySelectorAll('.groesse-card,.type-card,.color-pair-card').forEach(c=>c.classList.remove('selected'));
+  const clearList = (id) => { const el = document.getElementById(id); if (el) el.innerHTML = ''; };
+  clearList('highlightList'); clearList('ausstattungList'); clearList('einheitenBody'); clearList('investList');
+  renderPhotoGrid();
+  loadFromStorage();
+  if (typeof buildStepper === 'function') buildStepper();
+  showStep(current);
+  updateNav();
+}
+
+function deleteProject(id) {
+  let projects = getAllProjects();
+  projects = projects.filter(p => p.id !== id);
+  localStorage.setItem('expogen_projects', JSON.stringify(projects));
+  if (currentProjectId === id) currentProjectId = null;
+  renderProjectsModal();
+}
+
+function startNewProject() {
+  currentProjectId = null;
+  closeProjectsModal();
+  doResetAll();
+}
+
+function openProjectsModal() {
+  renderProjectsModal();
+  document.getElementById('projectsModal').classList.add('open');
+}
+
+function closeProjectsModal() {
+  document.getElementById('projectsModal').classList.remove('open');
+}
+
+function closeProjectsOnBg(e) {
+  if (e.target === document.getElementById('projectsModal')) closeProjectsModal();
+}
+
+function renderProjectsModal() {
+  const projects = getAllProjects();
+  const count = projects.length;
+  document.getElementById('projectsCount').textContent = count + ' / ' + MAX_PROJECTS;
+  const grid = document.getElementById('projectsGrid');
+  if (count === 0) {
+    grid.innerHTML = '<div class="projects-empty">Noch keine gespeicherten Exposés.<br>Fülle das Formular aus – es wird automatisch gespeichert.</div>';
+    return;
+  }
+  const sorted = [...projects].sort((a,b) => new Date(b.savedAt) - new Date(a.savedAt));
+  grid.innerHTML = sorted.map(p => {
+    const date = new Date(p.savedAt).toLocaleDateString('de-DE', {day:'2-digit',month:'2-digit',year:'numeric'});
+    const time = new Date(p.savedAt).toLocaleTimeString('de-DE', {hour:'2-digit',minute:'2-digit'});
+    const isActive = p.id === currentProjectId;
+    const thumb = p.thumb ? `<img src="${p.thumb}" class="proj-thumb" alt="">` : `<div class="proj-thumb proj-thumb-placeholder">◻</div>`;
+    const safeName = (typeof escHtml === 'function') ? escHtml(p.name) : String(p.name).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
+    return `<div class="proj-card${isActive ? ' proj-card-active' : ''}">
+      ${thumb}
+      <div class="proj-info">
+        <div class="proj-name">${safeName}</div>
+        <div class="proj-date">${date} · ${time}</div>
+        ${isActive ? '<div class="proj-active-badge">Aktiv</div>' : ''}
+      </div>
+      <div class="proj-actions">
+        <button class="btn-proj-load" onclick="loadProject('${p.id}');closeProjectsModal()">Laden</button>
+        <button class="btn-proj-delete" onclick="deleteProject('${p.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
 }
 function loadFromStorage() {
   try {
