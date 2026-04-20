@@ -3232,7 +3232,7 @@ function openConfirmStep() {
 }
 
 function doResetAll() {
-  localStorage.removeItem('expogen_data'); localStorage.removeItem('expogen_step'); localStorage.removeItem('expogen_photos');
+  localStorage.removeItem('expogen_std_data'); localStorage.removeItem('expogen_std_step'); localStorage.removeItem('expogen_std_photos');
   currentProjectId = null;
   data={}; photos=[]; current=1;
   document.querySelectorAll('input:not([type=file]),textarea').forEach(el=>el.value='');
@@ -3257,7 +3257,7 @@ function resetCurrentStep() {
     case 2: delete data.type; document.querySelectorAll('.type-card').forEach(c=>c.classList.remove('selected')); buildStepper(); break;
     case 3: setVal('f-brandFirma',''); data.brandFirma=''; data.brandLogoSrc=null; document.getElementById('logoPreviewImg').style.display='none'; document.getElementById('logoPlaceholder').style.display=''; break;
     case 4: ['f-titel','f-untertitel','f-adresse','f-preis','f-preisDetail'].forEach(id=>setVal(id,'')); break;
-    case 5: photos=[]; renderPhotoGrid(); localStorage.removeItem('expogen_photos'); break;
+    case 5: photos=[]; renderPhotoGrid(); localStorage.removeItem('expogen_std_photos'); break;
     case 6: ['baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','energiestandard','heizung','heizungsart','energieausweis','energieklasse','energiekennwert','energieausweisTyp','kaeuferp','weitereKosten'].forEach(k=>{setVal('f-'+k,''); delete data[k];}); document.querySelectorAll('.stellplatz-typ').forEach(cb=>cb.checked=false); setVal('f-stellplaetze-anz',''); setVal('f-stellplaetze-kosten',''); data.stellplaetzeTyp=''; data.stellplaetzeAnz=''; data.stellplaetzeKosten=''; break;
     case 7: setVal('f-beschreibung',''); document.getElementById('highlightList').innerHTML=''; data.highlights=[]; initHighlights(); break;
     case 8: setVal('f-lage',''); delete data.lage; break;
@@ -3320,8 +3320,8 @@ async function runAiGenerate() {
 // STORAGE
 // ══════════════════════════════════════════════════════
 function saveToStorage() {
-  try { localStorage.setItem('expogen_data',JSON.stringify(data)); localStorage.setItem('expogen_step',current); } catch(e){}
-  try { localStorage.setItem('expogen_photos',JSON.stringify(photos)); } catch(e){}
+  try { localStorage.setItem('expogen_std_data',JSON.stringify(data)); localStorage.setItem('expogen_std_step',current); } catch(e){}
+  try { localStorage.setItem('expogen_std_photos',JSON.stringify(photos)); } catch(e){}
   saveCurrentProject();
 }
 
@@ -3339,7 +3339,7 @@ function manualSave() {
 // MULTI-PROJECT STORAGE
 // ══════════════════════════════════════════════════════
 function getAllProjects() {
-  try { return JSON.parse(localStorage.getItem('expogen_projects') || '[]'); } catch(e) { return []; }
+  try { return JSON.parse(localStorage.getItem('expogen_std_projects') || '[]'); } catch(e) { return []; }
 }
 
 function getProjectName() {
@@ -3371,7 +3371,7 @@ function saveCurrentProject() {
       }
       projects.push({ id: newId, name, savedAt: now, data: JSON.parse(JSON.stringify(data)), photos: JSON.parse(JSON.stringify(photos)), thumb });
     }
-    localStorage.setItem('expogen_projects', JSON.stringify(projects));
+    localStorage.setItem('expogen_std_projects', JSON.stringify(projects));
   } catch(e) {}
 }
 
@@ -3383,7 +3383,7 @@ function loadProject(id) {
   data = proj.data || {};
   photos = proj.photos || [];
   current = 1;
-  try { localStorage.setItem('expogen_data', JSON.stringify(data)); localStorage.setItem('expogen_step', current); localStorage.setItem('expogen_photos', JSON.stringify(photos)); } catch(e){}
+  try { localStorage.setItem('expogen_std_data', JSON.stringify(data)); localStorage.setItem('expogen_std_step', current); localStorage.setItem('expogen_std_photos', JSON.stringify(photos)); } catch(e){}
   document.querySelectorAll('input:not([type=file]),textarea').forEach(el=>el.value='');
   document.querySelectorAll('.groesse-card,.type-card,.color-pair-card').forEach(c=>c.classList.remove('selected'));
   const clearList = (id) => { const el = document.getElementById(id); if (el) el.innerHTML = ''; };
@@ -3398,7 +3398,7 @@ function loadProject(id) {
 function deleteProject(id) {
   let projects = getAllProjects();
   projects = projects.filter(p => p.id !== id);
-  localStorage.setItem('expogen_projects', JSON.stringify(projects));
+  localStorage.setItem('expogen_std_projects', JSON.stringify(projects));
   if (currentProjectId === id) currentProjectId = null;
   renderProjectsModal();
 }
@@ -3454,9 +3454,9 @@ function renderProjectsModal() {
 }
 function loadFromStorage() {
   try {
-    const d=localStorage.getItem('expogen_data');
-    const s=localStorage.getItem('expogen_step');
-    const ph=localStorage.getItem('expogen_photos');
+    const d=localStorage.getItem('expogen_std_data');
+    const s=localStorage.getItem('expogen_std_step');
+    const ph=localStorage.getItem('expogen_std_photos');
     if(ph){ photos=JSON.parse(ph); renderPhotoGrid(); }
     if(d) {
       data=JSON.parse(d);
@@ -3474,7 +3474,7 @@ function loadFromStorage() {
       if(data.mapEnabled){ const cb=document.getElementById('f-mapEnabled'); if(cb){ cb.checked=true; document.getElementById('lageMapWrap').style.display=''; } }
       [['360','extras360Enabled'],['YT','extrasYTEnabled'],['Sonstiges','extrasSonstigesEnabled'],['Agb','extrasAgbEnabled']].forEach(([k,dk])=>{ if(data[dk]){ const cb=document.getElementById('toggle-'+k); if(cb){ cb.checked=true; const b=document.getElementById('extrasBody'+k); if(b) b.style.display=''; const bl=document.getElementById('extrasBlock'+k); if(bl) bl.classList.add('active'); if(k==='360'&&data.link360) updateQr('360'); if(k==='YT'&&data.linkYT) updateQr('YT'); } } });
       if(data.photosPerPage) setVal('f-photosPerPage', data.photosPerPage);
-      if(!data.kaeuferp){ const def=localStorage.getItem('expogen_default_provision'); if(def){ setVal('f-kaeuferp',def); data.kaeuferp=def; } }
+      if(!data.kaeuferp){ const def=localStorage.getItem('expogen_std_default_provision'); if(def){ setVal('f-kaeuferp',def); data.kaeuferp=def; } }
     }
     if(s) current=parseInt(s)||1;
     updateHeaderSizeSwitch();
@@ -3483,7 +3483,7 @@ function loadFromStorage() {
 
 function saveDefaultProvision() {
   const val = document.getElementById('f-kaeuferp').value;
-  if (val) localStorage.setItem('expogen_default_provision', val);
+  if (val) localStorage.setItem('expogen_std_default_provision', val);
 }
 function setVal(id,v){ const el=document.getElementById(id); if(el) el.value=v; }
 
