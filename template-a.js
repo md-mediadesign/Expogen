@@ -41,8 +41,10 @@ function buildPreviewA() {
 
   // ── PAGE 1: COVER ──
   const coverPhoto = photos.find(p => p.isCover) || photos[0];
+  const coverIdx = photos.findIndex(p => p.isCover);
+  const coverSlot = coverIdx >= 0 ? coverIdx : 0;
   const heroImg = coverPhoto
-    ? `<img src="${coverPhoto.src}" alt="Hauptbild">`
+    ? previewImgWrap(coverPhoto, coverSlot, 'width:100%;height:100%;min-height:550px', '')
     : `<div class="expo-cover-hero-placeholder"><span>Kein Hauptbild hochgeladen</span></div>`;
   out.innerHTML += `
   <div class="expo-page expo-cover">
@@ -87,7 +89,7 @@ function buildPreviewA() {
 
   const mkTable = rows => `<table class="expo-data-table">${rows.map(r=>`<tr><td>${escHtml(r[0])}</td><td>${escHtml(r[1]).replace(/\n/g,'<br>')}</td></tr>`).join('')}</table>`;
 
-  const sideImg = photos.length > 1 ? `<img src="${photos[1].src}" class="expo-sidebar-img" alt="">` : '';
+  const sideImg = photos.length > 1 ? previewImgWrap(photos[1], 1, 'width:100%;aspect-ratio:3/4;border-radius:4px', '') : '';
 
   out.innerHTML += `
   <div class="expo-page expo-inner">
@@ -120,7 +122,7 @@ function buildPreviewA() {
         </div>
         <div>
           ${hlHtml}
-          ${photos.length>2?`<img src="${photos[2].src}" style="width:100%;aspect-ratio:${fmtAr(photos[2])};object-fit:cover;margin-top:1rem;border-radius:4px" alt="">` : ''}
+          ${photos.length>2?previewImgWrap(photos[2],2,'width:100%;aspect-ratio:'+fmtAr(photos[2])+';margin-top:1rem;border-radius:4px',''):''}
         </div>
       </div>
     </div>
@@ -138,7 +140,7 @@ function buildPreviewA() {
           <div class="expo-body-plain"><p>${d.lage.split('\n').filter(Boolean).map(escHtml).join('</p><p>')}</p></div>
           <div>${data.mapEnabled && data.mapLat
             ? buildStaticMapHtml(data.mapLat, data.mapLon, 80)
-            : photos.length>3 ? `<img src="${photos[3].src}" style="width:100%;aspect-ratio:${fmtAr(photos[3])};object-fit:cover;border-radius:4px" alt="">` : ''
+            : photos.length>3 ? previewImgWrap(photos[3],3,'width:100%;aspect-ratio:'+fmtAr(photos[3])+';border-radius:4px','') : ''
           }</div>
         </div>
       </div>
@@ -170,33 +172,39 @@ function buildPreviewA() {
         <div class="expo-page-title">Ausstattung & Qualität</div>
         <div class="expo-two-col">
           <div><div class="expo-body">${escHtml(d.ausstattung||'')}</div></div>
-          <div>${ausHtml}${photos.length>4?`<img src="${photos[4].src}" style="width:100%;aspect-ratio:${fmtAr(photos[4])};object-fit:cover;margin-top:1rem;border-radius:4px" alt="">`:''}
+          <div>${ausHtml}${photos.length>4?previewImgWrap(photos[4],4,'width:100%;aspect-ratio:'+fmtAr(photos[4])+';margin-top:1rem;border-radius:4px',''):''}
           </div>
         </div>
       </div>
     </div>`;
   }
 
-  // ── PAGE 7: FOTOS ──
-  if (photos.length) {
+  // ── PAGE 7+: FOTOGALERIE (paginiert) ──
+  const galleryStartA = TEMPLATE_SLOT_MAP?.['A']?.galleryStartIndex ?? 5;
+  const galleryPhotosA = photos.slice(galleryStartA);
+  if (galleryPhotosA.length > 0) {
     const perPage = d.photosPerPage || 7;
-    const photoSet = photos.slice(0, perPage);
-    const firstThree = photoSet.slice(0,3);
-    const rest = photoSet.slice(3);
-    out.innerHTML += `
-    <div class="expo-page expo-inner" style="padding:0">
-      ${pageHeader}
-      <div style="padding:0 2.8rem 0">
-        <div class="expo-page-badge" style="padding-top:1.5rem">IMPRESSIONEN</div>
-        <div class="expo-page-title">Fotogalerie</div>
-      </div>
-      <div class="expo-photo-grid" style="margin:0 2.8rem">
-        ${firstThree.map((s,i)=>i===0?`<img src="${s.src}" style="aspect-ratio:${fmtAr(s)};object-fit:cover" alt="">`:``).join('')}
-      </div>
-      ${firstThree.length>1?`<div class="expo-photo-grid-2col" style="margin:3px 2.8rem 0">${firstThree.slice(1).map(s=>`<img src="${s.src}" style="aspect-ratio:${fmtAr(s)};object-fit:cover" alt="">`).join('')}</div>`:''}
-      ${rest.length?`<div class="expo-photo-grid-2col" style="margin:3px 2.8rem 0">${rest.map(s=>`<img src="${s.src}" style="aspect-ratio:${fmtAr(s)};object-fit:cover" alt="">`).join('')}</div>`:''}
-      <div style="height:2rem"></div>
-    </div>`;
+    const numPages = Math.ceil(galleryPhotosA.length / perPage);
+    for (let pg = 0; pg < numPages; pg++) {
+      const pgPhotos = galleryPhotosA.slice(pg * perPage, (pg + 1) * perPage);
+      const first = pgPhotos.slice(0, 3);
+      const rest = pgPhotos.slice(3);
+      const base = galleryStartA + pg * perPage;
+      out.innerHTML += `
+      <div class="expo-page expo-inner" style="padding:0">
+        ${pageHeader}
+        <div style="padding:0 2.8rem 0">
+          <div class="expo-page-badge" style="padding-top:1.5rem">IMPRESSIONEN</div>
+          <div class="expo-page-title">Fotogalerie${numPages > 1 ? ` (${pg + 1}/${numPages})` : ''}</div>
+        </div>
+        <div class="expo-photo-grid" style="margin:0 2.8rem">
+          ${first.length > 0 ? `<img src="${first[0].src}" style="aspect-ratio:${fmtAr(first[0])};object-fit:cover;object-position:${fmtPos(first[0])}" alt="">` : ''}
+        </div>
+        ${first.length > 1 ? `<div class="expo-photo-grid-2col" style="margin:3px 2.8rem 0">${first.slice(1).map(s => `<img src="${s.src}" style="aspect-ratio:${fmtAr(s)};object-fit:cover;object-position:${fmtPos(s)}" alt="">`).join('')}</div>` : ''}
+        ${rest.length ? `<div class="expo-photo-grid-2col" style="margin:3px 2.8rem 0">${rest.map(s => `<img src="${s.src}" style="aspect-ratio:${fmtAr(s)};object-fit:cover;object-position:${fmtPos(s)}" alt="">`).join('')}</div>` : ''}
+        <div style="height:2rem"></div>
+      </div>`;
+    }
   }
 
   // ── PAGE 8: EINHEITEN (L, Neubau-Projekt) ──

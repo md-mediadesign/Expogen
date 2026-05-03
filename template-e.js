@@ -22,6 +22,7 @@ function buildPreviewE() {
 
   const esc = (typeof escHtml === 'function') ? escHtml : (s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
   const coverPhoto = photos.find(p => p.isCover) || photos[0];
+  const coverBgPosE = coverPhoto ? fmtPos(coverPhoto) : 'center';
 
   const logoHtml = d.brandLogoSrc
     ? `<img src="${d.brandLogoSrc}" style="max-height:30px;object-fit:contain;display:block">`
@@ -32,7 +33,7 @@ function buildPreviewE() {
   out.innerHTML += `
   <div class="tl-page" style="display:flex;flex-direction:column">
     <!-- Full bleed image -->
-    ${coverBg ? `<div style="position:absolute;inset:0;background-image:url('${coverBg}');background-size:cover;background-position:center"></div>` : `<div style="position:absolute;inset:0;background:#1a2033"></div>`}
+    ${coverBg ? `<div style="position:absolute;inset:0;background-image:url('${coverBg}');background-size:cover;background-position:${coverBgPosE}"></div>` : `<div style="position:absolute;inset:0;background:#1a2033"></div>`}
     <!-- Gradient overlay -->
     <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,.85) 0%, rgba(0,0,0,.2) 60%, rgba(0,0,0,.05) 100%)"></div>
     <!-- Top bar -->
@@ -137,23 +138,28 @@ function buildPreviewE() {
     </div>
   </div>`;
 
-  // ── PAGE 4: BILDERGALERIE ──
-  if (photos.length > 1) {
+  // ── PAGE 4+: BILDERGALERIE (paginiert) ──
+  const galleryStartE = TEMPLATE_SLOT_MAP?.['E']?.galleryStartIndex ?? 1;
+  const galleryPhotosE = photos.slice(galleryStartE);
+  if (galleryPhotosE.length > 0) {
     const perPage = d.photosPerPage || 6;
-    const photoSet = photos.slice(0, perPage);
-    const mainPhoto = photoSet[0];
-    const thumbs = photoSet.slice(1);
-    out.innerHTML += `
-    <div class="tl-page" style="display:flex;flex-direction:column">
-      <div style="height:48px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:${acc}">
-        <div style="font-size:.52rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.7);font-weight:600">IMPRESSIONEN</div>
-        <div>${d.brandLogoSrc?`<img src="${d.brandLogoSrc}" style="max-height:24px;object-fit:contain;filter:brightness(0) invert(1)">`:''}</div>
-      </div>
-      <div style="flex:1;display:flex;padding:12px 16px;gap:8px;min-height:0">
-        ${mainPhoto?`<div style="flex:1.5;min-width:0"><img src="${mainPhoto.src}" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:4px" alt=""></div>`:''}
-        ${thumbs.length?`<div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(${Math.ceil(thumbs.length/2)},1fr);gap:6px">${thumbs.map(p=>`<img src="${p.src}" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:3px;min-height:0" alt="">`).join('')}</div>`:''}
-      </div>
-    </div>`;
+    const numPagesE = Math.ceil(galleryPhotosE.length / perPage);
+    for (let pg = 0; pg < numPagesE; pg++) {
+      const pgSet = galleryPhotosE.slice(pg * perPage, (pg + 1) * perPage);
+      const mainPhoto = pgSet[0];
+      const thumbs = pgSet.slice(1);
+      out.innerHTML += `
+      <div class="tl-page" style="display:flex;flex-direction:column">
+        <div style="height:48px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:${acc}">
+          <div style="font-size:.52rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.7);font-weight:600">IMPRESSIONEN${numPagesE > 1 ? ` ${pg+1}/${numPagesE}` : ''}</div>
+          <div>${d.brandLogoSrc?`<img src="${d.brandLogoSrc}" style="max-height:24px;object-fit:contain;filter:brightness(0) invert(1)">`:''}</div>
+        </div>
+        <div style="flex:1;display:flex;padding:12px 16px;gap:8px;min-height:0">
+          ${mainPhoto?`<div style="flex:1.5;min-width:0"><img src="${mainPhoto.src}" style="width:100%;height:100%;object-fit:cover;object-position:${fmtPos(mainPhoto)};display:block;border-radius:4px" alt=""></div>`:''}
+          ${thumbs.length?`<div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(${Math.ceil(thumbs.length/2)},1fr);gap:6px">${thumbs.map(p=>`<img src="${p.src}" style="width:100%;height:100%;object-fit:cover;object-position:${fmtPos(p)};display:block;border-radius:3px;min-height:0" alt="">`).join('')}</div>`:''}
+        </div>
+      </div>`;
+    }
   }
 
   // ── PAGE 5: BESCHREIBUNG ──

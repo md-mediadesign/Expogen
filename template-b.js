@@ -809,7 +809,9 @@ function buildPreviewB() {
 
   // ── PAGE 1: COVER ──────────────────────────────────────
   const coverPhotoB = photos.find(p => p.isCover) || photos[0];
-  const hero = coverPhotoB ? `<img src="${coverPhotoB.src}" alt="">` : `<div class="tb-cover-photo-placeholder">Kein Foto hochgeladen</div>`;
+  const coverIdxB = photos.findIndex(p => p.isCover);
+  const coverSlotB = coverIdxB >= 0 ? coverIdxB : 0;
+  const hero = coverPhotoB ? previewImgWrap(coverPhotoB, coverSlotB, 'width:100%;height:100%', '') : `<div class="tb-cover-photo-placeholder">Kein Foto hochgeladen</div>`;
   out.innerHTML += `
   <div class="tb-page tb-cover">
     <div class="tb-cover-hatch"></div>
@@ -903,9 +905,9 @@ function buildPreviewB() {
       <div class="tb-desc-body">${esc(d.beschreibung || '')}</div>
       <div>${hlHtml}</div>
     </div>
-    ${descPhotoSrc ? `
+    ${descPhoto ? `
     <div class="tb-photo-overlay-wrap">
-      <img src="${descPhotoSrc}" alt="">
+      ${previewImgWrap(descPhoto, 1, 'width:100%;height:100%', '')}
       <div class="tb-photo-overlay-text">
         <div class="tb-photo-overlay-headline">${esc((d.titel || '').toUpperCase())}</div>
       </div>
@@ -928,19 +930,19 @@ function buildPreviewB() {
       ${(data.mapEnabled && data.mapLat) ? `
       <div style="margin-top:.8rem">${buildStaticMapHtml(data.mapLat, data.mapLon, 58)}</div>` : (lp1 || lp2) ? `
       <div class="tb-lage-photos">
-        ${lp1 ? `<div class="tb-lage-photo1"><img src="${lp1}" alt=""></div>` : ''}
-        ${lp2 ? `<div class="tb-lage-photo2"><img src="${lp2}" alt=""></div>` : ''}
+        ${photos.length > 2 ? `<div class="tb-lage-photo1">${previewImgWrap(photos[2], 2, 'width:100%;height:100%', '')}</div>` : ''}
+        ${photos.length > 3 ? `<div class="tb-lage-photo2">${previewImgWrap(photos[3], 3, 'width:100%;height:100%', '')}</div>` : ''}
       </div>` : ''}
     </div>`;
   }
 
   // ── PAGE 5: STADTBESCHREIBUNG (L) ─────────────────────
   if (size === 'L' && d.stadtbeschr && isStepEnabled(9)) {
-    const sp = photos.length > 4 ? photos[4].src : null;
+    const spPhoto = photos.length > 4 ? photos[4] : null;
     out.innerHTML += `
     <div class="tb-page tb-stadt-page">
       <div class="tb-stadt-bg">
-        ${sp ? `<img src="${sp}" alt="">` : `<div class="tb-stadt-bg-fallback"></div>`}
+        ${spPhoto ? previewImgWrap(spPhoto, 4, 'width:100%;height:100%', '') : `<div class="tb-stadt-bg-fallback"></div>`}
       </div>
       <div class="tb-stadt-overlay">
         <div class="tb-stadt-overlay-title">Der Standort</div>
@@ -951,7 +953,7 @@ function buildPreviewB() {
 
   // ── PAGE 6: AUSSTATTUNG (L) ───────────────────────────
   if (size === 'L' && (d.ausstattung || d.ausstattungList?.length) && isStepEnabled(10)) {
-    const ap = photos.length > 5 ? photos[5].src : photos.length > 2 ? photos[2].src : null;
+    const apPhoto = photos.length > 5 ? photos[5] : photos.length > 2 ? photos[2] : null;
     const ausListHtml = d.ausstattungList?.length
       ? `<ul class="tb-aus-list">${d.ausstattungList.map(a => `<li>${esc(a)}</li>`).join('')}</ul>` : '';
     const buildingIcon = `<svg viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#3a3a3a" stroke-width="2.5" stroke-linecap="round">
@@ -974,9 +976,9 @@ function buildPreviewB() {
           ${ausListHtml}
         </div>
       </div>
-      ${ap ? `
+      ${apPhoto ? `
       <div class="tb-aus-photo-wrap">
-        <img src="${ap}" alt="">
+        ${previewImgWrap(apPhoto, photos.indexOf(apPhoto), 'width:100%;height:100%', '')}
         <div class="tb-aus-photo-text">
           <div class="tb-aus-photo-headline">AUSSTATTUNG</div>
         </div>
@@ -1027,11 +1029,13 @@ function buildPreviewB() {
     }
   }
 
-  // ── PAGE 8+: FOTOGALERIE ─────────────────────────────
-  if (photos.length) {
+  // ── PAGE 8+: FOTOGALERIE (paginiert ab galleryStartIndex) ──
+  const galleryStartB = TEMPLATE_SLOT_MAP?.['B']?.galleryStartIndex ?? 6;
+  const galleryPhotosB = photos.slice(galleryStartB);
+  if (galleryPhotosB.length > 0) {
     const PHOTOS_PER_PAGE = d.photosPerPage || 7;
     const gallPages = [];
-    for (let i = 0; i < photos.length; i += PHOTOS_PER_PAGE) gallPages.push(photos.slice(i, i + PHOTOS_PER_PAGE));
+    for (let i = 0; i < galleryPhotosB.length; i += PHOTOS_PER_PAGE) gallPages.push(galleryPhotosB.slice(i, i + PHOTOS_PER_PAGE));
 
     gallPages.forEach((pagePhotos, pgIdx) => {
       const [p0, ...rest] = pagePhotos;
@@ -1044,12 +1048,12 @@ function buildPreviewB() {
         ${pageHeader}
         <div class="tb-gallery-label">${pageLabel}</div>
         <div class="tb-gallery-hero-wrap">
-          <div class="tb-gallery-hero"><img src="${p0.src}" style="aspect-ratio:${fmtArB(p0)};object-fit:cover" alt=""></div>
+          <div class="tb-gallery-hero"><img src="${p0.src}" style="aspect-ratio:${fmtArB(p0)};object-fit:cover;object-position:${fmtPos(p0)}" alt=""></div>
           ${p0.caption ? `<div class="tb-gallery-caption">${esc(p0.caption)}</div>` : ''}
         </div>
         ${chunks.map(ch => ch.length === 3
-          ? `<div class="tb-gallery-grid3">${ch.map(p => `<div class="tb-gallery-img-wrap"><img src="${p.src}" style="aspect-ratio:${fmtArB(p)};object-fit:cover" alt="">${p.caption ? `<div class="tb-gallery-caption">${esc(p.caption)}</div>` : ''}</div>`).join('')}</div>`
-          : `<div class="tb-gallery-grid2">${ch.map(p => `<div class="tb-gallery-img-wrap"><img src="${p.src}" style="aspect-ratio:${fmtArB(p)};object-fit:cover" alt="">${p.caption ? `<div class="tb-gallery-caption">${esc(p.caption)}</div>` : ''}</div>`).join('')}</div>`
+          ? `<div class="tb-gallery-grid3">${ch.map(p => `<div class="tb-gallery-img-wrap"><img src="${p.src}" style="aspect-ratio:${fmtArB(p)};object-fit:cover;object-position:${fmtPos(p)}" alt="">${p.caption ? `<div class="tb-gallery-caption">${esc(p.caption)}</div>` : ''}</div>`).join('')}</div>`
+          : `<div class="tb-gallery-grid2">${ch.map(p => `<div class="tb-gallery-img-wrap"><img src="${p.src}" style="aspect-ratio:${fmtArB(p)};object-fit:cover;object-position:${fmtPos(p)}" alt="">${p.caption ? `<div class="tb-gallery-caption">${esc(p.caption)}</div>` : ''}</div>`).join('')}</div>`
         ).join('')}
       </div>`;
     });

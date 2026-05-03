@@ -19,6 +19,8 @@ function buildPreviewG() {
 
   const esc = (typeof escHtml === 'function') ? escHtml : (s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
   const coverPhoto = photos.find(p => p.isCover) || photos[0];
+  const coverIdxG = photos.findIndex(p => p.isCover);
+  const coverSlotG = coverIdxG >= 0 ? coverIdxG : 0;
 
   const logoHtml = (light) => d.brandLogoSrc
     ? `<img src="${d.brandLogoSrc}" style="max-height:30px;object-fit:contain;${light?'filter:brightness(0) invert(1)':''};display:block">`
@@ -36,7 +38,7 @@ function buildPreviewG() {
     <!-- Right: full bleed photo -->
     <div style="flex:1;min-width:0;position:relative;overflow:hidden">
       ${coverPhoto
-        ? `<img src="${coverPhoto.src}" style="width:100%;height:100%;object-fit:cover;display:block" alt="">`
+        ? previewImgWrap(coverPhoto, coverSlotG, 'width:100%;height:100%', '')
         : `<div style="width:100%;height:100%;background:linear-gradient(135deg,${acc}55,${sec}22)"></div>`}
       <!-- Bottom info overlay -->
       <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top, rgba(0,0,0,.75) 0%, transparent 100%);padding:20px 28px">
@@ -51,25 +53,30 @@ function buildPreviewG() {
     </div>
   </div>`;
 
-  // ── PAGE 2: MOSAIK-BILDGALERIE ──
-  if (photos.length > 1) {
+  // ── PAGE 2+: MOSAIK-BILDGALERIE (paginiert) ──
+  const galleryStartG = TEMPLATE_SLOT_MAP?.['G']?.galleryStartIndex ?? 1;
+  const galleryPhotosG = photos.slice(galleryStartG);
+  if (galleryPhotosG.length > 0) {
     const perPage = d.photosPerPage || 5;
-    const mosaicPhotos = photos.slice(0, perPage);
-    const [p1, p2, p3, p4, p5] = mosaicPhotos;
-    out.innerHTML += `
-    <div class="tl-page" style="display:flex;flex-direction:column">
-      <div style="height:44px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:${acc}">
-        <div style="font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.7);font-weight:600">IMPRESSIONEN</div>
-        <div>${logoHtml(true)}</div>
-      </div>
-      <div style="flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:4px;padding:4px;min-height:0">
-        ${p1?`<div style="grid-column:1/3;grid-row:1/2;overflow:hidden"><img src="${p1.src}" style="width:100%;height:100%;object-fit:cover;display:block" alt=""></div>`:''}
-        ${p2?`<div style="grid-column:3/4;grid-row:1/2;overflow:hidden"><img src="${p2.src}" style="width:100%;height:100%;object-fit:cover;display:block" alt=""></div>`:''}
-        ${p3?`<div style="grid-column:1/2;grid-row:2/3;overflow:hidden"><img src="${p3.src}" style="width:100%;height:100%;object-fit:cover;display:block" alt=""></div>`:''}
-        ${p4?`<div style="grid-column:2/3;grid-row:2/3;overflow:hidden"><img src="${p4.src}" style="width:100%;height:100%;object-fit:cover;display:block" alt=""></div>`:''}
-        ${p5?`<div style="grid-column:3/4;grid-row:2/3;overflow:hidden"><img src="${p5.src}" style="width:100%;height:100%;object-fit:cover;display:block" alt=""></div>`:''}
-      </div>
-    </div>`;
+    const numPagesG = Math.ceil(galleryPhotosG.length / perPage);
+    for (let pg = 0; pg < numPagesG; pg++) {
+      const pgSet = galleryPhotosG.slice(pg * perPage, (pg + 1) * perPage);
+      const [p1, p2, p3, p4, p5] = pgSet;
+      out.innerHTML += `
+      <div class="tl-page" style="display:flex;flex-direction:column">
+        <div style="height:44px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:${acc}">
+          <div style="font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.7);font-weight:600">IMPRESSIONEN${numPagesG > 1 ? ` ${pg+1}/${numPagesG}` : ''}</div>
+          <div>${logoHtml(true)}</div>
+        </div>
+        <div style="flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:4px;padding:4px;min-height:0">
+          ${p1?`<div style="grid-column:1/3;grid-row:1/2;overflow:hidden"><img src="${p1.src}" style="width:100%;height:100%;object-fit:cover;object-position:${fmtPos(p1)};display:block" alt=""></div>`:''}
+          ${p2?`<div style="grid-column:3/4;grid-row:1/2;overflow:hidden"><img src="${p2.src}" style="width:100%;height:100%;object-fit:cover;object-position:${fmtPos(p2)};display:block" alt=""></div>`:''}
+          ${p3?`<div style="grid-column:1/2;grid-row:2/3;overflow:hidden"><img src="${p3.src}" style="width:100%;height:100%;object-fit:cover;object-position:${fmtPos(p3)};display:block" alt=""></div>`:''}
+          ${p4?`<div style="grid-column:2/3;grid-row:2/3;overflow:hidden"><img src="${p4.src}" style="width:100%;height:100%;object-fit:cover;object-position:${fmtPos(p4)};display:block" alt=""></div>`:''}
+          ${p5?`<div style="grid-column:3/4;grid-row:2/3;overflow:hidden"><img src="${p5.src}" style="width:100%;height:100%;object-fit:cover;object-position:${fmtPos(p5)};display:block" alt=""></div>`:''}
+        </div>
+      </div>`;
+    }
   }
 
   // ── PAGE 3: ECKDATEN + BESCHREIBUNG ──
@@ -165,7 +172,7 @@ function buildPreviewG() {
         <div style="width:280px;flex-shrink:0">
           ${data.mapEnabled && data.mapLat
             ? buildStaticMapHtml(data.mapLat, data.mapLon, 80)
-            : photos.length>3 ? `<img src="${photos[3].src}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;display:block" alt="">` : ''
+            : photos.length>3 ? previewImgWrap(photos[3],3,'width:100%;height:100%;border-radius:6px','') : ''
           }
         </div>
       </div>

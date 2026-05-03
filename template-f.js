@@ -19,6 +19,8 @@ function buildPreviewF() {
 
   const esc = (typeof escHtml === 'function') ? escHtml : (s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
   const coverPhoto = photos.find(p => p.isCover) || photos[0];
+  const coverIdxF = photos.findIndex(p => p.isCover);
+  const coverSlotF = coverIdxF >= 0 ? coverIdxF : 0;
 
   const logoBar = (light) => d.brandLogoSrc
     ? `<img src="${d.brandLogoSrc}" style="max-height:28px;object-fit:contain;${light?'filter:brightness(0) invert(1)':''};display:block">`
@@ -49,7 +51,7 @@ function buildPreviewF() {
     <!-- Right: cover photo -->
     <div style="flex:1;min-width:0;overflow:hidden">
       ${coverPhoto
-        ? `<img src="${coverPhoto.src}" style="width:100%;height:100%;object-fit:cover;display:block" alt="">`
+        ? previewImgWrap(coverPhoto, coverSlotF, 'width:100%;height:100%', '')
         : `<div style="width:100%;height:100%;background:linear-gradient(135deg,${acc}55,${sec}33)"></div>`}
     </div>
   </div>`;
@@ -148,27 +150,32 @@ function buildPreviewF() {
     </div>
   </div>`;
 
-  // ── PAGE 5: LAGE + BILDERGALERIE ──
-  const perPage = d.photosPerPage || 4;
-  const galleryPhotos = photos.slice(photos.length > 1 ? 2 : 1).slice(0, perPage);
-  out.innerHTML += `
-  <div class="tl-page" style="display:flex;flex-direction:column">
-    <div style="height:48px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 32px;border-bottom:2px solid ${acc}">
-      <div style="font-size:.52rem;letter-spacing:.2em;text-transform:uppercase;color:${acc};font-weight:700">LAGE & BILDER</div>
-      <div>${logoBar(false)}</div>
-    </div>
-    <div style="flex:1;display:flex;padding:16px 24px;gap:16px;min-height:0">
-      ${(size==='M'||size==='L') && d.lage && isStepEnabled(8) ? `
-      <div style="flex:1;min-width:0">
-        <div style="font-family:'Ubuntu',sans-serif;font-size:.9rem;font-weight:700;color:${acc};margin-bottom:10px;padding-bottom:6px;border-bottom:1.5px solid ${acc}">Lage</div>
-        <div style="font-size:.75rem;color:#333;line-height:1.7">${d.lage.split('\n').filter(Boolean).slice(0,5).map(esc).join('<br>')}</div>
-      </div>` : ''}
-      ${galleryPhotos.length ? `
-      <div style="flex:1.5;min-width:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:6px">
-        ${galleryPhotos.map(p=>`<img src="${p.src}" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:3px;min-height:0" alt="">`).join('')}
-      </div>` : ''}
-    </div>
-  </div>`;
+  // ── PAGE 5+: LAGE + BILDERGALERIE (paginiert) ──
+  const galleryStartF = TEMPLATE_SLOT_MAP?.['F']?.galleryStartIndex ?? 2;
+  const galleryPhotosF = photos.slice(galleryStartF);
+  const perPageF = d.photosPerPage || 4;
+  const numPagesF = Math.max(1, Math.ceil(galleryPhotosF.length / perPageF));
+  for (let pg = 0; pg < numPagesF; pg++) {
+    const pgPhotos = galleryPhotosF.slice(pg * perPageF, (pg + 1) * perPageF);
+    out.innerHTML += `
+    <div class="tl-page" style="display:flex;flex-direction:column">
+      <div style="height:48px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 32px;border-bottom:2px solid ${acc}">
+        <div style="font-size:.52rem;letter-spacing:.2em;text-transform:uppercase;color:${acc};font-weight:700">${pg === 0 ? 'LAGE & BILDER' : `IMPRESSIONEN ${pg+1}/${numPagesF}`}</div>
+        <div>${logoBar(false)}</div>
+      </div>
+      <div style="flex:1;display:flex;padding:16px 24px;gap:16px;min-height:0">
+        ${pg === 0 && (size==='M'||size==='L') && d.lage && isStepEnabled(8) ? `
+        <div style="flex:1;min-width:0">
+          <div style="font-family:'Ubuntu',sans-serif;font-size:.9rem;font-weight:700;color:${acc};margin-bottom:10px;padding-bottom:6px;border-bottom:1.5px solid ${acc}">Lage</div>
+          <div style="font-size:.75rem;color:#333;line-height:1.7">${d.lage.split('\n').filter(Boolean).slice(0,5).map(esc).join('<br>')}</div>
+        </div>` : ''}
+        ${pgPhotos.length ? `
+        <div style="flex:1.5;min-width:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:6px">
+          ${pgPhotos.map(p=>`<img src="${p.src}" style="width:100%;height:100%;object-fit:cover;object-position:${fmtPos(p)};display:block;border-radius:3px;min-height:0" alt="">`).join('')}
+        </div>` : ''}
+      </div>
+    </div>`;
+  }
 
   // ── PAGE 6: KONTAKT ──
   out.innerHTML += `

@@ -29,6 +29,7 @@ function buildPreviewD() {
 
   const esc = (typeof escHtml === 'function') ? escHtml : (s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
   const coverPhoto = photos.find(p => p.isCover) || photos[0];
+  const coverBgPosD = coverPhoto ? fmtPos(coverPhoto) : 'center';
 
   const logoHtml = d.brandLogoSrc
     ? `<img src="${d.brandLogoSrc}" style="max-height:36px;object-fit:contain;display:block">`
@@ -42,7 +43,7 @@ function buildPreviewD() {
       @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap');
     </style>
     <!-- Cover: full background image -->
-    <div style="position:absolute;inset:0;background-image:${coverBg};background-size:cover;background-position:center;opacity:.75"></div>
+    <div style="position:absolute;inset:0;background-image:${coverBg};background-size:cover;background-position:${coverBgPosD};opacity:.75"></div>
     <!-- Diagonal overlay bottom-left -->
     <div style="position:absolute;bottom:0;left:0;width:55%;height:100%;clip-path:polygon(0 30%,0 100%,100% 100%);background:${acc};opacity:.93"></div>
     <!-- Logo top right -->
@@ -103,7 +104,7 @@ function buildPreviewD() {
         </div>
       </div>
       <div style="width:220px;flex-shrink:0">
-        ${photos.length>1?`<img src="${photos[1].src}" style="width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:6px;display:block" alt="">`:''}
+        ${photos.length>1?previewImgWrap(photos[1],1,'width:100%;aspect-ratio:3/4;border-radius:6px',''):''}
       </div>
     </div>
   </div>`;
@@ -125,27 +126,32 @@ function buildPreviewD() {
       </div>
       <div style="flex:1;min-width:0">
         ${d.highlights?.length?`<div style="font-family:'Ubuntu',sans-serif;font-size:.75rem;font-weight:700;color:${acc};letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">Highlights</div>${hlHtml}`:''}
-        ${photos.length>2?`<img src="${photos[2].src}" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:4px;margin-top:14px;display:block" alt="">`:''}
+        ${photos.length>2?previewImgWrap(photos[2],2,'width:100%;aspect-ratio:16/9;margin-top:14px;border-radius:4px',''):''}
       </div>
     </div>
   </div>`;
 
-  // ── PAGE 4: BILDERGALERIE ──
-  if (photos.length > 1) {
+  // ── PAGE 4+: BILDERGALERIE (paginiert) ──
+  const galleryStartD = TEMPLATE_SLOT_MAP?.['D']?.galleryStartIndex ?? 5;
+  const galleryPhotosD = photos.slice(galleryStartD);
+  if (galleryPhotosD.length > 0) {
     const perPage = d.photosPerPage || 6;
-    const photoSet = photos.slice(0, perPage);
-    const rows = [];
-    for (let i = 0; i < photoSet.length; i += 3) rows.push(photoSet.slice(i, i+3));
-    out.innerHTML += `
-    <div class="tl-page" style="display:flex;flex-direction:column">
-      <div style="height:48px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:${acc}">
-        <div style="font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.7);font-weight:600">IMPRESSIONEN</div>
-        <div>${logoHtml}</div>
-      </div>
-      <div style="flex:1;padding:20px 24px;display:flex;flex-direction:column;gap:6px;min-height:0">
-        ${rows.map(row=>`<div style="display:flex;gap:6px;flex:1">${row.map(p=>`<img src="${p.src}" style="flex:1;min-width:0;object-fit:cover;display:block;border-radius:3px" alt="">`).join('')}</div>`).join('')}
-      </div>
-    </div>`;
+    const numPagesD = Math.ceil(galleryPhotosD.length / perPage);
+    for (let pg = 0; pg < numPagesD; pg++) {
+      const pgSet = galleryPhotosD.slice(pg * perPage, (pg + 1) * perPage);
+      const rows = [];
+      for (let i = 0; i < pgSet.length; i += 3) rows.push(pgSet.slice(i, i+3));
+      out.innerHTML += `
+      <div class="tl-page" style="display:flex;flex-direction:column">
+        <div style="height:48px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:${acc}">
+          <div style="font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.7);font-weight:600">IMPRESSIONEN${numPagesD > 1 ? ` ${pg+1}/${numPagesD}` : ''}</div>
+          <div>${logoHtml}</div>
+        </div>
+        <div style="flex:1;padding:20px 24px;display:flex;flex-direction:column;gap:6px;min-height:0">
+          ${rows.map(row=>`<div style="display:flex;gap:6px;flex:1">${row.map(p=>`<img src="${p.src}" style="flex:1;min-width:0;object-fit:cover;object-position:${fmtPos(p)};display:block;border-radius:3px" alt="">`).join('')}</div>`).join('')}
+        </div>
+      </div>`;
+    }
   }
 
   // ── PAGE 5: LAGE (M+L) ──
@@ -164,7 +170,7 @@ function buildPreviewD() {
         <div style="width:280px;flex-shrink:0">
           ${data.mapEnabled && data.mapLat
             ? buildStaticMapHtml(data.mapLat, data.mapLon, 80)
-            : photos.length>3 ? `<img src="${photos[3].src}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;display:block" alt="">` : ''
+            : photos.length>3 ? previewImgWrap(photos[3],3,'width:100%;height:100%;border-radius:6px','') : ''
           }
         </div>
       </div>
@@ -187,7 +193,7 @@ function buildPreviewD() {
           <div style="font-size:.78rem;color:#333;line-height:1.75">${esc(d.ausstattung||'')}</div>
           ${ausHtml}
         </div>
-        ${photos.length>4?`<div style="width:260px;flex-shrink:0"><img src="${photos[4].src}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;display:block" alt=""></div>`:''}</div>
+        ${photos.length>4?`<div style="width:260px;flex-shrink:0">${previewImgWrap(photos[4],4,'width:100%;height:100%;border-radius:6px','')}</div>`:''}</div>
     </div>`;
   }
 

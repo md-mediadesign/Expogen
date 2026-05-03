@@ -555,8 +555,10 @@ function buildPreviewC() {
 
   // ── PAGE 1: COVER ──────────────────────────────────
   const coverPhotoC = photos.find(p => p.isCover) || photos[0];
+  const coverIdxC = photos.findIndex(p => p.isCover);
+  const coverSlotC = coverIdxC >= 0 ? coverIdxC : 0;
   const heroImg = coverPhotoC
-    ? `<img src="${coverPhotoC.src}" class="tc-cover-upper-img" alt="">`
+    ? previewImgWrap(coverPhotoC, coverSlotC, 'width:100%;height:100%', 'border-radius:0')
     : `<div class="tc-cover-upper-placeholder"></div>`;
 
   out.innerHTML += `
@@ -601,7 +603,7 @@ function buildPreviewC() {
   ].filter(([, v]) => v);
 
   const dataRightHtml = photos.length > 1
-    ? `<img src="${photos[1].src}" class="tc-data-img" alt="">`
+    ? previewImgWrap(photos[1], 1, 'width:100%;height:100%', 'border-radius:4px')
     : `<div class="tc-data-placeholder"></div>`;
 
   out.innerHTML += `
@@ -636,7 +638,7 @@ function buildPreviewC() {
         <div>${hlHtml}</div>
       </div>
       ${photos.length > 2
-        ? `<img src="${photos[2].src}" class="tc-strip-img" alt="">`
+        ? previewImgWrap(photos[2], 2, 'width:100%', 'border-radius:4px')
         : `<div class="tc-strip-placeholder"></div>`}
     </div>`;
   }
@@ -658,7 +660,7 @@ function buildPreviewC() {
           ${(data.mapEnabled && data.mapLat)
             ? buildStaticMapHtml(data.mapLat, data.mapLon, 70)
             : photos.length > 3
-              ? `<img src="${photos[3].src}" class="tc-lage-photo" alt="">`
+              ? previewImgWrap(photos[3], 3, 'width:100%;height:100%', 'border-radius:4px')
               : `<div class="tc-lage-photo-placeholder"></div>`}
           ${stadtSnippet}
         </div>
@@ -676,7 +678,7 @@ function buildPreviewC() {
       <div class="tc-aus-layout">
         <div class="tc-aus-photo-col">
           ${photos.length > 4
-            ? `<img src="${photos[4].src}" class="tc-aus-photo" alt="">`
+            ? previewImgWrap(photos[4], 4, 'width:100%;height:100%', 'border-radius:4px')
             : `<div class="tc-aus-photo-placeholder"></div>`}
         </div>
         <div class="tc-aus-text-col">
@@ -711,7 +713,7 @@ function buildPreviewC() {
         <tbody>${rows}</tbody>
       </table>
       ${photos.length > 5
-        ? `<img src="${photos[5].src}" class="tc-strip-img" style="margin-top:1.5rem" alt="">`
+        ? previewImgWrap(photos[5], 5, 'width:100%;margin-top:1.5rem', 'border-radius:4px')
         : ''}
     </div>`;
   }
@@ -739,22 +741,27 @@ function buildPreviewC() {
     </div>`;
   }
 
-  // ── PAGE 8: FOTOGALERIE ────────────────────────────
-  if (photos.length > 0) {
+  // ── PAGE 8+: FOTOGALERIE (paginiert ab galleryStartIndex) ──
+  const galleryStartC = TEMPLATE_SLOT_MAP?.['C']?.galleryStartIndex ?? 6;
+  const galleryPhotosC = photos.slice(galleryStartC);
+  if (galleryPhotosC.length > 0) {
     const perPage = d.photosPerPage || 7;
-    const set = photos.slice(0, perPage);
-    out.innerHTML += `
-    <div class="tc-page tc-inner">
-      ${pageHdr(8)}
-      <h2 class="tc-section-title">Impressionen</h2>
-      <hr class="tc-hr">
-      <div class="tc-gallery">
-        ${set.map((p, i) => `
-        <div class="tc-gallery-item${i === 0 ? ' tc-wide' : ''}">
-          <img src="${p.src}" style="aspect-ratio:${fmtArC(p)};object-fit:cover" alt="">
-        </div>`).join('')}
-      </div>
-    </div>`;
+    const numPagesC = Math.ceil(galleryPhotosC.length / perPage);
+    for (let pg = 0; pg < numPagesC; pg++) {
+      const pgSet = galleryPhotosC.slice(pg * perPage, (pg + 1) * perPage);
+      out.innerHTML += `
+      <div class="tc-page tc-inner">
+        ${pageHdr(8 + pg)}
+        <h2 class="tc-section-title">Impressionen${numPagesC > 1 ? ` (${pg + 1}/${numPagesC})` : ''}</h2>
+        <hr class="tc-hr">
+        <div class="tc-gallery">
+          ${pgSet.map((p, i) => `
+          <div class="tc-gallery-item${i === 0 ? ' tc-wide' : ''}">
+            <img src="${p.src}" style="aspect-ratio:${fmtArC(p)};object-fit:cover;object-position:${fmtPos(p)}" alt="">
+          </div>`).join('')}
+        </div>
+      </div>`;
+    }
   }
 
   // ── PAGE 9: KONTAKT ────────────────────────────────

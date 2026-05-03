@@ -233,6 +233,26 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
 .fmt-btn:hover{border-color:var(--gold);color:var(--gold)}
 .fmt-btn.fmt-active{border-color:var(--gold);background:rgba(201,168,76,.15);color:var(--gold2);font-weight:600}
 .photo-caption-input{font-size:.72rem;padding:.22rem .4rem;border:1px solid rgba(201,168,76,.2);border-radius:4px;background:rgba(255,255,255,.05);color:var(--fg);width:100%;box-sizing:border-box}
+.photo-slot-badge{display:inline-block;font-size:.6rem;font-weight:600;letter-spacing:.04em;padding:.12rem .45rem;border-radius:10px;margin-top:.3rem;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.badge-cover{background:rgba(245,197,24,.18);color:#f5c518;border:1px solid rgba(245,197,24,.35)}
+.badge-named{background:rgba(201,168,76,.1);color:var(--gold);border:1px solid rgba(201,168,76,.25)}
+.badge-gallery{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid rgba(255,255,255,.1)}
+.badge-contact{background:rgba(180,120,255,.12);color:#c89eff;border:1px solid rgba(180,120,255,.25)}
+.photo-grid-divider{grid-column:1/-1;display:flex;align-items:center;gap:.7rem;margin:.4rem 0}
+.photo-grid-divider hr{flex:1;border:none;border-top:1px dashed rgba(201,168,76,.2)}
+.photo-grid-divider span{font-size:.65rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.photo-slot-legend{background:rgba(255,255,255,.03);border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:.6rem .9rem;margin-bottom:.9rem}
+.photo-slot-legend-title{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:.35rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.photo-slot-legend-body{display:flex;flex-wrap:wrap;gap:.35rem .8rem;font-size:.72rem;color:var(--muted);line-height:1.6}
+.photo-slot-legend-body.collapsed{display:none}
+.slot-pill{display:inline-flex;align-items:center;gap:.3rem;font-size:.68rem;color:var(--text)}
+.slot-pill-num{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:rgba(201,168,76,.18);color:var(--gold);font-size:.58rem;font-weight:700;flex-shrink:0}
+.photos-per-page-inline{display:flex;align-items:center;gap:.6rem;padding:.55rem .9rem;background:rgba(255,255,255,.03);border:1px solid rgba(201,168,76,.15);border-radius:8px;margin-bottom:.9rem}
+.photos-per-page-inline label{font-size:.75rem;color:var(--muted);flex:1}
+.ppp-btn{width:26px;height:26px;border-radius:6px;border:1px solid rgba(201,168,76,.3);background:transparent;color:var(--gold);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;line-height:1}
+.ppp-btn:hover{background:rgba(201,168,76,.12);border-color:var(--gold)}
+.ppp-value{font-size:.9rem;font-weight:600;color:var(--gold);min-width:22px;text-align:center}
+.ppp-info{font-size:.65rem;color:var(--muted);margin-left:.3rem}
 
 /* ── Highlights / Einheiten ── */
 .list-items{display:flex;flex-direction:column;gap:.65rem;margin-bottom:.9rem}
@@ -527,7 +547,39 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
 .map-toggle-row input{accent-color:var(--gold);width:16px;height:16px;cursor:pointer}
 #lageMapPreview{z-index:0}
 
+/* ── Focal Point Picker ── */
+.focal-row{display:flex;align-items:center;gap:.4rem;margin-top:.25rem}
+.focal-label{font-size:.6rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;flex-shrink:0}
+.focal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:rgba(255,255,255,.04);border:1px solid rgba(201,168,76,.15);border-radius:5px;padding:2px;flex-shrink:0}
+.focal-dot{width:20px;height:20px;border:none;border-radius:3px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;padding:0}
+.focal-dot::after{content:'';width:5px;height:5px;border-radius:50%;background:var(--muted);display:block;transition:background .15s}
+.focal-dot:hover{background:rgba(201,168,76,.1)}
+.focal-dot:hover::after{background:var(--gold)}
+.focal-dot.focal-active{background:rgba(201,168,76,.18)}
+.focal-dot.focal-active::after{background:var(--gold2);width:7px;height:7px}
+
+/* ── Preview Image Swap ── */
+.preview-img-wrap{position:relative;overflow:hidden;display:block}
+.preview-img-swap{position:absolute;top:5px;right:5px;background:rgba(0,0,0,.65);border:1px solid rgba(255,255,255,.25);border-radius:5px;color:#fff;font-size:.6rem;font-family:'Roboto',sans-serif;font-weight:500;padding:3px 8px;cursor:pointer;opacity:0;transition:opacity .2s;z-index:10;letter-spacing:.04em;white-space:nowrap;line-height:1.5}
+.preview-img-wrap:hover .preview-img-swap{opacity:1}
+
+/* ── Swap Picker Modal ── */
+#swapPickerOverlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:5000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+#swapPickerOverlay.open{opacity:1;pointer-events:all}
+#swapPickerModal{background:var(--navy2);border:1px solid var(--border);border-radius:16px;padding:1.8rem;max-width:520px;width:92%;max-height:80vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.7)}
+.swap-picker-title{font-family:'Ubuntu',sans-serif;font-size:1rem;font-weight:700;color:var(--cream);margin-bottom:1.2rem;display:flex;align-items:center;justify-content:space-between}
+.swap-picker-close{background:transparent;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;padding:.2rem .4rem;line-height:1;transition:color .2s}
+.swap-picker-close:hover{color:var(--text)}
+.swap-picker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.6rem}
+.swap-picker-item{border-radius:8px;overflow:hidden;aspect-ratio:4/3;cursor:pointer;border:2px solid transparent;transition:border-color .15s;position:relative}
+.swap-picker-item img{width:100%;height:100%;object-fit:cover;display:block}
+.swap-picker-item:hover{border-color:var(--gold)}
+.swap-picker-item.current-slot{border-color:rgba(201,168,76,.4);cursor:default;box-shadow:0 0 0 2px rgba(201,168,76,.3)}
+.swap-picker-item-label{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.65);color:#fff;font-size:.58rem;text-align:center;padding:3px 4px;letter-spacing:.04em}
+#swapPickerEmpty{color:var(--muted);font-size:.85rem;text-align:center;padding:2rem 1rem;line-height:1.7}
+
 @media print{
+  .preview-img-swap{display:none!important}
   .leaflet-container{position:relative!important}
   .leaflet-pane,.leaflet-tile-pane{position:absolute!important}
   .expogen-map{overflow:visible!important}
@@ -981,8 +1033,28 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
     <div class="step-content" data-step="5">
       <div class="step-num" id="stepNum5"></div>
       <div class="step-title">Fotos & Visualisierungen</div>
-      <div class="step-desc">Reihenfolge per Drag & Drop ändern. ★ Titelbild festlegen. Format pro Bild wählbar. Bis zu 20 Bilder.</div>
-      <div class="photo-count" id="photoCount">0 / 20 Fotos</div>
+      <div class="step-desc">Reihenfolge per Drag & Drop ändern. ★ Titelbild festlegen. Format pro Bild wählbar. Bis zu 30 Bilder.</div>
+      <div class="photo-count" id="photoCount">0 / 30 Fotos</div>
+
+      <!-- Slot-Legende -->
+      <div class="photo-slot-legend" id="slotLegend">
+        <div class="photo-slot-legend-title" onclick="toggleSlotLegend()">
+          <span>Foto-Belegung im Template</span>
+          <span id="slotLegendToggleIcon">▾</span>
+        </div>
+        <div class="photo-slot-legend-body" id="slotLegendBody"></div>
+      </div>
+
+      <!-- Fotos pro Galerie-Seite -->
+      <div class="photos-per-page-inline">
+        <label>Fotos pro Galerie-Seite:</label>
+        <button class="ppp-btn" onclick="adjustPhotosPerPage(-1)">−</button>
+        <span class="ppp-value" id="pppDisplay">7</span>
+        <button class="ppp-btn" onclick="adjustPhotosPerPage(+1)">+</button>
+        <span class="ppp-info" id="pppInfo"></span>
+      </div>
+      <input type="number" id="f-photosPerPage" min="1" max="30" value="7" style="display:none" oninput="onPhotosPerPageChange()">
+
       <div class="photo-upload-area" id="dropZone">
         <div class="upload-icon">📷</div>
         <div class="upload-text">Fotos / Visualisierungen hier hineinziehen oder auswählen</div>
@@ -993,10 +1065,6 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
       </div>
       <input type="file" id="fileUpload" accept="image/*" multiple style="display:none" onchange="handlePhotoFiles(this.files)">
       <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoFiles(this.files)">
-      <div class="field-row" style="margin-bottom:12px; align-items:center; margin-top:12px;">
-        <label style="margin-right:8px;">Bilder pro Seite:</label>
-        <input type="number" id="f-photosPerPage" min="1" max="12" value="7" style="width:60px;" oninput="saveToStorage()">
-      </div>
       <div class="photo-grid" id="photoGrid"></div>
     </div>
 
@@ -1789,6 +1857,19 @@ function isStepEnabled(id) {
 }
 
 // ══════════════════════════════════════════════════════
+// TEMPLATE SLOT MAP
+// ══════════════════════════════════════════════════════
+const TEMPLATE_SLOT_MAP = {
+  A: { slots: ['Cover', 'Objektdaten', 'Beschreibung', 'Lage', 'Ausstattung'], galleryStartIndex: 5 },
+  B: { slots: ['Cover', 'Beschreibung', 'Lage 1', 'Lage 2', 'Stadt', 'Ausstattung'], galleryStartIndex: 6 },
+  C: { slots: ['Cover', 'Objektdaten', 'Beschreibung', 'Lage', 'Ausstattung', 'Einheiten'], galleryStartIndex: 6 },
+  D: { slots: ['Cover', 'Objektdaten', 'Überblick', 'Lage', 'Ausstattung'], galleryStartIndex: 5 },
+  E: { slots: ['Cover'], galleryStartIndex: 1 },
+  F: { slots: ['Cover', 'Seite 3 Foto'], galleryStartIndex: 2 },
+  G: { slots: ['Cover'], galleryStartIndex: 1 },
+};
+
+// ══════════════════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════════════════
 let current = 1;
@@ -1797,6 +1878,7 @@ let photos = [];
 let currentProjectId = null;
 const MAX_PROJECTS = 5;
 let dragSrcIndex = null;
+let _swapSlotIndex = null;
 let confirmCallback = null;
 let aiTargetField = null;
 let aiTargetContext = null;
@@ -3069,7 +3151,7 @@ function setupDragDrop() {
 }
 
 function handlePhotoFiles(files) {
-  const arr = Array.from(files).slice(0, 20 - photos.length);
+  const arr = Array.from(files).slice(0, 30 - photos.length);
   arr.forEach(file=>{
     if (!file.type.startsWith('image/')) return;
     const reader = new FileReader();
@@ -3078,11 +3160,116 @@ function handlePhotoFiles(files) {
   });
 }
 
+// ── Foto-Slot-Hilfsfunktionen ──────────────────────────
+
+let _slotLegendCollapsed = false;
+
+function toggleSlotLegend() {
+  _slotLegendCollapsed = !_slotLegendCollapsed;
+  const body = document.getElementById('slotLegendBody');
+  const icon = document.getElementById('slotLegendToggleIcon');
+  if (body) body.classList.toggle('collapsed', _slotLegendCollapsed);
+  if (icon) icon.textContent = _slotLegendCollapsed ? '▸' : '▾';
+}
+
+function updateSlotLegend() {
+  const tmpl = (data && data.template) || 'A';
+  const map = TEMPLATE_SLOT_MAP[tmpl];
+  if (!map) return;
+  const perPage = parseInt(document.getElementById('f-photosPerPage')?.value) || 7;
+  const body = document.getElementById('slotLegendBody');
+  if (!body) return;
+
+  let html = '';
+  map.slots.forEach((name, i) => {
+    const numStyle = i === 0 ? 'background:rgba(245,197,24,.2);color:#f5c518' : '';
+    html += `<span class="slot-pill"><span class="slot-pill-num" style="${numStyle}">${i+1}</span>${name}</span>`;
+  });
+  html += `<span class="slot-pill" style="color:var(--muted)">→ ab Foto ${map.galleryStartIndex + 1}: Galerie (${perPage}/Seite)</span>`;
+  if (tmpl === 'B') {
+    html += `<span class="slot-pill" style="color:#c89eff">| letzte 3: Kontaktseite</span>`;
+  }
+  body.innerHTML = html;
+
+  const pppInfo = document.getElementById('pppInfo');
+  if (pppInfo) {
+    if (photos.length === 0) { pppInfo.textContent = ''; return; }
+    if (tmpl === 'B') {
+      const p = Math.ceil(photos.length / perPage);
+      pppInfo.textContent = `→ ${p} Galerie-Seite${p !== 1 ? 'n' : ''}`;
+    } else {
+      const galleryCount = Math.max(0, photos.length - map.galleryStartIndex);
+      if (galleryCount === 0) { pppInfo.textContent = '→ noch keine Galerie-Fotos'; return; }
+      const p = Math.ceil(galleryCount / perPage);
+      pppInfo.textContent = `→ ${p} Galerie-Seite${p !== 1 ? 'n' : ''}`;
+    }
+  }
+}
+
+function adjustPhotosPerPage(delta) {
+  const input = document.getElementById('f-photosPerPage');
+  if (!input) return;
+  const next = Math.min(30, Math.max(1, (parseInt(input.value) || 7) + delta));
+  input.value = next;
+  document.getElementById('pppDisplay').textContent = next;
+  data.photosPerPage = next;
+  saveToStorage();
+  updateSlotLegend();
+  renderPhotoGrid();
+}
+
+function onPhotosPerPageChange() {
+  const input = document.getElementById('f-photosPerPage');
+  if (!input) return;
+  const v = parseInt(input.value) || 7;
+  const disp = document.getElementById('pppDisplay');
+  if (disp) disp.textContent = v;
+  data.photosPerPage = v;
+  saveToStorage();
+  updateSlotLegend();
+  renderPhotoGrid();
+}
+
+function syncPppDisplay() {
+  const input = document.getElementById('f-photosPerPage');
+  const disp = document.getElementById('pppDisplay');
+  if (input && disp) disp.textContent = input.value || '7';
+}
+
+// ── renderPhotoGrid ────────────────────────────────────
+
 function renderPhotoGrid() {
   const grid = document.getElementById('photoGrid');
   grid.innerHTML = '';
   const hasCover = photos.some(p => p.isCover);
-  photos.forEach((p,i)=>{
+  const tmpl = (data && data.template) || 'A';
+  const map = TEMPLATE_SLOT_MAP[tmpl];
+  const perPage = parseInt(document.getElementById('f-photosPerPage')?.value) || 7;
+  const dividerIndex = map ? map.galleryStartIndex : null;
+  let dividerInserted = false;
+
+  const contactIndices = new Set();
+  if (tmpl === 'B' && photos.length >= 3) {
+    contactIndices.add(photos.length - 3);
+    contactIndices.add(photos.length - 2);
+    contactIndices.add(photos.length - 1);
+  }
+
+  photos.forEach((p, i) => {
+    if (!dividerInserted && dividerIndex !== null && i === dividerIndex) {
+      const divider = document.createElement('div');
+      divider.className = 'photo-grid-divider';
+      const galleryCount = photos.length - dividerIndex;
+      let pageInfo = '';
+      if (galleryCount > 0) {
+        const pages = Math.ceil(galleryCount / perPage);
+        pageInfo = ` · ${pages} Seite${pages !== 1 ? 'n' : ''}`;
+      }
+      divider.innerHTML = `<hr><span>Galerie${pageInfo}</span><hr>`;
+      grid.appendChild(divider);
+      dividerInserted = true;
+    }
+
     const isCover = p.isCover || (!hasCover && i === 0);
     const fmt = p.format || 'landscape';
     const ar = fmt === 'portrait' ? '9/16' : fmt === 'square' ? '1/1' : '16/9';
@@ -3105,7 +3292,7 @@ function renderPhotoGrid() {
     const thumb = document.createElement('div');
     thumb.className = 'photo-thumb';
     thumb.style.aspectRatio = ar;
-    thumb.innerHTML = `<img src="${p.src}" alt="Foto ${i+1}" style="aspect-ratio:${ar};object-fit:cover">
+    thumb.innerHTML = `<img src="${p.src}" alt="Foto ${i+1}" style="aspect-ratio:${ar};object-fit:cover;object-position:${fmtPos(p)}">
       <button class="del-photo" onclick="removePhoto(${i})">×</button>
       <button class="cover-star${isCover?' active-cover':''}" onclick="setCover(${i})" title="Als Titelbild">${isCover ? '★' : '☆'}</button>`;
 
@@ -3116,19 +3303,46 @@ function renderPhotoGrid() {
       <button class="fmt-btn${fmt==='portrait'?' fmt-active':''}" onclick="setFormat(${i},'portrait')">↕ Hoch</button>
       <button class="fmt-btn${fmt==='square'?' fmt-active':''}" onclick="setFormat(${i},'square')">⬛ Quad</button>`;
 
+    const focalX = p.focalX ?? 50;
+    const focalY = p.focalY ?? 50;
+    const focalRow = document.createElement('div');
+    focalRow.className = 'focal-row';
+    const positions = [[0,0],[50,0],[100,0],[0,50],[50,50],[100,50],[0,100],[50,100],[100,100]];
+    focalRow.innerHTML = `<span class="focal-label">Ausschnitt</span><div class="focal-grid">${positions.map(([x,y]) =>
+      `<button class="focal-dot${focalX===x&&focalY===y?' focal-active':''}" onclick="setFocal(${i},${x},${y})" title="${x===0?'Links':x===100?'Rechts':'Mitte'} ${y===0?'oben':y===100?'unten':'Mitte'}"></button>`
+    ).join('')}</div>`;
+
     const cap = document.createElement('input');
     cap.className = 'photo-caption-input';
     cap.placeholder = 'Beschreibung (optional)';
     cap.value = p.caption || '';
     cap.oninput = () => { photos[i].caption = cap.value; };
 
+    let slotLabel = 'Galerie';
+    let badgeClass = 'badge-gallery';
+    if (map && i < map.slots.length) {
+      slotLabel = map.slots[i];
+      badgeClass = i === 0 ? 'badge-cover' : 'badge-named';
+    } else if (contactIndices.has(i)) {
+      slotLabel = 'Kontaktseite';
+      badgeClass = 'badge-contact';
+    }
+    const badge = document.createElement('span');
+    badge.className = `photo-slot-badge ${badgeClass}`;
+    badge.textContent = slotLabel;
+
     item.appendChild(thumb);
     item.appendChild(fmtRow);
+    item.appendChild(focalRow);
+    item.appendChild(badge);
     item.appendChild(cap);
     grid.appendChild(item);
   });
-  document.getElementById('photoCount').textContent = `${photos.length} / 20 Fotos`;
-  document.getElementById('dropZone').style.display = photos.length >= 20 ? 'none' : '';
+
+  document.getElementById('photoCount').textContent = `${photos.length} / 30 Fotos`;
+  document.getElementById('dropZone').style.display = photos.length >= 30 ? 'none' : '';
+  syncPppDisplay();
+  updateSlotLegend();
 }
 
 function setCover(idx) {
@@ -3242,7 +3456,7 @@ function doResetAll() {
   document.getElementById('einheitenBody').innerHTML='';
   document.getElementById('investList').innerHTML='';
   document.getElementById('photoGrid').innerHTML='';
-  document.getElementById('photoCount').textContent='0 / 20 Fotos';
+  document.getElementById('photoCount').textContent='0 / 30 Fotos';
   document.getElementById('dropZone').style.display='';
   document.getElementById('logoPreviewImg').style.display='none';
   document.getElementById('logoPlaceholder').style.display='';
@@ -3473,7 +3687,7 @@ function loadFromStorage() {
       if(data.brandLogoSrc){ const img=document.getElementById('logoPreviewImg'); img.src=data.brandLogoSrc; img.style.display='block'; document.getElementById('logoPlaceholder').style.display='none'; }
       if(data.mapEnabled){ const cb=document.getElementById('f-mapEnabled'); if(cb){ cb.checked=true; document.getElementById('lageMapWrap').style.display=''; } }
       [['360','extras360Enabled'],['YT','extrasYTEnabled'],['Sonstiges','extrasSonstigesEnabled'],['Agb','extrasAgbEnabled']].forEach(([k,dk])=>{ if(data[dk]){ const cb=document.getElementById('toggle-'+k); if(cb){ cb.checked=true; const b=document.getElementById('extrasBody'+k); if(b) b.style.display=''; const bl=document.getElementById('extrasBlock'+k); if(bl) bl.classList.add('active'); if(k==='360'&&data.link360) updateQr('360'); if(k==='YT'&&data.linkYT) updateQr('YT'); } } });
-      if(data.photosPerPage) setVal('f-photosPerPage', data.photosPerPage);
+      if(data.photosPerPage) { setVal('f-photosPerPage', data.photosPerPage); syncPppDisplay(); }
       if(!data.kaeuferp){ const def=localStorage.getItem('expogen_std_default_provision'); if(def){ setVal('f-kaeuferp',def); data.kaeuferp=def; } }
     }
     if(s) current=parseInt(s)||1;
@@ -3533,6 +3747,10 @@ function selectTemplate(tmpl) {
   const btn = document.getElementById('tmplBtn'+tmpl);
   if (btn) btn.classList.add('active');
   buildPreview();
+  if (document.getElementById('photoGrid')) {
+    renderPhotoGrid();
+    updateSlotLegend();
+  }
 }
 
 function buildPreview() {
@@ -3963,6 +4181,65 @@ function updateStellplatzSummary() {
   if (!lines.length) { el.textContent = 'Keine Angaben'; return; }
   el.innerHTML = lines.map(l => `<div>${l}</div>`).join('');
 }
+
+// ══════════════════════════════════════════════════════
+// FOTO-AUSSCHNITT & BILD-WECHSEL
+// ══════════════════════════════════════════════════════
+
+function fmtPos(p) {
+  return `${p?.focalX ?? 50}% ${p?.focalY ?? 50}%`;
+}
+
+function setFocal(idx, x, y) {
+  photos[idx].focalX = x;
+  photos[idx].focalY = y;
+  renderPhotoGrid();
+  if (document.getElementById('preview-output')?.children.length) buildPreview();
+}
+
+function previewImgWrap(photo, slotIndex, wrapStyle, imgExtraStyle) {
+  if (!photo) return '';
+  const pos = fmtPos(photo);
+  return `<div class="preview-img-wrap" style="${wrapStyle}"><img src="${photo.src}" style="width:100%;height:100%;display:block;object-fit:cover;object-position:${pos};${imgExtraStyle}" alt=""><button class="preview-img-swap" onclick="openSwapPicker(${slotIndex})">↔ Bild wechseln</button></div>`;
+}
+
+function openSwapPicker(slotIndex) {
+  _swapSlotIndex = slotIndex;
+  const grid = document.getElementById('swapPickerGrid');
+  const empty = document.getElementById('swapPickerEmpty');
+  grid.innerHTML = '';
+  if (photos.length === 0) {
+    empty.style.display = '';
+    grid.style.display = 'none';
+  } else {
+    empty.style.display = 'none';
+    grid.style.display = '';
+    photos.forEach((p, i) => {
+      const isCurrent = i === slotIndex;
+      const div = document.createElement('div');
+      div.className = 'swap-picker-item' + (isCurrent ? ' current-slot' : '');
+      div.innerHTML = `<img src="${p.src}" style="object-position:${fmtPos(p)}" alt="Foto ${i+1}"><div class="swap-picker-item-label">${isCurrent ? '✓ Aktuell' : 'Foto ' + (i+1)}</div>`;
+      if (!isCurrent) div.onclick = () => swapPhotoForSlot(slotIndex, i);
+      grid.appendChild(div);
+    });
+  }
+  document.getElementById('swapPickerOverlay').classList.add('open');
+}
+
+function closeSwapPicker() {
+  document.getElementById('swapPickerOverlay').classList.remove('open');
+  _swapSlotIndex = null;
+}
+
+function swapPhotoForSlot(slotIndex, newIndex) {
+  if (slotIndex === newIndex) { closeSwapPicker(); return; }
+  const tmp = photos[slotIndex];
+  photos[slotIndex] = photos[newIndex];
+  photos[newIndex] = tmp;
+  closeSwapPicker();
+  renderPhotoGrid();
+  buildPreview();
+}
 </script>
 
 <!-- Stellplatz Modal -->
@@ -3988,6 +4265,18 @@ function updateStellplatzSummary() {
         <button onclick="saveStellplatzModal()" style="background:var(--gold);color:var(--navy);border:none;border-radius:6px;padding:.55rem 1.4rem;font-size:.85rem;font-weight:600;cursor:pointer;font-family:'Roboto',sans-serif;letter-spacing:.03em;">Speichern</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Swap Picker Modal -->
+<div id="swapPickerOverlay" onclick="if(event.target===this)closeSwapPicker()">
+  <div id="swapPickerModal">
+    <div class="swap-picker-title">
+      <span>Bild wechseln</span>
+      <button class="swap-picker-close" onclick="closeSwapPicker()">✕</button>
+    </div>
+    <div id="swapPickerGrid"></div>
+    <div id="swapPickerEmpty" style="display:none">Keine Fotos hochgeladen.</div>
   </div>
 </div>
 
