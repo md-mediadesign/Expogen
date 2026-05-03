@@ -3188,14 +3188,13 @@ function setupDragDrop() {
   zone.addEventListener('drop', e=>{e.preventDefault();zone.classList.remove('dragover');handlePhotoFiles(e.dataTransfer.files);});
 }
 
-function handlePhotoFiles(files) {
-  const arr = Array.from(files).slice(0, 30 - photos.length);
-  arr.forEach(file=>{
-    if (!file.type.startsWith('image/')) return;
-    const reader = new FileReader();
-    reader.onload = e => { photos.push({src: e.target.result, caption: ''}); renderPhotoGrid(); };
-    reader.readAsDataURL(file);
-  });
+async function handlePhotoFiles(files) {
+  const arr = Array.from(files).filter(f => f.type.startsWith('image/')).slice(0, 30 - photos.length);
+  for (const file of arr) {
+    const src = await compressImage(file);
+    if (src) { photos.push({ src, caption: '' }); renderPhotoGrid(); }
+  }
+  PhotoDB.save('current', photos, grundrisse);
 }
 
 // ── Foto-Slot-Hilfsfunktionen ──────────────────────────
@@ -3484,7 +3483,7 @@ function openConfirmStep() {
 }
 
 function doResetAll() {
-  localStorage.removeItem('expogen_std_data'); localStorage.removeItem('expogen_std_step'); localStorage.removeItem('expogen_std_photos'); localStorage.removeItem('expogen_std_grundrisse'); grundrisse = []; renderGrundrissGrid();
+  localStorage.removeItem('expogen_std_data'); localStorage.removeItem('expogen_std_step'); photos = []; grundrisse = []; PhotoDB.save('current', [], []); renderPhotoGrid(); renderGrundrissGrid();
   currentProjectId = null;
   data={}; photos=[]; current=1;
   document.querySelectorAll('input:not([type=file]),textarea').forEach(el=>el.value='');
@@ -3509,7 +3508,7 @@ function resetCurrentStep() {
     case 2: delete data.type; document.querySelectorAll('.type-card').forEach(c=>c.classList.remove('selected')); buildStepper(); break;
     case 3: setVal('f-brandFirma',''); data.brandFirma=''; data.brandLogoSrc=null; document.getElementById('logoPreviewImg').style.display='none'; document.getElementById('logoPlaceholder').style.display=''; break;
     case 4: ['f-titel','f-untertitel','f-adresse','f-preis','f-preisDetail'].forEach(id=>setVal(id,'')); break;
-    case 5: photos=[]; grundrisse=[]; renderPhotoGrid(); renderGrundrissGrid(); localStorage.removeItem('expogen_std_photos'); localStorage.removeItem('expogen_std_grundrisse'); break;
+    case 5: photos=[]; grundrisse=[]; renderPhotoGrid(); renderGrundrissGrid(); PhotoDB.save('current', [], []); break;
     case 6: ['baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','energiestandard','heizung','heizungsart','energieausweis','energieklasse','energiekennwert','energieausweisTyp','kaeuferp','weitereKosten'].forEach(k=>{setVal('f-'+k,''); delete data[k];}); document.querySelectorAll('.stellplatz-typ').forEach(cb=>cb.checked=false); setVal('f-stellplaetze-anz',''); setVal('f-stellplaetze-kosten',''); data.stellplaetzeTyp=''; data.stellplaetzeAnz=''; data.stellplaetzeKosten=''; break;
     case 7: setVal('f-beschreibung',''); document.getElementById('highlightList').innerHTML=''; data.highlights=[]; initHighlights(); break;
     case 8: setVal('f-lage',''); delete data.lage; break;
@@ -3568,13 +3567,71 @@ async function runAiGenerate() {
   }
 }
 
+// ── Image compression ──
+function compressImage(file) {
+  return new Promise(resolve => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const MAX = 1800;
+      const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL('image/jpeg', 0.82));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+    img.src = url;
+  });
+}
+
+// ── IndexedDB for photos (no size limit) ──
+const PhotoDB = (() => {
+  let _db = null;
+  function open() {
+    return new Promise((res, rej) => {
+      if (_db) { res(_db); return; }
+      const req = indexedDB.open('expogen_photos_v1', 1);
+      req.onupgradeneeded = e => e.target.result.createObjectStore('sets');
+      req.onsuccess = e => { _db = e.target.result; res(_db); };
+      req.onerror = rej;
+    });
+  }
+  async function save(key, ph, gr) {
+    const db = await open();
+    return new Promise((res, rej) => {
+      const tx = db.transaction('sets', 'readwrite');
+      tx.objectStore('sets').put({ photos: ph, grundrisse: gr }, key);
+      tx.oncomplete = res; tx.onerror = rej;
+    });
+  }
+  async function load(key) {
+    const db = await open();
+    return new Promise(res => {
+      const req = db.transaction('sets', 'readonly').objectStore('sets').get(key);
+      req.onsuccess = e => res(e.target.result || null);
+      req.onerror = () => res(null);
+    });
+  }
+  async function remove(key) {
+    const db = await open();
+    return new Promise(res => {
+      const tx = db.transaction('sets', 'readwrite');
+      tx.objectStore('sets').delete(key);
+      tx.oncomplete = res; tx.onerror = res;
+    });
+  }
+  return { save, load, remove };
+})();
+
 // ══════════════════════════════════════════════════════
 // STORAGE
 // ══════════════════════════════════════════════════════
 function saveToStorage() {
   try { localStorage.setItem('expogen_std_data',JSON.stringify(data)); localStorage.setItem('expogen_std_step',current); } catch(e){}
-  try { localStorage.setItem('expogen_std_photos',JSON.stringify(photos)); } catch(e){}
-  saveGrundrisse();
+  PhotoDB.save('current', photos, grundrisse);
   saveCurrentProject();
 }
 
@@ -3607,10 +3664,12 @@ function saveCurrentProject() {
     const now = new Date().toISOString();
     const name = getProjectName();
     const thumb = photos.length > 0 ? photos[0].src : null;
+    const projData = { data: JSON.parse(JSON.stringify(data)) };
     if (currentProjectId) {
       const idx = projects.findIndex(p => p.id === currentProjectId);
       if (idx !== -1) {
-        projects[idx] = { ...projects[idx], name, savedAt: now, data: JSON.parse(JSON.stringify(data)), photos: JSON.parse(JSON.stringify(photos)), grundrisse: JSON.parse(JSON.stringify(grundrisse)), thumb };
+        projects[idx] = { ...projects[idx], name, savedAt: now, ...projData, thumb };
+        PhotoDB.save('project_' + currentProjectId, photos, grundrisse);
       } else {
         currentProjectId = null;
         saveCurrentProject(); return;
@@ -3619,30 +3678,35 @@ function saveCurrentProject() {
       const newId = 'proj_' + Date.now();
       currentProjectId = newId;
       if (projects.length >= MAX_PROJECTS) {
-        projects.sort((a,b) => new Date(a.savedAt) - new Date(b.savedAt));
-        projects.shift();
+        const sorted = [...projects].sort((a,b) => new Date(a.savedAt) - new Date(b.savedAt));
+        const oldest = sorted[0];
+        projects = projects.filter(p => p.id !== oldest.id);
+        PhotoDB.remove('project_' + oldest.id);
       }
-      projects.push({ id: newId, name, savedAt: now, data: JSON.parse(JSON.stringify(data)), photos: JSON.parse(JSON.stringify(photos)), grundrisse: JSON.parse(JSON.stringify(grundrisse)), thumb });
+      projects.push({ id: newId, name, savedAt: now, ...projData, thumb });
+      PhotoDB.save('project_' + newId, photos, grundrisse);
     }
     localStorage.setItem('expogen_std_projects', JSON.stringify(projects));
   } catch(e) {}
 }
 
-function loadProject(id) {
+async function loadProject(id) {
   const projects = getAllProjects();
   const proj = projects.find(p => p.id === id);
   if (!proj) return;
   currentProjectId = proj.id;
   data = proj.data || {};
-  photos = proj.photos || [];
-  grundrisse = proj.grundrisse || [];
   current = 1;
-  try { localStorage.setItem('expogen_std_data', JSON.stringify(data)); localStorage.setItem('expogen_std_step', current); localStorage.setItem('expogen_std_photos', JSON.stringify(photos)); saveGrundrisse(); } catch(e){}
+  const set = await PhotoDB.load('project_' + id);
+  photos = set?.photos || proj.photos || [];
+  grundrisse = set?.grundrisse || proj.grundrisse || [];
+  try { localStorage.setItem('expogen_std_data', JSON.stringify(data)); localStorage.setItem('expogen_std_step', current); } catch(e){}
   document.querySelectorAll('input:not([type=file]),textarea').forEach(el=>el.value='');
   document.querySelectorAll('.groesse-card,.type-card,.color-pair-card').forEach(c=>c.classList.remove('selected'));
   const clearList = (id) => { const el = document.getElementById(id); if (el) el.innerHTML = ''; };
   clearList('highlightList'); clearList('ausstattungList'); clearList('einheitenBody'); clearList('investList');
   renderPhotoGrid();
+  renderGrundrissGrid();
   loadFromStorage();
   if (typeof buildStepper === 'function') buildStepper();
   showStep(current);
@@ -3653,6 +3717,7 @@ function deleteProject(id) {
   let projects = getAllProjects();
   projects = projects.filter(p => p.id !== id);
   localStorage.setItem('expogen_std_projects', JSON.stringify(projects));
+  PhotoDB.remove('project_' + id);
   if (currentProjectId === id) currentProjectId = null;
   renderProjectsModal();
 }
@@ -3706,14 +3771,25 @@ function renderProjectsModal() {
     </div>`;
   }).join('');
 }
-function loadFromStorage() {
+async function loadFromStorage() {
   try {
     const d=localStorage.getItem('expogen_std_data');
     const s=localStorage.getItem('expogen_std_step');
-    const ph=localStorage.getItem('expogen_std_photos');
-    const gr=localStorage.getItem('expogen_std_grundrisse');
-    if(ph){ photos=JSON.parse(ph); renderPhotoGrid(); }
-    if(gr){ grundrisse=JSON.parse(gr); renderGrundrissGrid(); }
+    // Load photos from IndexedDB (primary), fall back to localStorage migration
+    const set = await PhotoDB.load('current');
+    if (set) {
+      photos = set.photos || [];
+      grundrisse = set.grundrisse || [];
+    } else {
+      // Migrate from old localStorage storage
+      const ph=localStorage.getItem('expogen_std_photos');
+      const gr=localStorage.getItem('expogen_std_grundrisse');
+      if(ph) { try { photos=JSON.parse(ph); } catch(e){} localStorage.removeItem('expogen_std_photos'); }
+      if(gr) { try { grundrisse=JSON.parse(gr); } catch(e){} localStorage.removeItem('expogen_std_grundrisse'); }
+      if(photos.length || grundrisse.length) PhotoDB.save('current', photos, grundrisse);
+    }
+    renderPhotoGrid();
+    renderGrundrissGrid();
     if(d) {
       data=JSON.parse(d);
       if(data.size){ const c=document.querySelector(`.groesse-card[data-size="${data.size}"]`); if(c) c.classList.add('selected'); }
@@ -4228,13 +4304,13 @@ function updateStellplatzSummary() {
 // GRUNDRISSE
 // ══════════════════════════════════════════════════════
 
-function handleGrundrissFiles(files) {
-  const arr = Array.from(files).slice(0, 10 - grundrisse.length);
-  arr.forEach(f => {
-    const reader = new FileReader();
-    reader.onload = e => { grundrisse.push({ src: e.target.result, caption: '' }); renderGrundrissGrid(); saveGrundrisse(); };
-    reader.readAsDataURL(f);
-  });
+async function handleGrundrissFiles(files) {
+  const arr = Array.from(files).filter(f => f.type.startsWith('image/')).slice(0, 10 - grundrisse.length);
+  for (const f of arr) {
+    const src = await compressImage(f);
+    if (src) { grundrisse.push({ src, caption: '' }); renderGrundrissGrid(); }
+  }
+  PhotoDB.save('current', photos, grundrisse);
 }
 
 function renderGrundrissGrid() {
@@ -4267,7 +4343,7 @@ function renderGrundrissGrid() {
 function removeGrundriss(idx) { grundrisse.splice(idx, 1); renderGrundrissGrid(); saveGrundrisse(); }
 
 function saveGrundrisse() {
-  try { localStorage.setItem('expogen_std_grundrisse', JSON.stringify(grundrisse)); } catch(e){}
+  PhotoDB.save('current', photos, grundrisse);
 }
 
 // Drop-Zone für Grundrisse
