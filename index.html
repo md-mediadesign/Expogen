@@ -547,6 +547,26 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
 .map-toggle-row input{accent-color:var(--gold);width:16px;height:16px;cursor:pointer}
 #lageMapPreview{z-index:0}
 
+/* ── Grundriss Preview Page ── */
+.expo-gr-grid-1{display:flex;flex-direction:column;gap:1.4rem}
+.expo-gr-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem}
+.expo-gr-item{display:flex;flex-direction:column;gap:.5rem}
+.expo-gr-img-wrap{border:1px solid #e5e7eb;border-radius:4px;overflow:hidden;background:#fafafa;display:flex;align-items:center;justify-content:center;padding:.5rem}
+.expo-gr-img-wrap img{width:100%;max-height:320px;object-fit:contain;display:block}
+.expo-gr-caption{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:#888;text-align:center;padding-top:.2rem}
+
+/* ── Grundriss Upload ── */
+.grundriss-section{margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border)}
+.grundriss-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem}
+.grundriss-section-title{font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:700;font-family:'Roboto',sans-serif}
+.grundriss-count{font-size:.72rem;color:var(--muted)}
+.grundriss-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.8rem;margin-bottom:1rem}
+.grundriss-item{display:flex;flex-direction:column;gap:.3rem}
+.grundriss-thumb{position:relative;border-radius:8px;overflow:hidden;border:1px solid rgba(201,168,76,.15);background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;aspect-ratio:4/3}
+.grundriss-thumb img{width:100%;height:100%;object-fit:contain;display:block;padding:4px}
+.grundriss-thumb .del-gr{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.7);border:none;color:#fff;font-size:.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
+.grundriss-thumb:hover .del-gr{opacity:1}
+
 /* ── Focal Point Picker ── */
 .focal-row{display:flex;align-items:center;gap:.4rem;margin-top:.25rem}
 .focal-label{font-size:.6rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;flex-shrink:0}
@@ -1066,6 +1086,23 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
       <input type="file" id="fileUpload" accept="image/*" multiple style="display:none" onchange="handlePhotoFiles(this.files)">
       <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoFiles(this.files)">
       <div class="photo-grid" id="photoGrid"></div>
+
+      <!-- Grundrisse -->
+      <div class="grundriss-section">
+        <div class="grundriss-section-header">
+          <span class="grundriss-section-title">Grundrisse</span>
+          <span class="grundriss-count" id="grundrissCount">0 Grundrisse</span>
+        </div>
+        <div class="photo-upload-area" id="grundrissDropZone" style="padding:1.8rem 2rem">
+          <div class="upload-icon">📐</div>
+          <div class="upload-text">Grundriss-Bilder hier hineinziehen oder auswählen</div>
+          <div class="upload-btns">
+            <button class="btn-photo" onclick="document.getElementById('grundrissInput').click()">📁 Grundrisse auswählen</button>
+          </div>
+        </div>
+        <input type="file" id="grundrissInput" accept="image/*" multiple style="display:none" onchange="handleGrundrissFiles(this.files)">
+        <div class="grundriss-grid" id="grundrissGrid"></div>
+      </div>
     </div>
 
     <!-- Step 6: Objektdaten -->
@@ -1879,6 +1916,7 @@ let currentProjectId = null;
 const MAX_PROJECTS = 5;
 let dragSrcIndex = null;
 let _swapSlotIndex = null;
+let grundrisse = [];
 let confirmCallback = null;
 let aiTargetField = null;
 let aiTargetContext = null;
@@ -3446,7 +3484,7 @@ function openConfirmStep() {
 }
 
 function doResetAll() {
-  localStorage.removeItem('expogen_std_data'); localStorage.removeItem('expogen_std_step'); localStorage.removeItem('expogen_std_photos');
+  localStorage.removeItem('expogen_std_data'); localStorage.removeItem('expogen_std_step'); localStorage.removeItem('expogen_std_photos'); localStorage.removeItem('expogen_std_grundrisse'); grundrisse = []; renderGrundrissGrid();
   currentProjectId = null;
   data={}; photos=[]; current=1;
   document.querySelectorAll('input:not([type=file]),textarea').forEach(el=>el.value='');
@@ -3471,7 +3509,7 @@ function resetCurrentStep() {
     case 2: delete data.type; document.querySelectorAll('.type-card').forEach(c=>c.classList.remove('selected')); buildStepper(); break;
     case 3: setVal('f-brandFirma',''); data.brandFirma=''; data.brandLogoSrc=null; document.getElementById('logoPreviewImg').style.display='none'; document.getElementById('logoPlaceholder').style.display=''; break;
     case 4: ['f-titel','f-untertitel','f-adresse','f-preis','f-preisDetail'].forEach(id=>setVal(id,'')); break;
-    case 5: photos=[]; renderPhotoGrid(); localStorage.removeItem('expogen_std_photos'); break;
+    case 5: photos=[]; grundrisse=[]; renderPhotoGrid(); renderGrundrissGrid(); localStorage.removeItem('expogen_std_photos'); localStorage.removeItem('expogen_std_grundrisse'); break;
     case 6: ['baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','energiestandard','heizung','heizungsart','energieausweis','energieklasse','energiekennwert','energieausweisTyp','kaeuferp','weitereKosten'].forEach(k=>{setVal('f-'+k,''); delete data[k];}); document.querySelectorAll('.stellplatz-typ').forEach(cb=>cb.checked=false); setVal('f-stellplaetze-anz',''); setVal('f-stellplaetze-kosten',''); data.stellplaetzeTyp=''; data.stellplaetzeAnz=''; data.stellplaetzeKosten=''; break;
     case 7: setVal('f-beschreibung',''); document.getElementById('highlightList').innerHTML=''; data.highlights=[]; initHighlights(); break;
     case 8: setVal('f-lage',''); delete data.lage; break;
@@ -3536,6 +3574,7 @@ async function runAiGenerate() {
 function saveToStorage() {
   try { localStorage.setItem('expogen_std_data',JSON.stringify(data)); localStorage.setItem('expogen_std_step',current); } catch(e){}
   try { localStorage.setItem('expogen_std_photos',JSON.stringify(photos)); } catch(e){}
+  saveGrundrisse();
   saveCurrentProject();
 }
 
@@ -3571,7 +3610,7 @@ function saveCurrentProject() {
     if (currentProjectId) {
       const idx = projects.findIndex(p => p.id === currentProjectId);
       if (idx !== -1) {
-        projects[idx] = { ...projects[idx], name, savedAt: now, data: JSON.parse(JSON.stringify(data)), photos: JSON.parse(JSON.stringify(photos)), thumb };
+        projects[idx] = { ...projects[idx], name, savedAt: now, data: JSON.parse(JSON.stringify(data)), photos: JSON.parse(JSON.stringify(photos)), grundrisse: JSON.parse(JSON.stringify(grundrisse)), thumb };
       } else {
         currentProjectId = null;
         saveCurrentProject(); return;
@@ -3583,7 +3622,7 @@ function saveCurrentProject() {
         projects.sort((a,b) => new Date(a.savedAt) - new Date(b.savedAt));
         projects.shift();
       }
-      projects.push({ id: newId, name, savedAt: now, data: JSON.parse(JSON.stringify(data)), photos: JSON.parse(JSON.stringify(photos)), thumb });
+      projects.push({ id: newId, name, savedAt: now, data: JSON.parse(JSON.stringify(data)), photos: JSON.parse(JSON.stringify(photos)), grundrisse: JSON.parse(JSON.stringify(grundrisse)), thumb });
     }
     localStorage.setItem('expogen_std_projects', JSON.stringify(projects));
   } catch(e) {}
@@ -3596,8 +3635,9 @@ function loadProject(id) {
   currentProjectId = proj.id;
   data = proj.data || {};
   photos = proj.photos || [];
+  grundrisse = proj.grundrisse || [];
   current = 1;
-  try { localStorage.setItem('expogen_std_data', JSON.stringify(data)); localStorage.setItem('expogen_std_step', current); localStorage.setItem('expogen_std_photos', JSON.stringify(photos)); } catch(e){}
+  try { localStorage.setItem('expogen_std_data', JSON.stringify(data)); localStorage.setItem('expogen_std_step', current); localStorage.setItem('expogen_std_photos', JSON.stringify(photos)); saveGrundrisse(); } catch(e){}
   document.querySelectorAll('input:not([type=file]),textarea').forEach(el=>el.value='');
   document.querySelectorAll('.groesse-card,.type-card,.color-pair-card').forEach(c=>c.classList.remove('selected'));
   const clearList = (id) => { const el = document.getElementById(id); if (el) el.innerHTML = ''; };
@@ -3671,7 +3711,9 @@ function loadFromStorage() {
     const d=localStorage.getItem('expogen_std_data');
     const s=localStorage.getItem('expogen_std_step');
     const ph=localStorage.getItem('expogen_std_photos');
+    const gr=localStorage.getItem('expogen_std_grundrisse');
     if(ph){ photos=JSON.parse(ph); renderPhotoGrid(); }
+    if(gr){ grundrisse=JSON.parse(gr); renderGrundrissGrid(); }
     if(d) {
       data=JSON.parse(d);
       if(data.size){ const c=document.querySelector(`.groesse-card[data-size="${data.size}"]`); if(c) c.classList.add('selected'); }
@@ -4181,6 +4223,65 @@ function updateStellplatzSummary() {
   if (!lines.length) { el.textContent = 'Keine Angaben'; return; }
   el.innerHTML = lines.map(l => `<div>${l}</div>`).join('');
 }
+
+// ══════════════════════════════════════════════════════
+// GRUNDRISSE
+// ══════════════════════════════════════════════════════
+
+function handleGrundrissFiles(files) {
+  const arr = Array.from(files).slice(0, 10 - grundrisse.length);
+  arr.forEach(f => {
+    const reader = new FileReader();
+    reader.onload = e => { grundrisse.push({ src: e.target.result, caption: '' }); renderGrundrissGrid(); saveGrundrisse(); };
+    reader.readAsDataURL(f);
+  });
+}
+
+function renderGrundrissGrid() {
+  const grid = document.getElementById('grundrissGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  grundrisse.forEach((gr, i) => {
+    const item = document.createElement('div');
+    item.className = 'grundriss-item';
+    const thumb = document.createElement('div');
+    thumb.className = 'grundriss-thumb';
+    thumb.innerHTML = `<img src="${gr.src}" alt="Grundriss ${i + 1}">
+      <button class="del-gr" onclick="removeGrundriss(${i})">×</button>`;
+    const cap = document.createElement('input');
+    cap.className = 'photo-caption-input';
+    cap.placeholder = 'Bezeichnung (z. B. Erdgeschoss)';
+    cap.value = gr.caption || '';
+    cap.oninput = () => { grundrisse[i].caption = cap.value; saveGrundrisse(); if (document.getElementById('preview-output')?.children.length) buildPreview(); };
+    item.appendChild(thumb);
+    item.appendChild(cap);
+    grid.appendChild(item);
+  });
+  const countEl = document.getElementById('grundrissCount');
+  if (countEl) countEl.textContent = `${grundrisse.length} Grundriss${grundrisse.length !== 1 ? 'e' : ''}`;
+  const dropZone = document.getElementById('grundrissDropZone');
+  if (dropZone) dropZone.style.display = grundrisse.length >= 10 ? 'none' : '';
+  if (document.getElementById('preview-output')?.children.length) buildPreview();
+}
+
+function removeGrundriss(idx) { grundrisse.splice(idx, 1); renderGrundrissGrid(); saveGrundrisse(); }
+
+function saveGrundrisse() {
+  try { localStorage.setItem('expogen_std_grundrisse', JSON.stringify(grundrisse)); } catch(e){}
+}
+
+// Drop-Zone für Grundrisse
+(function initGrundrissDropZone() {
+  const ready = () => {
+    const zone = document.getElementById('grundrissDropZone');
+    if (!zone) return;
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+    zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); handleGrundrissFiles(e.dataTransfer.files); });
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready);
+  else ready();
+})();
 
 // ══════════════════════════════════════════════════════
 // FOTO-AUSSCHNITT & BILD-WECHSEL

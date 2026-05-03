@@ -892,6 +892,26 @@ function buildPreviewB() {
     </div>
   </div>`;
 
+  // ── PAGE 3: GRUNDRISSE (wenn vorhanden) ──
+  if (typeof grundrisse !== 'undefined' && grundrisse.length > 0) {
+    const grClass = grundrisse.length === 1 ? 'expo-gr-grid-1' : 'expo-gr-grid-2';
+    out.innerHTML += `
+    <div class="tb-page">
+      ${pageHeader}
+      <div class="tb-page-content" style="padding:2rem 2.8rem">
+        <div style="font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--tb-acc,#1a2744);font-weight:700;margin-bottom:.5rem">GRUNDRISSE</div>
+        <div style="font-family:'Ubuntu',sans-serif;font-size:1.6rem;font-weight:700;color:var(--tb-acc,#1a2744);margin-bottom:1.4rem">Grundriss &amp; Raumaufteilung</div>
+        <div class="${grClass}">
+          ${grundrisse.map(gr => `
+          <div class="expo-gr-item">
+            <div class="expo-gr-img-wrap"><img src="${gr.src}" alt="Grundriss"></div>
+            ${gr.caption ? `<div class="expo-gr-caption">${esc(gr.caption)}</div>` : ''}
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  }
+
   // ── PAGE 3: BESCHREIBUNG ───────────────────────────────
   const hlHtml = d.highlights?.length
     ? `<ul class="tb-hl-list">${d.highlights.map(h => `<li>${esc(h)}</li>`).join('')}</ul>` : '';

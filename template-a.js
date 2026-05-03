@@ -107,6 +107,26 @@ function buildPreviewA() {
     </div>
   </div>`;
 
+  // ── PAGE 3: GRUNDRISSE (wenn vorhanden) ──
+  if (typeof grundrisse !== 'undefined' && grundrisse.length > 0) {
+    const grClass = grundrisse.length === 1 ? 'expo-gr-grid-1' : 'expo-gr-grid-2';
+    out.innerHTML += `
+    <div class="expo-page expo-inner">
+      ${pageHeader}
+      <div class="expo-page-content">
+        <div class="expo-page-badge">GRUNDRISSE</div>
+        <div class="expo-page-title">Grundriss &amp; Raumaufteilung</div>
+        <div class="${grClass}">
+          ${grundrisse.map(gr => `
+          <div class="expo-gr-item">
+            <div class="expo-gr-img-wrap"><img src="${gr.src}" alt="Grundriss"></div>
+            ${gr.caption ? `<div class="expo-gr-caption">${escHtml(gr.caption)}</div>` : ''}
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  }
+
   // ── PAGE 3: BESCHREIBUNG ──
   const hlHtml = d.highlights?.length
     ? `<ul class="expo-list">${d.highlights.map(h=>`<li>${escHtml(h)}</li>`).join('')}</ul>` : '';
@@ -179,7 +199,7 @@ function buildPreviewA() {
     </div>`;
   }
 
-  // ── PAGE 7+: FOTOGALERIE (paginiert) ──
+  // ── PAGE 7+: FOTOGALERIE (paginiert, wechselnde Layouts) ──
   const galleryStartA = TEMPLATE_SLOT_MAP?.['A']?.galleryStartIndex ?? 5;
   const galleryPhotosA = photos.slice(galleryStartA);
   if (galleryPhotosA.length > 0) {
@@ -187,21 +207,66 @@ function buildPreviewA() {
     const numPages = Math.ceil(galleryPhotosA.length / perPage);
     for (let pg = 0; pg < numPages; pg++) {
       const pgPhotos = galleryPhotosA.slice(pg * perPage, (pg + 1) * perPage);
-      const first = pgPhotos.slice(0, 3);
-      const rest = pgPhotos.slice(3);
-      const base = galleryStartA + pg * perPage;
+      const layout = pg % 3; // 0=Hero, 1=Triptychon, 2=Editorial
+      const pageTitle = `Fotogalerie${numPages > 1 ? ` (${pg + 1}/${numPages})` : ''}`;
+      const m = '0 2.8rem'; // margin shorthand
+      const imgStyle = (s) => `object-fit:cover;object-position:${fmtPos(s)};display:block;width:100%`;
+
+      let galleryContent = '';
+
+      if (layout === 0) {
+        // ── Hero: 1 breites Bild oben, dann 2-spaltig ──
+        const hero = pgPhotos[0];
+        const rest = pgPhotos.slice(1);
+        const rows2 = [];
+        for (let i = 0; i < rest.length; i += 2) rows2.push(rest.slice(i, i + 2));
+        galleryContent = `
+          <div style="margin:${m}">
+            ${hero ? `<img src="${hero.src}" style="${imgStyle(hero)};aspect-ratio:16/7;margin-bottom:3px" alt="">` : ''}
+            ${rows2.map(row => `<div style="display:flex;gap:3px;margin-bottom:3px">${row.map(s =>
+              `<img src="${s.src}" style="${imgStyle(s)};flex:1;min-width:0;aspect-ratio:${fmtAr(s)}" alt="">`).join('')}</div>`).join('')}
+          </div>`;
+
+      } else if (layout === 1) {
+        // ── Triptychon: 3 gleiche Spalten ──
+        const rows3 = [];
+        for (let i = 0; i < pgPhotos.length; i += 3) rows3.push(pgPhotos.slice(i, i + 3));
+        galleryContent = `
+          <div style="margin:${m};display:flex;flex-direction:column;gap:3px">
+            ${rows3.map(row => `<div style="display:flex;gap:3px">${row.map(s =>
+              `<img src="${s.src}" style="${imgStyle(s)};flex:1;min-width:0;aspect-ratio:4/3" alt="">`).join('')}</div>`).join('')}
+          </div>`;
+
+      } else {
+        // ── Editorial: 1 großes links (60%) + 2 gestapelt rechts, dann 2-spaltig ──
+        const big = pgPhotos[0];
+        const r1 = pgPhotos[1];
+        const r2 = pgPhotos[2];
+        const rest = pgPhotos.slice(3);
+        const rows2 = [];
+        for (let i = 0; i < rest.length; i += 2) rows2.push(rest.slice(i, i + 2));
+        galleryContent = `
+          <div style="margin:${m}">
+            <div style="display:flex;gap:3px;margin-bottom:3px">
+              ${big ? `<img src="${big.src}" style="${imgStyle(big)};flex:1.6;min-width:0;aspect-ratio:4/3" alt="">` : ''}
+              ${(r1 || r2) ? `<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+                ${r1 ? `<img src="${r1.src}" style="${imgStyle(r1)};flex:1;min-height:0" alt="">` : ''}
+                ${r2 ? `<img src="${r2.src}" style="${imgStyle(r2)};flex:1;min-height:0" alt="">` : ''}
+              </div>` : ''}
+            </div>
+            ${rows2.map(row => `<div style="display:flex;gap:3px;margin-bottom:3px">${row.map(s =>
+              `<img src="${s.src}" style="${imgStyle(s)};flex:1;min-width:0;aspect-ratio:${fmtAr(s)}" alt="">`).join('')}</div>`).join('')}
+          </div>`;
+      }
+
       out.innerHTML += `
       <div class="expo-page expo-inner" style="padding:0">
         ${pageHeader}
         <div style="padding:0 2.8rem 0">
           <div class="expo-page-badge" style="padding-top:1.5rem">IMPRESSIONEN</div>
-          <div class="expo-page-title">Fotogalerie${numPages > 1 ? ` (${pg + 1}/${numPages})` : ''}</div>
+          <div class="expo-page-title">${pageTitle}</div>
         </div>
-        <div class="expo-photo-grid" style="margin:0 2.8rem">
-          ${first.length > 0 ? `<img src="${first[0].src}" style="aspect-ratio:${fmtAr(first[0])};object-fit:cover;object-position:${fmtPos(first[0])}" alt="">` : ''}
-        </div>
-        ${first.length > 1 ? `<div class="expo-photo-grid-2col" style="margin:3px 2.8rem 0">${first.slice(1).map(s => `<img src="${s.src}" style="aspect-ratio:${fmtAr(s)};object-fit:cover;object-position:${fmtPos(s)}" alt="">`).join('')}</div>` : ''}
-        ${rest.length ? `<div class="expo-photo-grid-2col" style="margin:3px 2.8rem 0">${rest.map(s => `<img src="${s.src}" style="aspect-ratio:${fmtAr(s)};object-fit:cover;object-position:${fmtPos(s)}" alt="">`).join('')}</div>` : ''}
+        ${galleryContent}
         <div style="height:2rem"></div>
       </div>`;
     }

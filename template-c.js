@@ -624,6 +624,24 @@ function buildPreviewC() {
     </div>
   </div>`;
 
+  // ── PAGE 3: GRUNDRISSE (wenn vorhanden) ──
+  if (typeof grundrisse !== 'undefined' && grundrisse.length > 0) {
+    const grClass = grundrisse.length === 1 ? 'expo-gr-grid-1' : 'expo-gr-grid-2';
+    out.innerHTML += `
+    <div class="tc-page tc-inner">
+      ${pageHdr(3)}
+      <h2 class="tc-section-title">Grundriss</h2>
+      <hr class="tc-hr">
+      <div class="${grClass}">
+        ${grundrisse.map(gr => `
+        <div class="expo-gr-item">
+          <div class="expo-gr-img-wrap"><img src="${gr.src}" alt="Grundriss"></div>
+          ${gr.caption ? `<div class="expo-gr-caption">${esc(gr.caption)}</div>` : ''}
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }
+
   // ── PAGE 3: BESCHREIBUNG ───────────────────────────
   if (d.beschreibung && isStepEnabled(7)) {
     const hlHtml = d.highlights?.length
