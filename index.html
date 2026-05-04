@@ -3557,7 +3557,11 @@ async function runAiGenerate() {
   try {
     const { raw } = await callAiChat(systemPrompt, userMsg);
     const f = document.getElementById(aiTargetField);
-    if (f) f.value = raw.trim();
+    if (f) {
+      f.value = raw.trim();
+      collectStep(current);
+      saveToStorage();
+    }
     closeAiModal();
   } catch (err) {
     alert('KI-Generierung fehlgeschlagen: ' + err.message + '\n\nBitte Internetverbindung prüfen.');
@@ -3636,7 +3640,7 @@ function saveToStorage() {
 }
 
 function manualSave() {
-  if (typeof collectStep === 'function') collectStep(current);
+  collectAllSteps();
   saveToStorage();
   const btn = document.getElementById('btnSave');
   if (!btn) return;
@@ -3658,7 +3662,12 @@ function getProjectName() {
   return 'Exposé ' + new Date().toLocaleDateString('de-DE');
 }
 
+function collectAllSteps() {
+  [3,4,5,6,7,8,9,10,11,12,13,14].forEach(id => collectStep(id));
+}
+
 function saveCurrentProject() {
+  collectAllSteps();
   try {
     let projects = getAllProjects();
     const now = new Date().toISOString();
