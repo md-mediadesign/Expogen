@@ -1477,6 +1477,7 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
         <button class="tmpl-btn" id="tmplBtnE" data-format="landscape" style="display:none" onclick="selectTemplate('E')">Template E – Seitenleiste</button>
         <button class="tmpl-btn" id="tmplBtnF" data-format="landscape" style="display:none" onclick="selectTemplate('F')">Template F – Bold</button>
         <button class="tmpl-btn" id="tmplBtnG" data-format="landscape" style="display:none" onclick="selectTemplate('G')">Template G – Magazin</button>
+        <button class="tmpl-btn" id="tmplBtnH" data-format="landscape" style="display:none" onclick="selectTemplate('H')">Template H – Editorial</button>
       </div>
       <div id="preview-output"></div>
       <div class="preview-actions" style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.5rem">
@@ -1832,6 +1833,7 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
 <script src="template-e.js"></script>
 <script src="template-f.js"></script>
 <script src="template-g.js"></script>
+<script src="template-h.js"></script>
 <script src="landingpage-template.js"></script>
 <script>
 // ══════════════════════════════════════════════════════
@@ -1904,6 +1906,7 @@ const TEMPLATE_SLOT_MAP = {
   E: { slots: ['Cover'], galleryStartIndex: 1 },
   F: { slots: ['Cover', 'Seite 3 Foto'], galleryStartIndex: 2 },
   G: { slots: ['Cover'], galleryStartIndex: 1 },
+  H: { slots: ['Cover', 'Aerial'], galleryStartIndex: 2 },
 };
 
 // ══════════════════════════════════════════════════════
@@ -3840,7 +3843,7 @@ function selectFormat(fmt) {
   document.querySelectorAll('.tmpl-btn').forEach(b=>{
     b.style.display = (b.dataset.format===fmt||!b.dataset.format) ? '' : 'none';
   });
-  const landscapeTemplates = ['D','E','F','G'];
+  const landscapeTemplates = ['D','E','F','G','H'];
   const portraitTemplates = ['A','B','C'];
   const templates = fmt==='landscape' ? landscapeTemplates : portraitTemplates;
   if (!templates.includes(data.template)) {
@@ -3892,6 +3895,7 @@ function buildPreview() {
   else if (tmpl === 'E' && typeof buildPreviewE === 'function') buildPreviewE();
   else if (tmpl === 'F' && typeof buildPreviewF === 'function') buildPreviewF();
   else if (tmpl === 'G' && typeof buildPreviewG === 'function') buildPreviewG();
+  else if (tmpl === 'H' && typeof buildPreviewH === 'function') buildPreviewH();
   else buildPreviewA();
 }
 
