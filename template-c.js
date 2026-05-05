@@ -675,8 +675,8 @@ function buildPreviewC() {
           <div class="tc-body">${body(d.lage)}</div>
         </div>
         <div class="tc-lage-right">
-          ${(data.mapEnabled && data.mapLat)
-            ? buildStaticMapHtml(data.mapLat, data.mapLon, 70)
+          ${hasLageMedia()
+            ? buildLageMediaHtml(70)
             : photos.length > 3
               ? previewImgWrap(photos[3], 3, 'width:100%;height:100%', 'border-radius:4px')
               : `<div class="tc-lage-photo-placeholder"></div>`}

@@ -947,8 +947,8 @@ function buildPreviewB() {
         <div class="tb-lage-hl3">INMITTEN URBANER LEBENDIGKEIT</div>
       </div>
       <div class="tb-lage-body">${esc(d.lage)}</div>
-      ${(data.mapEnabled && data.mapLat) ? `
-      <div style="margin-top:.8rem">${buildStaticMapHtml(data.mapLat, data.mapLon, 58)}</div>` : (lp1 || lp2) ? `
+      ${hasLageMedia() ? `
+      <div style="margin-top:.8rem">${buildLageMediaHtml(58)}</div>` : (lp1 || lp2) ? `
       <div class="tb-lage-photos">
         ${photos.length > 2 ? `<div class="tb-lage-photo1">${previewImgWrap(photos[2], 2, 'width:100%;height:100%', '')}</div>` : ''}
         ${photos.length > 3 ? `<div class="tb-lage-photo2">${previewImgWrap(photos[3], 3, 'width:100%;height:100%', '')}</div>` : ''}

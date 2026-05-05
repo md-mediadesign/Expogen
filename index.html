@@ -1167,7 +1167,20 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
       </label>
       <div id="lageMapWrap" style="display:none">
         <div id="lageMapPreview" style="height:220px;border-radius:8px;margin-top:.7rem;border:1px solid rgba(201,168,76,.2);overflow:hidden"></div>
-        <button class="btn-add" onclick="geocodeAdresse()" style="margin-top:.6rem">Adresse auf Karte suchen</button>
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.6rem">
+          <button class="btn-add" onclick="geocodeAdresse()">Adresse auf Karte suchen</button>
+        </div>
+        <div id="lageMapStatus" style="font-size:.8rem;color:var(--muted);margin-top:.5rem;display:none"></div>
+
+        <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(201,168,76,.15)">
+          <div style="font-size:.85rem;color:var(--muted);margin-bottom:.5rem">Alternativ: eigenes Lageplan-Bild verwenden</div>
+          <input type="file" id="f-mapImage" accept="image/*" onchange="handleMapImageUpload(this)" style="display:none">
+          <button class="btn-add" onclick="document.getElementById('f-mapImage').click()">Bild hochladen</button>
+          <div id="mapImagePreviewWrap" style="display:none;margin-top:.6rem">
+            <img id="mapImagePreviewImg" style="width:100%;max-height:220px;object-fit:contain;border-radius:6px;background:#f5f5f5;display:block">
+            <button class="btn-add" onclick="removeMapImage()" style="margin-top:.5rem;background:transparent;border:1px solid rgba(255,255,255,.18);color:var(--muted)">Bild entfernen</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -2725,9 +2738,18 @@ function onMapToggle() {
 
 async function geocodeAdresse() {
   const addr = data.adresse || val('f-adresse');
-  if (!addr) return;
+  const status = document.getElementById('lageMapStatus');
+  const setStatus = (msg, isError) => {
+    if (!status) return;
+    if (!msg) { status.style.display = 'none'; status.innerHTML = ''; return; }
+    status.style.display = '';
+    status.style.color = isError ? '#e07a2f' : 'var(--muted)';
+    status.innerHTML = msg;
+  };
+  if (!addr) { setStatus('Bitte zuerst eine Adresse in Schritt 1 eintragen.', true); return; }
   const btn = document.querySelector('#lageMapWrap .btn-add');
   if (btn) { btn.disabled = true; btn.textContent = 'Suche …'; }
+  setStatus('');
   try {
     const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(addr)}&format=json&limit=1`;
     const res = await fetch(url, { headers: { 'Accept-Language': 'de' } });
@@ -2737,9 +2759,64 @@ async function geocodeAdresse() {
       data.mapLon = parseFloat(json[0].lon);
       saveToStorage();
       initLageFormMap();
+      setStatus('');
+    } else {
+      setStatus('Adresse nicht gefunden. Sie können stattdessen ein eigenes Lageplan-Bild hochladen.', true);
     }
-  } catch(e) {}
+  } catch(e) {
+    setStatus('Suche fehlgeschlagen (Verbindung). Sie können stattdessen ein eigenes Lageplan-Bild hochladen.', true);
+  }
   if (btn) { btn.disabled = false; btn.textContent = 'Adresse auf Karte suchen'; }
+}
+
+async function handleMapImageUpload(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const src = await compressImage(file);
+  if (!src) return;
+  data.mapImageSrc = src;
+  saveToStorage();
+  renderMapImagePreview();
+  if (document.getElementById('preview-output')?.children.length) buildPreview();
+}
+
+function removeMapImage() {
+  data.mapImageSrc = null;
+  const inp = document.getElementById('f-mapImage');
+  if (inp) inp.value = '';
+  saveToStorage();
+  renderMapImagePreview();
+  if (document.getElementById('preview-output')?.children.length) buildPreview();
+}
+
+function renderMapImagePreview() {
+  const wrap = document.getElementById('mapImagePreviewWrap');
+  const img = document.getElementById('mapImagePreviewImg');
+  if (!wrap || !img) return;
+  if (data.mapImageSrc) {
+    img.src = data.mapImageSrc;
+    wrap.style.display = '';
+  } else {
+    wrap.style.display = 'none';
+    img.src = '';
+  }
+}
+
+function buildLageMediaHtml(heightMm, opts) {
+  const wrapStyle = (opts && opts.wrapStyle) || '';
+  if (data.mapImageSrc) {
+    return `<div style="width:100%;height:${heightMm}mm;position:relative;overflow:hidden;border-radius:4px;background:#f5f5f5;${wrapStyle}">
+      <img src="${data.mapImageSrc}" style="width:100%;height:100%;object-fit:cover;display:block" alt="Lageplan">
+    </div>`;
+  }
+  if (data.mapEnabled && data.mapLat && data.mapLon) {
+    return buildStaticMapHtml(data.mapLat, data.mapLon, heightMm);
+  }
+  return '';
+}
+
+function hasLageMedia() {
+  return !!(data.mapImageSrc || (data.mapEnabled && data.mapLat && data.mapLon));
 }
 
 function initLageFormMap() {
@@ -3514,7 +3591,7 @@ function resetCurrentStep() {
     case 5: photos=[]; grundrisse=[]; renderPhotoGrid(); renderGrundrissGrid(); PhotoDB.save('current', [], []); break;
     case 6: ['baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','energiestandard','heizung','heizungsart','energieausweis','energieklasse','energiekennwert','energieausweisTyp','kaeuferp','weitereKosten'].forEach(k=>{setVal('f-'+k,''); delete data[k];}); document.querySelectorAll('.stellplatz-typ').forEach(cb=>cb.checked=false); setVal('f-stellplaetze-anz',''); setVal('f-stellplaetze-kosten',''); data.stellplaetzeTyp=''; data.stellplaetzeAnz=''; data.stellplaetzeKosten=''; break;
     case 7: setVal('f-beschreibung',''); document.getElementById('highlightList').innerHTML=''; data.highlights=[]; initHighlights(); break;
-    case 8: setVal('f-lage',''); delete data.lage; break;
+    case 8: setVal('f-lage',''); delete data.lage; data.mapImageSrc=null; data.mapEnabled=false; data.mapLat=null; data.mapLon=null; const me=document.getElementById('f-mapEnabled'); if(me) me.checked=false; const lw=document.getElementById('lageMapWrap'); if(lw) lw.style.display='none'; renderMapImagePreview(); const ls=document.getElementById('lageMapStatus'); if(ls){ls.style.display='none';ls.innerHTML='';} break;
     case 9: setVal('f-stadtbeschr',''); delete data.stadtbeschr; break;
     case 10: setVal('f-ausstattung',''); document.getElementById('ausstattungList').innerHTML=''; data.ausstattungList=[]; initAusstattungList(); break;
     case 11: document.getElementById('einheitenBody').innerHTML=''; data.einheiten=[]; initEinheiten(); break;
@@ -3816,6 +3893,7 @@ async function loadFromStorage() {
       if(data.einheiten?.length){ document.getElementById('einheitenBody').innerHTML=''; data.einheiten.forEach(e=>addEinheit(e.typ,e.anzahl,e.flaeche,e.preis,e.besonderheit)); }
       if(data.brandLogoSrc){ const img=document.getElementById('logoPreviewImg'); img.src=data.brandLogoSrc; img.style.display='block'; document.getElementById('logoPlaceholder').style.display='none'; }
       if(data.mapEnabled){ const cb=document.getElementById('f-mapEnabled'); if(cb){ cb.checked=true; document.getElementById('lageMapWrap').style.display=''; } }
+      if(data.mapImageSrc){ const cb=document.getElementById('f-mapEnabled'); if(cb){ cb.checked=true; data.mapEnabled=true; document.getElementById('lageMapWrap').style.display=''; } renderMapImagePreview(); }
       [['360','extras360Enabled'],['YT','extrasYTEnabled'],['Sonstiges','extrasSonstigesEnabled'],['Agb','extrasAgbEnabled']].forEach(([k,dk])=>{ if(data[dk]){ const cb=document.getElementById('toggle-'+k); if(cb){ cb.checked=true; const b=document.getElementById('extrasBody'+k); if(b) b.style.display=''; const bl=document.getElementById('extrasBlock'+k); if(bl) bl.classList.add('active'); if(k==='360'&&data.link360) updateQr('360'); if(k==='YT'&&data.linkYT) updateQr('YT'); } } });
       if(data.photosPerPage) { setVal('f-photosPerPage', data.photosPerPage); syncPppDisplay(); }
       if(!data.kaeuferp){ const def=localStorage.getItem('expogen_std_default_provision'); if(def){ setVal('f-kaeuferp',def); data.kaeuferp=def; } }

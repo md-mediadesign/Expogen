@@ -69,14 +69,6 @@ function buildPreviewH() {
   // Kurzversion adresse → Stadt/Region
   const subline = d.adresse || '';
 
-  // Pills aus Eckdaten
-  const pillData = [
-    d.gesamtflaeche || d.wohnflaeche,
-    d.baujahr ? `Baujahr ${d.baujahr}` : null,
-    d.zimmer ? `${d.zimmer} Zimmer` : null,
-    d.type,
-  ].filter(Boolean);
-
   // ── PAGE 1: COVER ────────────────────────────────────
   out.innerHTML += `
   <div class="tl-page h-page" style="background:${T.warm};display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden">
@@ -98,8 +90,7 @@ function buildPreviewH() {
     <div style="position:relative;padding:0 32px 60px;width:64%;z-index:2">
       <div class="h-stag dark"><span>${esc((d.eyebrow||'Premium-Immobilie'))}</span></div>
       <h1 class="h-serif" style="font-size:62px;font-weight:400;line-height:.98;color:${T.parch};margin-bottom:10px;letter-spacing:-.005em">${esc(d.titel||'Objekt')}</h1>
-      ${subline ? `<p style="font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:rgba(242,236,224,.55);margin-bottom:24px">${esc(subline)}</p>` : ''}
-      ${pillData.length ? `<div style="display:flex;gap:8px;flex-wrap:wrap">${pillData.map(p=>`<div class="h-pill">${esc(p)}</div>`).join('')}</div>` : ''}
+      ${subline ? `<p style="font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:rgba(242,236,224,.55)">${esc(subline)}</p>` : ''}
     </div>
 
     <!-- Right: Preis-Anker -->
@@ -294,7 +285,13 @@ function buildPreviewH() {
             : 'Wir vereinbaren gerne einen individuellen Termin vor Ort. Kontaktieren Sie uns telefonisch oder per E-Mail.'}
         </p>
         ${has360
-          ? `<a href="${esc(d.link360)}" target="_blank" style="display:inline-flex;align-items:center;gap:9px;padding:10px 20px;border:1px solid ${sec};color:${sec};font-size:8.5px;letter-spacing:.32em;text-transform:uppercase;text-decoration:none;align-self:flex-start">Zum Rundgang →</a>`
+          ? `<div style="margin-top:auto;display:flex;align-items:center;gap:12px">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(d.link360)}" style="width:74px;height:74px;background:#fff;padding:4px;flex-shrink:0;display:block" alt="QR-Code 360°">
+              <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+                <div style="font-size:7px;letter-spacing:.3em;text-transform:uppercase;color:rgba(242,236,224,.5);line-height:1.5">QR scannen<br>& Tour starten</div>
+                <a href="${esc(d.link360)}" target="_blank" style="font-size:7.5px;letter-spacing:.32em;text-transform:uppercase;color:${sec};text-decoration:none;border-bottom:1px solid ${sec}66;padding-bottom:2px;align-self:flex-start">Zum Rundgang →</a>
+              </div>
+            </div>`
           : (d.tel ? `<div style="font-family:'Playfair Display',serif;font-size:14px;color:${T.parch};margin-top:auto">${esc(d.tel)}</div>` : '')
         }
       </div>
@@ -338,8 +335,8 @@ function buildPreviewH() {
         ${d.adresse
           ? `<div class="h-dist-row"><span class="h-dist-k">Adresse</span><span class="h-dist-v">${esc(d.adresse)}</span></div>`
           : ''}
-        ${(typeof data!=='undefined' && data.mapEnabled && data.mapLat)
-          ? `<div style="margin-top:14px">${typeof buildStaticMapHtml==='function' ? buildStaticMapHtml(data.mapLat, data.mapLon, 75) : ''}</div>`
+        ${(typeof hasLageMedia==='function' && hasLageMedia())
+          ? `<div style="margin-top:14px">${buildLageMediaHtml(75)}</div>`
           : ''}
       </div>
     </div>`;
