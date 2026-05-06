@@ -174,37 +174,69 @@ function buildPreviewH() {
         : `<div style="background:${T.linen};${gridArea}"></div>`;
 
       const wrap = (gridStyle, slots) => `<div class="tl-page h-page" style="background:${T.linen};display:grid;${gridStyle};gap:3px">${slots}</div>`;
-      let pageHtml = '';
+      const auto = () => set.map((p, i) => gimg(p, i, '')).join('');
+      let variants = [];
       if (perPage === 1) {
-        pageHtml = wrap('grid-template-columns:1fr;grid-template-rows:1fr', gimg(set[0], 0, ''));
+        variants = [() => wrap('grid-template-columns:1fr;grid-template-rows:1fr', auto())];
       } else if (perPage === 2) {
-        pageHtml = wrap('grid-template-columns:1fr 1fr;grid-template-rows:1fr',
-          gimg(set[0], 0, '') + gimg(set[1], 1, ''));
+        variants = [
+          () => wrap('grid-template-columns:1fr 1fr;grid-template-rows:1fr', auto()),
+          () => wrap('grid-template-columns:1fr;grid-template-rows:1fr 1fr', auto()),
+        ];
       } else if (perPage === 3) {
-        pageHtml = wrap('grid-template-columns:1.5fr 1fr;grid-template-rows:1fr 1fr',
-          gimg(set[0], 0, 'grid-column:1/2;grid-row:1/3') +
-          gimg(set[1], 1, '') + gimg(set[2], 2, ''));
+        variants = [
+          // tall left + 2 stacked right
+          () => wrap('grid-template-columns:1.5fr 1fr;grid-template-rows:1fr 1fr',
+            gimg(set[0],0,'grid-column:1/2;grid-row:1/3') + gimg(set[1],1,'') + gimg(set[2],2,'')),
+          // 2 stacked left + tall right
+          () => wrap('grid-template-columns:1fr 1.5fr;grid-template-rows:1fr 1fr',
+            gimg(set[0],0,'') + gimg(set[1],1,'') + gimg(set[2],2,'grid-column:2/3;grid-row:1/3')),
+          // wide top + 2 below
+          () => wrap('grid-template-columns:1fr 1fr;grid-template-rows:1.3fr 1fr',
+            gimg(set[0],0,'grid-column:1/3') + gimg(set[1],1,'') + gimg(set[2],2,'')),
+        ];
       } else if (perPage === 4) {
-        pageHtml = wrap('grid-template-columns:1.5fr 1fr;grid-template-rows:1fr 1fr 1fr',
-          gimg(set[0], 0, 'grid-column:1/2;grid-row:1/4') +
-          gimg(set[1], 1, '') + gimg(set[2], 2, '') + gimg(set[3], 3, ''));
+        variants = [
+          // tall left + 3 stacked right
+          () => wrap('grid-template-columns:1.5fr 1fr;grid-template-rows:1fr 1fr 1fr',
+            gimg(set[0],0,'grid-column:1/2;grid-row:1/4') + gimg(set[1],1,'') + gimg(set[2],2,'') + gimg(set[3],3,'')),
+          // 2x2 uniform
+          () => wrap('grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr', auto()),
+          // 3 stacked left + tall right
+          () => wrap('grid-template-columns:1fr 1.5fr;grid-template-rows:1fr 1fr 1fr',
+            gimg(set[0],0,'') + gimg(set[1],1,'') + gimg(set[2],2,'') + gimg(set[3],3,'grid-column:2/3;grid-row:1/4')),
+        ];
       } else if (perPage === 5) {
-        pageHtml = wrap('grid-template-columns:1.5fr 1fr 1fr;grid-template-rows:1fr 1fr',
-          gimg(set[0], 0, 'grid-column:1/2;grid-row:1/3') +
-          gimg(set[1], 1, '') + gimg(set[2], 2, '') +
-          gimg(set[3], 3, '') + gimg(set[4], 4, ''));
+        variants = [
+          // tall left + 2x2 right
+          () => wrap('grid-template-columns:1.5fr 1fr 1fr;grid-template-rows:1fr 1fr',
+            gimg(set[0],0,'grid-column:1/2;grid-row:1/3') + gimg(set[1],1,'') + gimg(set[2],2,'') + gimg(set[3],3,'') + gimg(set[4],4,'')),
+          // wide top + 4 below
+          () => wrap('grid-template-columns:1fr 1fr 1fr 1fr;grid-template-rows:1.3fr 1fr',
+            gimg(set[0],0,'grid-column:1/5') + gimg(set[1],1,'') + gimg(set[2],2,'') + gimg(set[3],3,'') + gimg(set[4],4,'')),
+          // 2x2 left + tall right
+          () => wrap('grid-template-columns:1fr 1fr 1.5fr;grid-template-rows:1fr 1fr',
+            gimg(set[0],0,'') + gimg(set[1],1,'') + gimg(set[2],2,'') + gimg(set[3],3,'') + gimg(set[4],4,'grid-column:3/4;grid-row:1/3')),
+        ];
       } else if (perPage === 6) {
-        pageHtml = wrap('grid-template-columns:1.5fr 1fr 1fr 1fr;grid-template-rows:1fr 1fr',
-          gimg(set[0], 0, 'grid-column:1/2;grid-row:1/3') +
-          gimg(set[1], 1, '') + gimg(set[2], 2, '') + gimg(set[3], 3, '') +
-          gimg(set[4], 4, 'grid-column:2/4') + gimg(set[5], 5, ''));
+        variants = [
+          // tall left + 4 small + wide bottom (Editorial-Default)
+          () => wrap('grid-template-columns:1.5fr 1fr 1fr 1fr;grid-template-rows:1fr 1fr',
+            gimg(set[0],0,'grid-column:1/2;grid-row:1/3') + gimg(set[1],1,'') + gimg(set[2],2,'') + gimg(set[3],3,'') +
+            gimg(set[4],4,'grid-column:2/4') + gimg(set[5],5,'')),
+          // wide top + 4 small + tall right
+          () => wrap('grid-template-columns:1fr 1fr 1fr 1.5fr;grid-template-rows:1fr 1fr',
+            gimg(set[0],0,'grid-column:1/3') + gimg(set[1],1,'') + gimg(set[2],2,'') + gimg(set[3],3,'') + gimg(set[4],4,'') +
+            gimg(set[5],5,'grid-column:4/5;grid-row:1/3')),
+          // 3x2 uniform
+          () => wrap('grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr', auto()),
+        ];
       } else {
         const cols = perPage >= 12 ? 4 : 3;
         const rows = Math.ceil(perPage / cols);
-        const slots = Array.from({length: perPage}, (_, idx) => gimg(set[idx], idx, '')).join('');
-        pageHtml = wrap(`grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr)`, slots);
+        variants = [() => wrap(`grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr)`, auto())];
       }
-      out.innerHTML += pageHtml;
+      out.innerHTML += variants[pg % variants.length]();
     }
   }
 
@@ -375,8 +407,7 @@ function buildPreviewH() {
 
     <!-- Preis-Block -->
     <div style="position:relative;z-index:1">
-      <div class="h-stag"><span>Investment</span></div>
-      <p style="font-size:8.5px;letter-spacing:.46em;text-transform:uppercase;color:${T.tSoft};margin-bottom:10px">Kaufpreis</p>
+      <div class="h-stag"><span>Kaufpreis</span></div>
       <div class="h-serif" style="font-size:48px;font-weight:400;color:${T.soil};line-height:1;margin-bottom:8px">
         ${esc(d.preis || 'Auf Anfrage')}
       </div>
