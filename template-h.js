@@ -184,8 +184,10 @@ function buildPreviewH() {
           // 2 above + wide bottom
           () => wrap('grid-template-columns:1fr 1fr;grid-template-rows:1fr 1.3fr',
             gimg(set[0],0,'') + gimg(set[1],1,'') + gimg(set[2],2,'grid-column:1/3')),
-          // 3 horizontale Streifen (alle Querformat)
-          () => wrap('grid-template-columns:1fr;grid-template-rows:1fr 1fr 1fr', auto()),
+          // asymmetrisch: wide hero oben + 60/40 split unten
+          () => wrap('grid-template-columns:1.5fr 1fr;grid-template-rows:1.4fr 1fr',
+            gimg(set[0],0,'grid-column:1/3;grid-row:1') +
+            gimg(set[1],1,'grid-column:1;grid-row:2') + gimg(set[2],2,'grid-column:2;grid-row:2')),
         ];
       } else if (perPage === 4) {
         variants = [
@@ -197,8 +199,10 @@ function buildPreviewH() {
           // 3 above + wide bottom band
           () => wrap('grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1.3fr',
             gimg(set[0],0,'') + gimg(set[1],1,'') + gimg(set[2],2,'') + gimg(set[3],3,'grid-column:1/4')),
-          // 4 horizontale Streifen (Magazin-Reihen)
-          () => wrap('grid-template-columns:1fr;grid-template-rows:1fr 1fr 1fr 1fr', auto()),
+          // Z-Pattern: wide oben links + small rechts, small unten links + wide rechts
+          () => wrap('grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr',
+            gimg(set[0],0,'grid-column:1/3;grid-row:1') + gimg(set[1],1,'grid-column:3;grid-row:1') +
+            gimg(set[2],2,'grid-column:1;grid-row:2') + gimg(set[3],3,'grid-column:2/4;grid-row:2')),
         ];
       } else if (perPage === 5) {
         variants = [
@@ -232,7 +236,7 @@ function buildPreviewH() {
             gimg(set[3],3,'grid-column:1;grid-row:3') + gimg(set[4],4,'grid-column:2;grid-row:3') + gimg(set[5],5,'grid-column:3;grid-row:3')),
           // 3x2 mit oberer Reihe höher (Querformat-Zellen)
           () => wrap('grid-template-columns:1fr 1fr 1fr;grid-template-rows:1.2fr 1fr', auto()),
-          // 2x3 stapel-Streifen (alle Zellen breit-Querformat)
+          // 2x3 (alle Zellen breit-Querformat, halbe Seitenbreite)
           () => wrap('grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr 1fr', auto()),
         ];
       } else {
