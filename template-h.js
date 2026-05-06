@@ -170,9 +170,16 @@ function buildPreviewH() {
     const numPages = Math.ceil(galPhotos.length / perPage);
     for (let pg = 0; pg < numPages; pg++) {
       const set = galPhotos.slice(pg * perPage, (pg + 1) * perPage);
-      const gimg = (p, idx, gridArea) => p
-        ? `<div style="position:relative;overflow:hidden;${gridArea}">${previewImgWrap(p, galStart + pg*perPage + idx, 'width:100%;height:100%', 'filter:saturate(.92)')}</div>`
-        : `<div style="background:${T.linen};${gridArea}"></div>`;
+      const gimg = (p, idx, gridArea) => {
+        if (!p) return `<div style="background:${T.linen};${gridArea}"></div>`;
+        const cap = (p.caption || '').trim();
+        const capHtml = cap
+          ? `<div style="position:absolute;left:0;right:0;bottom:0;padding:22px 14px 10px;background:linear-gradient(180deg,rgba(43,31,15,0) 0%,rgba(43,31,15,.78) 100%);pointer-events:none">
+              <div class="h-serif" style="font-size:10px;font-style:italic;color:${T.parch};line-height:1.3;letter-spacing:.01em">»${esc(cap)}«</div>
+            </div>`
+          : '';
+        return `<div style="position:relative;overflow:hidden;${gridArea}">${previewImgWrap(p, galStart + pg*perPage + idx, 'width:100%;height:100%', 'filter:saturate(.92)')}${capHtml}</div>`;
+      };
 
       const wrap = (gridStyle, slots) => `<div class="tl-page h-page" style="background:${T.linen};display:grid;${gridStyle};gap:3px">${slots}</div>`;
       const auto = () => set.map((p, i) => gimg(p, i, '')).join('');
