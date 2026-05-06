@@ -118,8 +118,9 @@ function buildPreviewH() {
   // ── PAGE 2: INTRO + AERIAL ────────────────────────────
   if (d.beschreibung || d.titel) {
     const beschr = (d.beschreibung || '').split('\n').filter(Boolean);
-    const aerialPhoto = photos.find(p => !p.isCover) || photos[1];
-    const aerialIdx = aerialPhoto ? photos.indexOf(aerialPhoto) : 1;
+    // Aerial = Slot 1 (zweites Photo); falls Cover dort liegt, weiche auf Slot 0 aus
+    const aerialIdx = coverSlot === 1 ? 0 : 1;
+    const aerialPhoto = photos[aerialIdx] || null;
     out.innerHTML += `
     <div class="tl-page h-page" style="background:${T.cream};display:grid;grid-template-columns:1fr 1.15fr">
       <!-- Left: Headline + Body + Pull -->
