@@ -138,26 +138,11 @@ function buildPreviewH() {
         </div>` : ''}
       </div>
 
-      <!-- Right: Aerial Photo + Stats Overlay -->
+      <!-- Right: Aerial Photo -->
       <div style="position:relative;overflow:hidden;background:linear-gradient(135deg,${acc},${T.bark})">
         ${aerialPhoto
-          ? `<div style="position:absolute;inset:0">${previewImgWrap(aerialPhoto, aerialIdx, 'width:100%;height:100%', 'filter:saturate(.9) brightness(.85)')}</div>`
+          ? `<div style="position:absolute;inset:0">${previewImgWrap(aerialPhoto, aerialIdx, 'width:100%;height:100%', 'filter:saturate(.92)')}</div>`
           : ''}
-        <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(43,31,15,0) 50%, rgba(43,31,15,.85) 100%)"></div>
-        <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 16px;display:flex;gap:10px;z-index:1;overflow:hidden">
-          ${[
-            [d.gesamtflaeche, 'Gesamtfläche'],
-            [d.wohnflaeche, 'Wohnfläche'],
-            [d.zimmer, 'Zimmer'],
-            [d.baujahr, 'Baujahr'],
-          ].filter(r=>r[0]).slice(0,4).map((r,i,arr) => `
-            <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
-              <span class="h-serif" style="font-size:12px;color:${T.parch};line-height:1;white-space:nowrap">${esc(r[0])}</span>
-              <span style="font-size:5.5px;letter-spacing:.26em;text-transform:uppercase;color:rgba(242,236,224,.65);white-space:nowrap">${r[1]}</span>
-            </div>
-            ${i<arr.length-1?`<div style="width:1px;background:rgba(242,236,224,.18);align-self:stretch;flex-shrink:0"></div>`:''}
-          `).join('')}
-        </div>
       </div>
     </div>`;
   }
