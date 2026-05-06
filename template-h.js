@@ -193,51 +193,62 @@ function buildPreviewH() {
         ];
       } else if (perPage === 3) {
         variants = [
-          // tall left + 2 stacked right
-          () => wrap('grid-template-columns:1.5fr 1fr;grid-template-rows:1fr 1fr',
-            gimg(set[0],0,'grid-column:1/2;grid-row:1/3') + gimg(set[1],1,'') + gimg(set[2],2,'')),
-          // 2 stacked left + tall right
-          () => wrap('grid-template-columns:1fr 1.5fr;grid-template-rows:1fr 1fr',
-            gimg(set[0],0,'') + gimg(set[1],1,'') + gimg(set[2],2,'grid-column:2/3;grid-row:1/3')),
-          // wide top + 2 below
+          // wide top + 2 below (Querformat-Hero)
           () => wrap('grid-template-columns:1fr 1fr;grid-template-rows:1.3fr 1fr',
             gimg(set[0],0,'grid-column:1/3') + gimg(set[1],1,'') + gimg(set[2],2,'')),
+          // 2 above + wide bottom
+          () => wrap('grid-template-columns:1fr 1fr;grid-template-rows:1fr 1.3fr',
+            gimg(set[0],0,'') + gimg(set[1],1,'') + gimg(set[2],2,'grid-column:1/3')),
+          // 3 horizontale Streifen (alle Querformat)
+          () => wrap('grid-template-columns:1fr;grid-template-rows:1fr 1fr 1fr', auto()),
         ];
       } else if (perPage === 4) {
         variants = [
-          // tall left + 3 stacked right
-          () => wrap('grid-template-columns:1.5fr 1fr;grid-template-rows:1fr 1fr 1fr',
-            gimg(set[0],0,'grid-column:1/2;grid-row:1/4') + gimg(set[1],1,'') + gimg(set[2],2,'') + gimg(set[3],3,'')),
-          // 2x2 uniform
+          // 2x2 uniform (Zellen ~1.4:1 → Querformat)
           () => wrap('grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr', auto()),
-          // 3 stacked left + tall right
-          () => wrap('grid-template-columns:1fr 1.5fr;grid-template-rows:1fr 1fr 1fr',
-            gimg(set[0],0,'') + gimg(set[1],1,'') + gimg(set[2],2,'') + gimg(set[3],3,'grid-column:2/3;grid-row:1/4')),
+          // wide hero top + 3 below
+          () => wrap('grid-template-columns:1fr 1fr 1fr;grid-template-rows:1.3fr 1fr',
+            gimg(set[0],0,'grid-column:1/4') + gimg(set[1],1,'') + gimg(set[2],2,'') + gimg(set[3],3,'')),
+          // 3 above + wide bottom band
+          () => wrap('grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1.3fr',
+            gimg(set[0],0,'') + gimg(set[1],1,'') + gimg(set[2],2,'') + gimg(set[3],3,'grid-column:1/4')),
+          // 4 horizontale Streifen (Magazin-Reihen)
+          () => wrap('grid-template-columns:1fr;grid-template-rows:1fr 1fr 1fr 1fr', auto()),
         ];
       } else if (perPage === 5) {
         variants = [
-          // tall left + 2x2 right
-          () => wrap('grid-template-columns:1.5fr 1fr 1fr;grid-template-rows:1fr 1fr',
-            gimg(set[0],0,'grid-column:1/2;grid-row:1/3') + gimg(set[1],1,'') + gimg(set[2],2,'') + gimg(set[3],3,'') + gimg(set[4],4,'')),
-          // wide top + 4 below
-          () => wrap('grid-template-columns:1fr 1fr 1fr 1fr;grid-template-rows:1.3fr 1fr',
-            gimg(set[0],0,'grid-column:1/5') + gimg(set[1],1,'') + gimg(set[2],2,'') + gimg(set[3],3,'') + gimg(set[4],4,'')),
-          // 2x2 left + tall right
-          () => wrap('grid-template-columns:1fr 1fr 1.5fr;grid-template-rows:1fr 1fr',
-            gimg(set[0],0,'') + gimg(set[1],1,'') + gimg(set[2],2,'') + gimg(set[3],3,'') + gimg(set[4],4,'grid-column:3/4;grid-row:1/3')),
+          // wide top + 2x2 below (alle Zellen Querformat)
+          () => wrap('grid-template-columns:1fr 1fr;grid-template-rows:1.3fr 1fr 1fr',
+            gimg(set[0],0,'grid-column:1/3') + gimg(set[1],1,'') + gimg(set[2],2,'') + gimg(set[3],3,'') + gimg(set[4],4,'')),
+          // 2x2 oben + wide unten
+          () => wrap('grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr 1.3fr',
+            gimg(set[0],0,'') + gimg(set[1],1,'') + gimg(set[2],2,'') + gimg(set[3],3,'') + gimg(set[4],4,'grid-column:1/3')),
+          // 1 wide + 1 medium top, 3 below
+          () => wrap('grid-template-columns:1fr 1fr 1fr;grid-template-rows:1.2fr 1fr',
+            gimg(set[0],0,'grid-column:1/3;grid-row:1') + gimg(set[1],1,'grid-column:3;grid-row:1') +
+            gimg(set[2],2,'') + gimg(set[3],3,'') + gimg(set[4],4,'')),
+          // 3 oben + 1 medium + 1 wide unten (gespiegelt)
+          () => wrap('grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1.2fr',
+            gimg(set[0],0,'') + gimg(set[1],1,'') + gimg(set[2],2,'') +
+            gimg(set[3],3,'grid-column:1;grid-row:2') + gimg(set[4],4,'grid-column:2/4;grid-row:2')),
         ];
       } else if (perPage === 6) {
         variants = [
-          // tall left + 4 small + wide bottom (Editorial-Default)
-          () => wrap('grid-template-columns:1.5fr 1fr 1fr 1fr;grid-template-rows:1fr 1fr',
-            gimg(set[0],0,'grid-column:1/2;grid-row:1/3') + gimg(set[1],1,'') + gimg(set[2],2,'') + gimg(set[3],3,'') +
-            gimg(set[4],4,'grid-column:2/4') + gimg(set[5],5,'')),
-          // wide top + 4 small + tall right
-          () => wrap('grid-template-columns:1fr 1fr 1fr 1.5fr;grid-template-rows:1fr 1fr',
-            gimg(set[0],0,'grid-column:1/3') + gimg(set[1],1,'') + gimg(set[2],2,'') + gimg(set[3],3,'') + gimg(set[4],4,'') +
-            gimg(set[5],5,'grid-column:4/5;grid-row:1/3')),
-          // 3x2 uniform
-          () => wrap('grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr', auto()),
+          // wide hero top + 4 medium + wide band bottom (Editorial)
+          () => wrap('grid-template-columns:1fr 1fr 1fr 1fr;grid-template-rows:1.3fr 1fr 1.3fr',
+            gimg(set[0],0,'grid-column:1/5;grid-row:1') +
+            gimg(set[1],1,'grid-column:1;grid-row:2') + gimg(set[2],2,'grid-column:2;grid-row:2') +
+            gimg(set[3],3,'grid-column:3;grid-row:2') + gimg(set[4],4,'grid-column:4;grid-row:2') +
+            gimg(set[5],5,'grid-column:1/5;grid-row:3')),
+          // großer Hero links + 2 rechts + 3 wide unten
+          () => wrap('grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr',
+            gimg(set[0],0,'grid-column:1/3;grid-row:1/3') +
+            gimg(set[1],1,'grid-column:3;grid-row:1') + gimg(set[2],2,'grid-column:3;grid-row:2') +
+            gimg(set[3],3,'grid-column:1;grid-row:3') + gimg(set[4],4,'grid-column:2;grid-row:3') + gimg(set[5],5,'grid-column:3;grid-row:3')),
+          // 3x2 mit oberer Reihe höher (Querformat-Zellen)
+          () => wrap('grid-template-columns:1fr 1fr 1fr;grid-template-rows:1.2fr 1fr', auto()),
+          // 2x3 stapel-Streifen (alle Zellen breit-Querformat)
+          () => wrap('grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr 1fr', auto()),
         ];
       } else {
         const cols = perPage >= 12 ? 4 : 3;
