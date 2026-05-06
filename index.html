@@ -4020,6 +4020,14 @@ function buildPreview() {
   document.querySelectorAll('.tmpl-btn').forEach(b => b.classList.remove('active'));
   const btn = document.getElementById('tmplBtn'+tmpl);
   if (btn) btn.classList.add('active');
+  const isLandscape = ['D','E','F','G','H'].includes(tmpl);
+  let printStyle = document.getElementById('landscape-print-style');
+  if (isLandscape) {
+    if (!printStyle) { printStyle = document.createElement('style'); printStyle.id='landscape-print-style'; document.head.appendChild(printStyle); }
+    printStyle.textContent = '@media print{@page{size:A4 landscape!important;margin:0}}';
+  } else if (printStyle) {
+    printStyle.remove();
+  }
   if (tmpl === 'B' && typeof buildPreviewB === 'function') buildPreviewB();
   else if (tmpl === 'C' && typeof buildPreviewC === 'function') buildPreviewC();
   else if (tmpl === 'D' && typeof buildPreviewD === 'function') buildPreviewD();
