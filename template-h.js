@@ -161,26 +161,50 @@ function buildPreviewH() {
     </div>`;
   }
 
-  // ── PAGE 3+: GALLERY (Mosaik, paginiert) ──────────────
+  // ── PAGE 3+: GALLERY (paginiert, Layout passt sich der Anzahl an) ──
   const galStart = TEMPLATE_SLOT_MAP?.['H']?.galleryStartIndex ?? 1;
   const galPhotos = photos.slice(galStart);
   if (galPhotos.length > 0) {
-    const perPage = 6;
+    const perPage = Math.max(1, parseInt(d.photosPerPage) || 6);
     const numPages = Math.ceil(galPhotos.length / perPage);
     for (let pg = 0; pg < numPages; pg++) {
       const set = galPhotos.slice(pg * perPage, (pg + 1) * perPage);
       const gimg = (p, idx, gridArea) => p
         ? `<div style="position:relative;overflow:hidden;${gridArea}">${previewImgWrap(p, galStart + pg*perPage + idx, 'width:100%;height:100%', 'filter:saturate(.92)')}</div>`
         : `<div style="background:${T.linen};${gridArea}"></div>`;
-      out.innerHTML += `
-      <div class="tl-page h-page" style="background:${T.linen};display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:3px">
-        ${gimg(set[0], 0, 'grid-column:1/2;grid-row:1/3')}
-        ${gimg(set[1], 1, '')}
-        ${gimg(set[2], 2, '')}
-        ${gimg(set[3], 3, '')}
-        ${gimg(set[4], 4, 'grid-column:2/4')}
-        ${gimg(set[5], 5, '')}
-      </div>`;
+
+      const wrap = (gridStyle, slots) => `<div class="tl-page h-page" style="background:${T.linen};display:grid;${gridStyle};gap:3px">${slots}</div>`;
+      let pageHtml = '';
+      if (perPage === 1) {
+        pageHtml = wrap('grid-template-columns:1fr;grid-template-rows:1fr', gimg(set[0], 0, ''));
+      } else if (perPage === 2) {
+        pageHtml = wrap('grid-template-columns:1fr 1fr;grid-template-rows:1fr',
+          gimg(set[0], 0, '') + gimg(set[1], 1, ''));
+      } else if (perPage === 3) {
+        pageHtml = wrap('grid-template-columns:1.5fr 1fr;grid-template-rows:1fr 1fr',
+          gimg(set[0], 0, 'grid-column:1/2;grid-row:1/3') +
+          gimg(set[1], 1, '') + gimg(set[2], 2, ''));
+      } else if (perPage === 4) {
+        pageHtml = wrap('grid-template-columns:1.5fr 1fr;grid-template-rows:1fr 1fr 1fr',
+          gimg(set[0], 0, 'grid-column:1/2;grid-row:1/4') +
+          gimg(set[1], 1, '') + gimg(set[2], 2, '') + gimg(set[3], 3, ''));
+      } else if (perPage === 5) {
+        pageHtml = wrap('grid-template-columns:1.5fr 1fr 1fr;grid-template-rows:1fr 1fr',
+          gimg(set[0], 0, 'grid-column:1/2;grid-row:1/3') +
+          gimg(set[1], 1, '') + gimg(set[2], 2, '') +
+          gimg(set[3], 3, '') + gimg(set[4], 4, ''));
+      } else if (perPage === 6) {
+        pageHtml = wrap('grid-template-columns:1.5fr 1fr 1fr 1fr;grid-template-rows:1fr 1fr',
+          gimg(set[0], 0, 'grid-column:1/2;grid-row:1/3') +
+          gimg(set[1], 1, '') + gimg(set[2], 2, '') + gimg(set[3], 3, '') +
+          gimg(set[4], 4, 'grid-column:2/4') + gimg(set[5], 5, ''));
+      } else {
+        const cols = perPage >= 12 ? 4 : 3;
+        const rows = Math.ceil(perPage / cols);
+        const slots = Array.from({length: perPage}, (_, idx) => gimg(set[idx], idx, '')).join('');
+        pageHtml = wrap(`grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr)`, slots);
+      }
+      out.innerHTML += pageHtml;
     }
   }
 

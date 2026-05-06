@@ -3383,6 +3383,7 @@ function adjustPhotosPerPage(delta) {
   saveToStorage();
   updateSlotLegend();
   renderPhotoGrid();
+  if (document.getElementById('preview-output')?.children.length) buildPreview();
 }
 
 function onPhotosPerPageChange() {
@@ -3395,6 +3396,7 @@ function onPhotosPerPageChange() {
   saveToStorage();
   updateSlotLegend();
   renderPhotoGrid();
+  if (document.getElementById('preview-output')?.children.length) buildPreview();
 }
 
 function syncPppDisplay() {
