@@ -115,14 +115,35 @@ function buildPreviewH() {
     </div>
   </div>`;
 
-  // ── PAGE 2: AERIAL (full-bleed, ohne Texte) ───────────
-  // Aerial = Slot 1 (zweites Photo); falls Cover dort liegt, weiche auf Slot 0 aus
-  const aerialIdx = coverSlot === 1 ? 0 : 1;
-  const aerialPhoto = photos[aerialIdx] || null;
-  if (aerialPhoto) {
+  // ── PAGE 2: INTRO + AERIAL ────────────────────────────
+  if (d.beschreibung || d.titel) {
+    const beschr = (d.beschreibung || '').split('\n').filter(Boolean);
+    // Aerial = Slot 1 (zweites Photo); falls Cover dort liegt, weiche auf Slot 0 aus
+    const aerialIdx = coverSlot === 1 ? 0 : 1;
+    const aerialPhoto = photos[aerialIdx] || null;
     out.innerHTML += `
-    <div class="tl-page h-page" style="position:relative;overflow:hidden;background:linear-gradient(135deg,${acc},${T.bark})">
-      <div style="position:absolute;inset:0">${previewImgWrap(aerialPhoto, aerialIdx, 'width:100%;height:100%', 'filter:saturate(.92)')}</div>
+    <div class="tl-page h-page" style="background:${T.cream};display:grid;grid-template-columns:1fr 1.15fr">
+      <!-- Left: Headline + Body + Pull -->
+      <div style="padding:30px 36px;display:flex;flex-direction:column;justify-content:center">
+        <div class="h-stag"><span>Das Anwesen</span></div>
+        <h2 class="h-serif" style="font-size:32px;font-weight:400;line-height:1.08;color:${T.soil};margin-bottom:4px">
+          ${esc(d.intro_h || d.titel || 'Das Anwesen')}
+        </h2>
+        <div class="h-rule"></div>
+        <div style="font-size:10px;line-height:1.85;color:${T.tMid}">
+          ${beschr.slice(0,3).map(p=>`<p style="margin-bottom:8px">${esc(p)}</p>`).join('') || `<p>Eine ausführliche Objektbeschreibung wird hier eingefügt.</p>`}
+        </div>
+        ${d.pullQuote || beschr.length ? `<div style="padding:14px 18px;border-left:2px solid ${acc}66;background:${T.linen};margin-top:18px">
+          <p class="h-serif" style="font-size:12px;font-style:italic;line-height:1.55;color:${T.barkD}">»${esc(d.pullQuote || beschr[0]?.slice(0,140) + (beschr[0]?.length>140?'…':'')) || ''}«</p>
+        </div>` : ''}
+      </div>
+
+      <!-- Right: Aerial Photo -->
+      <div style="position:relative;overflow:hidden;background:linear-gradient(135deg,${acc},${T.bark})">
+        ${aerialPhoto
+          ? `<div style="position:absolute;inset:0">${previewImgWrap(aerialPhoto, aerialIdx, 'width:100%;height:100%', 'filter:saturate(.92)')}</div>`
+          : ''}
+      </div>
     </div>`;
   }
 
