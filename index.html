@@ -1248,6 +1248,21 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
       </div>
       <label>Adresse (Kontakt)</label>
       <input type="text" id="f-kontaktAdresse" placeholder="Straße, PLZ Stadt">
+
+      <div style="margin-top:1.2rem;padding-top:1rem;border-top:1px solid rgba(201,168,76,.15)">
+        <label>Foto des Maklers (optional)</label>
+        <input type="file" id="f-brokerPhoto" accept="image/*" onchange="handleBrokerPhotoUpload(this)" style="display:none">
+        <div style="display:flex;align-items:center;gap:1rem;margin-top:.5rem">
+          <div id="brokerPhotoPreviewWrap" style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.05);border:1px solid rgba(201,168,76,.2);overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <img id="brokerPhotoPreviewImg" style="width:100%;height:100%;object-fit:cover;display:none">
+            <span id="brokerPhotoPlaceholder" style="font-size:.7rem;color:var(--muted)">Kein Foto</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:.4rem">
+            <button class="btn-add" onclick="document.getElementById('f-brokerPhoto').click()">Foto auswählen</button>
+            <button class="btn-add" onclick="removeBrokerPhoto()" style="background:transparent;border:1px solid rgba(255,255,255,.18);color:var(--muted)">Entfernen</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Step 14: Extras -->
@@ -3258,6 +3273,41 @@ function handleLogoUpload(input) {
   reader.readAsDataURL(file);
 }
 
+async function handleBrokerPhotoUpload(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const src = await compressImage(file);
+  if (!src) return;
+  data.brokerPhotoSrc = src;
+  saveToStorage();
+  renderBrokerPhotoPreview();
+  if (document.getElementById('preview-output')?.children.length) buildPreview();
+}
+
+function removeBrokerPhoto() {
+  data.brokerPhotoSrc = null;
+  const inp = document.getElementById('f-brokerPhoto');
+  if (inp) inp.value = '';
+  saveToStorage();
+  renderBrokerPhotoPreview();
+  if (document.getElementById('preview-output')?.children.length) buildPreview();
+}
+
+function renderBrokerPhotoPreview() {
+  const img = document.getElementById('brokerPhotoPreviewImg');
+  const ph = document.getElementById('brokerPhotoPlaceholder');
+  if (!img || !ph) return;
+  if (data.brokerPhotoSrc) {
+    img.src = data.brokerPhotoSrc;
+    img.style.display = 'block';
+    ph.style.display = 'none';
+  } else {
+    img.src = '';
+    img.style.display = 'none';
+    ph.style.display = '';
+  }
+}
+
 // ══════════════════════════════════════════════════════
 // PHOTOS
 // ══════════════════════════════════════════════════════
@@ -3596,7 +3646,7 @@ function resetCurrentStep() {
     case 10: setVal('f-ausstattung',''); document.getElementById('ausstattungList').innerHTML=''; data.ausstattungList=[]; initAusstattungList(); break;
     case 11: document.getElementById('einheitenBody').innerHTML=''; data.einheiten=[]; initEinheiten(); break;
     case 12: setVal('f-investment',''); document.getElementById('investList').innerHTML=''; data.investHighlights=[]; initInvestList(); break;
-    case 13: ['f-name','f-tel','f-email','f-firma','f-kontaktAdresse'].forEach(id=>setVal(id,'')); break;
+    case 13: ['f-name','f-tel','f-email','f-firma','f-kontaktAdresse'].forEach(id=>setVal(id,'')); data.brokerPhotoSrc=null; const bp=document.getElementById('f-brokerPhoto'); if(bp) bp.value=''; renderBrokerPhotoPreview(); break;
     case 14: setVal('f-link360',''); setVal('f-linkYT',''); setVal('f-sonstigerText',''); setVal('f-agbText','');
       ['360','YT','Sonstiges','Agb'].forEach(k=>{ const cb=document.getElementById('toggle-'+k); if(cb){cb.checked=false;} const b=document.getElementById('extrasBody'+k); if(b) b.style.display='none'; const bl=document.getElementById('extrasBlock'+k); if(bl) bl.classList.remove('active'); const qr=document.getElementById('qrPreview'+k); if(qr) qr.innerHTML='<span style="color:rgba(120,130,160,.4);font-size:.65rem;text-align:center;padding:.3rem">QR erscheint nach Link-Eingabe</span>'; });
       delete data.link360; delete data.linkYT; delete data.sonstigerText; delete data.agbText; delete data.extras360Enabled; delete data.extrasYTEnabled; delete data.extrasSonstigesEnabled; delete data.extrasAgbEnabled;
@@ -3892,6 +3942,7 @@ async function loadFromStorage() {
       if(data.investHighlights?.length){ document.getElementById('investList').innerHTML=''; data.investHighlights.forEach(v=>addInvest(v)); }
       if(data.einheiten?.length){ document.getElementById('einheitenBody').innerHTML=''; data.einheiten.forEach(e=>addEinheit(e.typ,e.anzahl,e.flaeche,e.preis,e.besonderheit)); }
       if(data.brandLogoSrc){ const img=document.getElementById('logoPreviewImg'); img.src=data.brandLogoSrc; img.style.display='block'; document.getElementById('logoPlaceholder').style.display='none'; }
+      if(data.brokerPhotoSrc){ renderBrokerPhotoPreview(); }
       if(data.mapEnabled){ const cb=document.getElementById('f-mapEnabled'); if(cb){ cb.checked=true; document.getElementById('lageMapWrap').style.display=''; } }
       if(data.mapImageSrc){ const cb=document.getElementById('f-mapEnabled'); if(cb){ cb.checked=true; data.mapEnabled=true; document.getElementById('lageMapWrap').style.display=''; } renderMapImagePreview(); }
       [['360','extras360Enabled'],['YT','extrasYTEnabled'],['Sonstiges','extrasSonstigesEnabled'],['Agb','extrasAgbEnabled']].forEach(([k,dk])=>{ if(data[dk]){ const cb=document.getElementById('toggle-'+k); if(cb){ cb.checked=true; const b=document.getElementById('extrasBody'+k); if(b) b.style.display=''; const bl=document.getElementById('extrasBlock'+k); if(bl) bl.classList.add('active'); if(k==='360'&&data.link360) updateQr('360'); if(k==='YT'&&data.linkYT) updateQr('YT'); } } });

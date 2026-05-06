@@ -89,7 +89,7 @@ function buildPreviewH() {
     <!-- Body: Title -->
     <div style="position:relative;padding:0 32px 60px;width:64%;z-index:2">
       <div class="h-stag dark"><span>${esc((d.eyebrow||'Premium-Immobilie'))}</span></div>
-      <h1 class="h-serif" style="font-size:62px;font-weight:400;line-height:.98;color:${T.parch};margin-bottom:10px;letter-spacing:-.005em">${esc(d.titel||'Objekt')}</h1>
+      <h1 class="h-serif" style="font-size:62px;font-weight:400;line-height:1;color:${T.parch};margin-bottom:10px;letter-spacing:-.005em">${esc(d.titel||'Objekt')}${d.untertitel ? `<br><span style="font-style:italic;color:${sec};font-weight:400">${esc(d.untertitel)}</span>` : ''}</h1>
       ${subline ? `<p style="font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:rgba(242,236,224,.55)">${esc(subline)}</p>` : ''}
     </div>
 
@@ -366,7 +366,10 @@ function buildPreviewH() {
     <div style="background:${T.cream};padding:22px;border:1px solid ${T.sand};position:relative;z-index:1">
       <div style="display:flex;align-items:flex-start;gap:16px">
         <div style="width:64px;height:64px;border-radius:50%;background:${T.linen};border:2px solid ${T.sand};display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden">
-          <svg viewBox="0 0 24 24" fill="none" stroke="${T.bark}" stroke-width="1.2" style="width:30px;height:30px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          ${d.brokerPhotoSrc
+            ? `<img src="${d.brokerPhotoSrc}" alt="${esc(d.name||'')}" style="width:100%;height:100%;object-fit:cover;display:block">`
+            : `<svg viewBox="0 0 24 24" fill="none" stroke="${T.bark}" stroke-width="1.2" style="width:30px;height:30px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`
+          }
         </div>
         <div>
           <div class="h-serif" style="font-size:17px;color:${T.soil};margin-bottom:2px">${esc(d.name||'Ihr Ansprechpartner')}</div>
