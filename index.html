@@ -666,16 +666,17 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
 
   @page{size:A4 portrait;margin:0}
 
-  /* Landscape template pages */
+  /* Landscape template pages — print at 1.369× zoom so content matches preview proportions */
   .tl-page{
     page-break-after:always!important;
     break-after:page!important;
     margin:0!important;
     box-shadow:none!important;
-    width:297mm!important;
-    height:210mm!important;
+    width:calc(297mm / 1.369)!important;
+    height:calc(210mm / 1.369)!important;
     overflow:hidden!important;
     position:relative!important;
+    zoom:1.369!important;
   }
   .tl-page:last-child{page-break-after:auto!important;break-after:auto!important}
   body.landscape-preview @page{size:A4 landscape!important;margin:0}
