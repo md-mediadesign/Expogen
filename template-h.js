@@ -337,7 +337,7 @@ function buildPreviewH() {
       </div>
 
       <!-- 360° Tour Box -->
-      <div style="background:${T.barkD};color:${T.parch};padding:24px;display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden">
+      <div style="background:${acc};color:${T.parch};padding:24px;display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden">
         <div style="position:absolute;right:-30px;bottom:-30px;width:140px;height:140px;border:1px solid ${sec}26;border-radius:50%"></div>
         <div class="h-stag dark"><span>${has360 ? '360°-Rundgang' : 'Besichtigung'}</span></div>
         <h3 class="h-serif" style="font-size:18px;line-height:1.15;color:${T.parch}">
@@ -369,7 +369,7 @@ function buildPreviewH() {
     out.innerHTML += `
     <div class="tl-page h-page" style="display:grid;grid-template-columns:1.1fr 1fr">
       <!-- Left: Owner Quote / Highlight -->
-      <div style="background:${T.barkD};padding:30px 36px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden">
+      <div style="background:${acc};padding:30px 36px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden">
         <div style="position:absolute;left:-60px;top:-60px;width:240px;height:240px;border:1px solid ${sec}1f;border-radius:50%"></div>
         <div class="h-stag dark"><span>Charakter</span></div>
         <h2 class="h-serif" style="font-size:24px;color:${T.parch};font-weight:400;line-height:1.18;margin-bottom:18px">
@@ -456,7 +456,7 @@ function buildPreviewH() {
     </div>
 
     <!-- Footer Band -->
-    <div style="position:absolute;left:0;right:0;bottom:0;background:${T.soil};padding:9px 36px;display:flex;justify-content:space-between;align-items:center">
+    <div style="position:absolute;left:0;right:0;bottom:0;background:${acc};padding:9px 36px;display:flex;justify-content:space-between;align-items:center">
       ${logoHtml(true) || `<div class="h-serif" style="color:${T.parch};font-size:13px;letter-spacing:.1em">${esc(d.brandFirma||d.firma||'')}</div>`}
       <div style="font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:rgba(242,236,224,.32);text-align:center">
         Alle Angaben ohne Gewähr · Irrtümer vorbehalten
