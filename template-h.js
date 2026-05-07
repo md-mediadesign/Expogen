@@ -420,7 +420,7 @@ function buildPreviewH() {
         ${esc(d.preis || 'Auf Anfrage')}
       </div>
       ${d.kaeuferp ? `<p style="font-size:9.5px;letter-spacing:.18em;color:${T.tSoft};text-transform:uppercase;margin-bottom:22px">Käuferprovision: ${esc(d.kaeuferp)}</p>` : '<div style="margin-bottom:22px"></div>'}
-      <div style="display:inline-flex;align-items:center;gap:10px;padding:12px 26px;background:${T.barkD};color:${T.parch};font-size:8.5px;letter-spacing:.34em;text-transform:uppercase">
+      <div style="display:inline-flex;align-items:center;gap:10px;padding:12px 26px;background:${acc};color:${T.parch};font-size:8.5px;letter-spacing:.34em;text-transform:uppercase">
         Besichtigung anfragen →
       </div>
     </div>
