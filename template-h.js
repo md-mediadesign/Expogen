@@ -457,12 +457,12 @@ function buildPreviewH() {
     </div>
 
     <!-- Footer Band -->
-    <div style="position:absolute;left:0;right:0;bottom:0;background:${acc};padding:9px 36px;display:flex;justify-content:space-between;align-items:center">
-      ${logoHtml(true) || `<div class="h-serif" style="color:${T.parch};font-size:13px;letter-spacing:.1em">${esc(d.brandFirma||d.firma||'')}</div>`}
-      <div style="font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:rgba(242,236,224,.32);text-align:center">
+    <div style="position:absolute;left:0;right:0;bottom:0;background:${acc};padding:14px 36px;display:flex;justify-content:space-between;align-items:center">
+      ${logoHtml(true) || `<div class="h-serif" style="color:${T.parch};font-size:13px;font-weight:600;letter-spacing:.1em">${esc(d.brandFirma||d.firma||'')}</div>`}
+      <div style="font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:rgba(242,236,224,.6);text-align:center">
         Alle Angaben ohne Gewähr · Irrtümer vorbehalten
       </div>
-      <div style="font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:rgba(242,236,224,.28);text-align:right">
+      <div style="font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:rgba(242,236,224,.6);text-align:right">
         ${d.objektnr ? `Obj.-Nr. ${esc(d.objektnr)}` : ''}
       </div>
     </div>
