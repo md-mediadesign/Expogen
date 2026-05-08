@@ -48,7 +48,7 @@ function buildPreviewH() {
     .h-spec-v { font-family:'Playfair Display',serif; font-size:11px; color:${T.soil}; text-align:right; }
     .h-feat { display:flex; align-items:flex-start; gap:9px; padding:7px 0; border-bottom:1px solid rgba(242,236,224,.09); }
     .h-feat-dot { width:4px; height:4px; border-radius:50%; background:${sec}; margin-top:6px; flex-shrink:0; }
-    .h-feat-txt { font-size:9.5px; line-height:1.5; color:rgba(242,236,224,.72); }
+    .h-feat-txt { font-size:9.5px; line-height:1.5; color:rgba(242,236,224,.88); }
     .h-feat-txt strong { color:${T.parch}; font-weight:400; }
     .h-dist-row { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(122,101,72,.14); }
     .h-dist-k { font-size:8.5px; letter-spacing:.14em; color:${T.tMid}; text-transform:uppercase; }
@@ -262,7 +262,7 @@ function buildPreviewH() {
         <h2 class="h-serif" style="font-size:30px;font-weight:400;color:${T.parch};line-height:1.08">
           Was dieses<br>Anwesen<br><em class="sage">unvergleichlich</em><br>macht
         </h2>
-        <p style="font-size:9.5px;line-height:1.85;color:rgba(242,236,224,.55);margin-top:14px;max-width:30ch">
+        <p style="font-size:9.5px;line-height:1.85;color:rgba(242,236,224,.75);margin-top:14px;max-width:30ch">
           ${highlights.length} Argumente, die dieses Objekt von gewöhnlichen Immobilien unterscheiden.
         </p>
       </div>
@@ -324,7 +324,7 @@ function buildPreviewH() {
               <div style="aspect-ratio:16/10;overflow:hidden">
                 <img src="${g.src}" style="width:100%;height:100%;object-fit:contain;display:block" alt="">
               </div>
-              <div style="font-size:8px;letter-spacing:.3em;text-transform:uppercase;color:${T.tSoft};margin-top:6px;text-align:center">
+              <div style="font-size:8px;letter-spacing:.3em;text-transform:uppercase;color:${T.tMid};margin-top:6px;text-align:center">
                 ${esc(g.label || (i===0?'Erdgeschoss':'Obergeschoss'))}
               </div>
             </div>`).join('')
@@ -353,8 +353,8 @@ function buildPreviewH() {
           ? `<div style="margin-top:auto;display:flex;align-items:center;gap:12px">
               <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(d.link360)}" style="width:74px;height:74px;background:#fff;padding:4px;flex-shrink:0;display:block" alt="QR-Code 360°">
               <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
-                <div style="font-size:7px;letter-spacing:.3em;text-transform:uppercase;color:rgba(242,236,224,.5);line-height:1.5">QR scannen<br>& Tour starten</div>
-                <a href="${esc(d.link360)}" target="_blank" style="font-size:7.5px;letter-spacing:.32em;text-transform:uppercase;color:${sec};text-decoration:none;border-bottom:1px solid ${sec}66;padding-bottom:2px;align-self:flex-start">Zum Rundgang →</a>
+                <div style="font-size:9px;font-weight:500;letter-spacing:.24em;text-transform:uppercase;color:rgba(242,236,224,.88);line-height:1.55">QR scannen<br>& Tour starten</div>
+                <a href="${esc(d.link360)}" target="_blank" style="font-size:9.5px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:${sec};text-decoration:none;border-bottom:1px solid ${sec}99;padding-bottom:2px;align-self:flex-start">Zum Rundgang →</a>
               </div>
             </div>`
           : (d.tel ? `<div style="font-family:'Playfair Display',serif;font-size:14px;color:${T.parch};margin-top:auto">${esc(d.tel)}</div>` : '')
@@ -437,7 +437,7 @@ function buildPreviewH() {
         </div>
         <div>
           <div class="h-serif" style="font-size:17px;color:${T.soil};margin-bottom:2px">${esc(d.name||'Ihr Ansprechpartner')}</div>
-          <div style="font-size:7.5px;letter-spacing:.3em;text-transform:uppercase;color:${T.tSoft};margin-bottom:4px">${esc(d.firma||'')}</div>
+          <div style="font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;color:${T.tMid};margin-bottom:4px">${esc(d.firma||'')}</div>
           ${d.objektnr ? `<div style="font-size:8.5px;letter-spacing:.18em;color:${acc};text-transform:uppercase">Objekt ${esc(d.objektnr)}</div>` : ''}
         </div>
       </div>
