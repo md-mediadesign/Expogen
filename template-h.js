@@ -100,17 +100,18 @@ function buildPreviewH() {
     </div>` : ''}
 
     <!-- Strip -->
-    <div style="position:absolute;left:0;right:0;bottom:0;background:${acc}EE;backdrop-filter:blur(6px);padding:9px 32px;display:flex;align-items:center;gap:24px;z-index:2">
+    <div style="position:absolute;left:0;right:0;bottom:0;background:${acc}EE;backdrop-filter:blur(6px);padding:14px 32px;display:flex;align-items:center;gap:28px;z-index:2">
       ${[
-        d.wohnflaeche && `${esc(d.wohnflaeche)} Wohnfläche`,
-        d.gesamtflaeche && `${esc(d.gesamtflaeche)} Gesamt`,
-        d.zimmer && `${esc(d.zimmer)} Zimmer`,
-        d.baujahr && `Baujahr ${esc(d.baujahr)}`,
-      ].filter(Boolean).map((t,i,arr) => `
-        <div style="display:flex;align-items:center;gap:8px;font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:rgba(242,236,224,.72)">
-          <div style="width:5px;height:5px;border-radius:50%;background:${sec}"></div>${t}
+        d.wohnflaeche && [esc(d.wohnflaeche), 'Wohnfläche'],
+        d.gesamtflaeche && [esc(d.gesamtflaeche), 'Gesamtfläche'],
+        d.zimmer && [esc(d.zimmer), 'Zimmer'],
+        d.baujahr && [esc(d.baujahr), 'Baujahr'],
+      ].filter(Boolean).map(([val,lbl],i,arr) => `
+        <div style="display:flex;flex-direction:column;gap:3px">
+          <span style="font-size:13px;font-weight:600;color:${T.parch};line-height:1">${val}</span>
+          <span style="font-size:7px;letter-spacing:.22em;text-transform:uppercase;color:rgba(242,236,224,.5)">${lbl}</span>
         </div>
-        ${i<arr.length-1?`<div style="width:3px;height:3px;border-radius:50%;background:rgba(242,236,224,.22)"></div>`:''}
+        ${i<arr.length-1?`<div style="width:1px;height:28px;background:rgba(242,236,224,.2);flex-shrink:0"></div>`:''}
       `).join('')}
     </div>
   </div>`;
