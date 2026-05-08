@@ -32,24 +32,24 @@ function buildPreviewH() {
   let styleEl = document.getElementById(styleId);
   if (!styleEl) { styleEl = document.createElement('style'); styleEl.id = styleId; document.head.appendChild(styleEl); }
   styleEl.textContent = `
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Lato:wght@200;300;400&display=swap');
-    .h-page { font-family:'Lato',sans-serif; font-weight:300; color:${T.soil}; }
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Lato:wght@300;400;700&display=swap');
+    .h-page { font-family:'Lato',sans-serif; font-weight:400; color:${T.soil}; }
     .h-page * { box-sizing:border-box; }
     .h-serif { font-family:'Playfair Display',serif; }
     .h-stag { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
     .h-stag::before { content:""; display:block; width:22px; height:1px; background:${acc}; }
-    .h-stag span { font-size:8.5px; letter-spacing:.44em; text-transform:uppercase; color:${acc}; }
+    .h-stag span { font-size:8.5px; font-weight:700; letter-spacing:.44em; text-transform:uppercase; color:${acc}; }
     .h-stag.dark::before { background:${sec}; }
     .h-stag.dark span { color:${sec}; }
     .h-rule { width:32px; height:2px; background:${acc}66; margin:10px 0 16px; }
-    .h-pill { padding:6px 14px; border:1px solid rgba(242,236,224,.24); font-size:8.5px; letter-spacing:.22em; text-transform:uppercase; color:${T.parch}; background:rgba(242,236,224,.07); backdrop-filter:blur(4px); }
+    .h-pill { padding:6px 14px; border:1px solid rgba(242,236,224,.24); font-size:8.5px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:${T.parch}; background:rgba(242,236,224,.07); backdrop-filter:blur(4px); }
     .h-spec-row { display:flex; justify-content:space-between; align-items:baseline; padding:6px 0; gap:12px; border-bottom:1px solid rgba(122,101,72,.18); }
-    .h-spec-k { font-size:8px; letter-spacing:.22em; text-transform:uppercase; color:${T.tSoft}; flex-shrink:0; }
+    .h-spec-k { font-size:8px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:${T.tMid}; flex-shrink:0; }
     .h-spec-v { font-family:'Playfair Display',serif; font-size:11px; color:${T.soil}; text-align:right; }
     .h-feat { display:flex; align-items:flex-start; gap:9px; padding:7px 0; border-bottom:1px solid rgba(242,236,224,.09); }
     .h-feat-dot { width:4px; height:4px; border-radius:50%; background:${sec}; margin-top:6px; flex-shrink:0; }
-    .h-feat-txt { font-size:9.5px; line-height:1.5; color:rgba(242,236,224,.88); }
-    .h-feat-txt strong { color:${T.parch}; font-weight:400; }
+    .h-feat-txt { font-size:9.5px; font-weight:400; line-height:1.5; color:rgba(242,236,224,.92); }
+    .h-feat-txt strong { color:${T.parch}; font-weight:700; }
     .h-dist-row { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(122,101,72,.14); }
     .h-dist-k { font-size:8.5px; letter-spacing:.14em; color:${T.tMid}; text-transform:uppercase; }
     .h-dist-v { font-family:'Playfair Display',serif; font-size:11px; color:${T.rust}; }
