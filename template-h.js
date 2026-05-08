@@ -353,8 +353,8 @@ function buildPreviewH() {
           ? `<div style="margin-top:auto;display:flex;align-items:center;gap:12px">
               <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(d.link360)}" style="width:74px;height:74px;background:#fff;padding:4px;flex-shrink:0;display:block" alt="QR-Code 360°">
               <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
-                <div style="font-size:9px;font-weight:500;letter-spacing:.24em;text-transform:uppercase;color:rgba(242,236,224,.88);line-height:1.55">QR scannen<br>& Tour starten</div>
-                <a href="${esc(d.link360)}" target="_blank" style="font-size:9.5px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:${sec};text-decoration:none;border-bottom:1px solid ${sec}99;padding-bottom:2px;align-self:flex-start">Zum Rundgang →</a>
+                <div style="font-size:11px;font-weight:600;letter-spacing:.04em;color:${T.parch};line-height:1.45">QR scannen<br>& Tour starten</div>
+                <a href="${esc(d.link360)}" target="_blank" style="font-size:11px;font-weight:700;letter-spacing:.04em;color:${T.parch};text-decoration:none;border-bottom:2px solid ${T.parch}66;padding-bottom:2px;align-self:flex-start">Zum Rundgang →</a>
               </div>
             </div>`
           : (d.tel ? `<div style="font-family:'Playfair Display',serif;font-size:14px;color:${T.parch};margin-top:auto">${esc(d.tel)}</div>` : '')
