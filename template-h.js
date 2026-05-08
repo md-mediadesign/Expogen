@@ -166,7 +166,7 @@ function buildPreviewH() {
         return `<div style="position:relative;overflow:hidden;${gridArea}">${previewImgWrap(p, galStart + pg*perPage + idx, 'width:100%;height:100%', 'filter:saturate(.92)')}${capHtml}</div>`;
       };
 
-      const wrap = (gridStyle, slots) => `<div class="tl-page h-page" style="background:${T.linen};display:grid;${gridStyle};gap:3px">${slots}</div>`;
+      const wrap = (gridStyle, slots) => `<div class="tl-page h-page" style="background:${T.linen};display:grid;${gridStyle};gap:10px;padding:10px">${slots}</div>`;
       const auto = () => set.map((p, i) => gimg(p, i, '')).join('');
       let variants = [];
       if (perPage === 1) {
