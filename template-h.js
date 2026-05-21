@@ -77,8 +77,8 @@ function buildPreviewH() {
       ? `<div style="position:absolute;inset:0">${previewImgWrap(coverPhoto, coverSlot, 'width:100%;height:100%', 'filter:saturate(.95)')}</div>`
       : `<div style="position:absolute;inset:0;background:linear-gradient(135deg,${acc} 0%, ${T.bark} 60%, ${T.barkD} 100%)"></div>`
     }
-    <!-- Lesbarkeits-Verlauf (Akzent/Balkenfarbe, 0% oben → 30% an der Balkenoberkante) -->
-    <div style="position:absolute;left:0;right:0;bottom:0;height:55%;background:linear-gradient(to top, ${acc}4D 0%, ${acc}4D 18%, ${acc}00 100%);pointer-events:none;z-index:1"></div>
+    <!-- Lesbarkeits-Verlauf (dunkler Braunton, sichtbar oberhalb der Akzent-Leiste) -->
+    <div style="position:absolute;left:0;right:0;bottom:0;height:55%;background:linear-gradient(to top, rgba(78,63,40,.60) 0%, rgba(78,63,40,.60) 18%, rgba(78,63,40,0) 100%);pointer-events:none;z-index:1"></div>
 
     <!-- Top: Brand + Ref -->
     <div style="position:absolute;top:24px;left:32px;right:32px;display:flex;justify-content:space-between;align-items:flex-start;z-index:2">
