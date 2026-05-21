@@ -74,11 +74,9 @@ function buildPreviewH() {
   <div class="tl-page h-page" style="background:${T.warm};display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden">
     <!-- Cover Background Photo -->
     ${coverPhoto
-      ? `<div style="position:absolute;inset:0">${previewImgWrap(coverPhoto, coverSlot, 'width:100%;height:100%', 'filter:saturate(.92) brightness(.78)')}</div>`
+      ? `<div style="position:absolute;inset:0">${previewImgWrap(coverPhoto, coverSlot, 'width:100%;height:100%', 'filter:saturate(.95)')}</div>`
       : `<div style="position:absolute;inset:0;background:linear-gradient(135deg,${acc} 0%, ${T.bark} 60%, ${T.barkD} 100%)"></div>`
     }
-    <!-- Gradients -->
-    <div style="position:absolute;inset:0;background:linear-gradient(115deg, rgba(43,31,15,.78) 0%, rgba(43,31,15,.32) 38%, rgba(43,31,15,0) 62%, rgba(43,31,15,.45) 92%), linear-gradient(180deg, rgba(43,31,15,.18) 0%, rgba(43,31,15,0) 40%, rgba(43,31,15,.92) 100%);pointer-events:none"></div>
 
     <!-- Top: Brand + Ref -->
     <div style="position:absolute;top:24px;left:32px;right:32px;display:flex;justify-content:space-between;align-items:flex-start;z-index:2">
