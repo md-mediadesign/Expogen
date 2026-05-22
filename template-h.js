@@ -39,8 +39,8 @@ function buildPreviewH() {
     .h-stag { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
     .h-stag::before { content:""; display:block; width:22px; height:1px; background:${acc}; }
     .h-stag span { font-size:8.5px; font-weight:700; letter-spacing:.44em; text-transform:uppercase; color:${acc}; }
-    .h-stag.dark::before { background:${sec}; }
-    .h-stag.dark span { color:${sec}; }
+    .h-stag.dark::before { background:${T.parch}; }
+    .h-stag.dark span { color:${T.parch}; }
     .h-rule { width:32px; height:2px; background:${acc}66; margin:10px 0 16px; }
     .h-pill { padding:6px 14px; border:1px solid rgba(242,236,224,.24); font-size:8.5px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:${T.parch}; background:rgba(242,236,224,.07); backdrop-filter:blur(4px); }
     .h-spec-row { display:flex; justify-content:space-between; align-items:baseline; padding:6px 0; gap:12px; border-bottom:1px solid rgba(122,101,72,.18); }
@@ -89,7 +89,7 @@ function buildPreviewH() {
     <!-- Body: Title -->
     <div style="position:relative;padding:0 32px 60px;width:64%;z-index:2">
       <div class="h-stag dark"><span>${esc((d.eyebrow||'Premium-Immobilie'))}</span></div>
-      <h1 class="h-serif" style="font-size:62px;font-weight:400;line-height:1;color:${T.parch};margin-bottom:10px;letter-spacing:-.005em">${esc(d.titel||'Objekt')}${d.untertitel ? `<br><span style="font-style:italic;color:${sec};font-weight:400">${esc(d.untertitel)}</span>` : ''}</h1>
+      <h1 class="h-serif" style="font-size:62px;font-weight:400;line-height:1;color:${T.parch};margin-bottom:10px;letter-spacing:-.005em">${esc(d.titel||'Objekt')}${d.untertitel ? `<br><span style="font-style:italic;color:${T.parch};font-weight:400">${esc(d.untertitel)}</span>` : ''}</h1>
       ${subline ? `<p style="font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:rgba(242,236,224,.55)">${esc(subline)}</p>` : ''}
     </div>
 
