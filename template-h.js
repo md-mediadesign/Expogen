@@ -62,8 +62,8 @@ function buildPreviewH() {
   const coverIdx = photos.findIndex(p => p.isCover);
   const coverSlot = coverIdx >= 0 ? coverIdx : 0;
 
-  const logoHtml = (light) => d.brandLogoSrc
-    ? `<img src="${d.brandLogoSrc}" style="max-height:24px;object-fit:contain;${light?'filter:brightness(0) invert(1)':''};display:block">`
+  const logoHtml = (light, sizePx=24) => d.brandLogoSrc
+    ? `<img src="${d.brandLogoSrc}" style="max-height:${sizePx}px;object-fit:contain;${light?'filter:brightness(0) invert(1)':''};display:block">`
     : d.brandFirma ? `<span class="h-serif" style="font-size:13px;letter-spacing:.18em;color:${light?T.parch:T.soil}">${esc(d.brandFirma)}</span>` : '';
 
   // Kurzversion adresse → Stadt/Region
@@ -82,7 +82,7 @@ function buildPreviewH() {
 
     <!-- Top: Brand + Ref -->
     <div style="position:absolute;top:24px;left:32px;right:32px;display:flex;justify-content:space-between;align-items:flex-start;z-index:2">
-      ${logoHtml(true) || `<div class="h-serif" style="color:${T.parch};font-size:13px;letter-spacing:.18em">${esc(d.brandFirma||d.firma||'')}</div>`}
+      ${logoHtml(true, 72) || `<div class="h-serif" style="color:${T.parch};font-size:13px;letter-spacing:.18em">${esc(d.brandFirma||d.firma||'')}</div>`}
       ${d.objektnr ? `<div style="font-size:8.5px;letter-spacing:.28em;text-transform:uppercase;color:rgba(242,236,224,.55);border:1px solid rgba(242,236,224,.22);padding:6px 14px">${esc(d.objektnr)}</div>` : ''}
     </div>
 
@@ -90,13 +90,13 @@ function buildPreviewH() {
     <div style="position:relative;padding:0 32px 60px;width:64%;z-index:2">
       <div class="h-stag dark"><span>${esc((d.eyebrow||'Premium-Immobilie'))}</span></div>
       <h1 class="h-serif" style="font-size:62px;font-weight:400;line-height:1;color:${T.parch};margin-bottom:10px;letter-spacing:-.005em">${esc(d.titel||'Objekt')}${d.untertitel ? `<br><span style="font-style:italic;color:${T.parch};font-weight:400">${esc(d.untertitel)}</span>` : ''}</h1>
-      ${subline ? `<p style="font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:rgba(242,236,224,.55)">${esc(subline)}</p>` : ''}
+      ${subline ? `<p style="font-size:10px;font-weight:700;letter-spacing:.32em;text-transform:uppercase;color:${T.parch}">${esc(subline)}</p>` : ''}
     </div>
 
     <!-- Right: Preis-Anker -->
     ${d.preis ? `<div style="position:absolute;right:32px;bottom:60px;text-align:right;z-index:2">
       <div class="h-serif" style="font-size:30px;line-height:1;color:${T.parch}">${esc(d.preis)}</div>
-      <div style="font-size:8.5px;letter-spacing:.32em;text-transform:uppercase;color:rgba(242,236,224,.55);margin-top:6px">Kaufpreis</div>
+      <div style="font-size:8.5px;font-weight:700;letter-spacing:.32em;text-transform:uppercase;color:${T.parch};margin-top:6px">Kaufpreis</div>
     </div>` : ''}
 
     <!-- Strip -->
