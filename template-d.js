@@ -122,7 +122,7 @@ function buildPreviewD() {
     <div style="flex:1;display:flex;padding:24px 32px;gap:32px;min-height:0">
       <div style="flex:1.4;min-width:0">
         <div style="font-family:'Ubuntu',sans-serif;font-size:1.2rem;font-weight:700;color:${acc};margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid ${acc}">Objektbeschreibung</div>
-        <div style="font-size:.78rem;color:#333;line-height:1.75;white-space:pre-wrap;overflow:hidden">${esc(d.beschreibung||'').substring(0,900)}</div>
+        <div style="font-size:.78rem;color:#333;line-height:1.75;white-space:pre-wrap;display:-webkit-box;-webkit-line-clamp:18;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word">${esc(d.beschreibung||'')}</div>
       </div>
       <div style="flex:1;min-width:0">
         ${d.highlights?.length?`<div style="font-family:'Ubuntu',sans-serif;font-size:.75rem;font-weight:700;color:${acc};letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">Highlights</div>${hlHtml}`:''}

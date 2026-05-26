@@ -144,8 +144,8 @@ function buildPreviewF() {
       <!-- Description -->
       <div style="flex:1;min-width:0">
         <div style="font-family:'Ubuntu',sans-serif;font-size:1rem;font-weight:700;color:${acc};margin-bottom:12px;padding-bottom:6px;border-bottom:1.5px solid ${acc}55">Objektbeschreibung</div>
-        <div style="font-size:.77rem;color:#333;line-height:1.8;white-space:pre-wrap;overflow:hidden">${esc(d.beschreibung||'').substring(0,750)}</div>
-        ${size==='L' && d.ausstattung && isStepEnabled(10) ? `<div style="margin-top:16px;font-family:'Ubuntu',sans-serif;font-size:.85rem;font-weight:700;color:${acc};margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid ${acc}33">Ausstattung</div><div style="font-size:.74rem;color:#444;line-height:1.7;overflow:hidden">${esc(d.ausstattung).substring(0,300)}</div>` : ''}
+        <div style="font-size:.77rem;color:#333;line-height:1.8;white-space:pre-wrap;display:-webkit-box;-webkit-line-clamp:15;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word">${esc(d.beschreibung||'')}</div>
+        ${size==='L' && d.ausstattung && isStepEnabled(10) ? `<div style="margin-top:16px;font-family:'Ubuntu',sans-serif;font-size:.85rem;font-weight:700;color:${acc};margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid ${acc}33">Ausstattung</div><div style="font-size:.74rem;color:#444;line-height:1.7;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word">${esc(d.ausstattung)}</div>` : ''}
       </div>
     </div>
   </div>`;

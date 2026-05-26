@@ -1,0 +1,87 @@
+/* Globale Overflow-/Clamp-Regeln für alle Expogen-Templates.
+   Ergänzt template-spezifische Styles, ohne sie zu ersetzen.
+   Wirksam bei langen onOffice-Titeln/Adressen/Beschreibungen. */
+
+/* ─── COVER-TITEL: max. 2 Zeilen, weicher Bruch ───────── */
+.expo-cover-title,
+.tb-cover-title,
+.tc-cover-title,
+.td-cover-title,
+.te-cover-title,
+.tf-cover-title,
+.tg-cover-title,
+.expo-page-title,
+.tb-page-title,
+.tc-page-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+/* ─── COVER-UNTERTITEL/SUBTITLE: 1 Zeile mit Ellipsis ─── */
+.expo-cover-subtitle,
+.tb-cover-subtitle,
+.tc-cover-subtitle,
+.td-cover-subtitle,
+.te-cover-subtitle,
+.tf-cover-subtitle,
+.tg-cover-subtitle,
+.tb-cover-type-label,
+.tc-cover-type-label {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+}
+
+/* ─── ADRESSE: 2 Zeilen ─────────────────────────────── */
+.expo-cover-address,
+.tb-cover-address,
+.tc-cover-address {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+/* ─── LANGE BESCHREIBUNG: clamp + Fade-Ellipsis ─────── */
+/* Templates A/B/C nutzen .expo-body / .tb-desc-body / .tc-body — line-clamp begrenzt
+   zuverlässig auf 12-15 Zeilen, was in den jeweiligen Containern exakt reinpasst. */
+.expo-body,
+.tb-desc-body,
+.tc-body {
+  display: -webkit-box;
+  -webkit-line-clamp: 14;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+/* ─── TEMPLATE-B SPEZIAL: Stadtbeschreibung im Overlay ─ */
+.tb-stadt-overlay-body {
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+/* ─── TEMPLATE-B SPEZIAL: Photo-Overlay-Texte ─────── */
+.tb-photo-overlay-text,
+.tb-aus-photo-text {
+  word-break: break-word;
+  hyphens: auto;
+}
+
+/* ─── HIGHLIGHTS-LIST: einzelner Eintrag max. 2 Zeilen ─ */
+.expo-list li,
+.tb-aus-body p,
+.tb-lage-body {
+  word-break: break-word;
+}

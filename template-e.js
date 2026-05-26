@@ -172,7 +172,7 @@ function buildPreviewE() {
     <div style="flex:1;display:flex;padding:24px 32px;gap:32px;min-height:0">
       <div style="flex:1.3;min-width:0">
         <div style="font-family:'Ubuntu',sans-serif;font-size:1.15rem;font-weight:700;color:${acc};margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid ${acc}">${esc(d.titel||'Objektbeschreibung')}</div>
-        <div style="font-size:.78rem;color:#333;line-height:1.8;white-space:pre-wrap;overflow:hidden">${esc(d.beschreibung||'').substring(0,1000)}</div>
+        <div style="font-size:.78rem;color:#333;line-height:1.8;white-space:pre-wrap;display:-webkit-box;-webkit-line-clamp:20;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word">${esc(d.beschreibung||'')}</div>
       </div>
       ${(size==='M'||size==='L') && d.lage && isStepEnabled(8) ? `
       <div style="flex:1;min-width:0">

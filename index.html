@@ -16,6 +16,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&family=Ubuntu:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="template-clamp.css">
 <!-- PDF text extraction -->
 <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 <!-- Word (.docx) text extraction -->
@@ -172,6 +173,10 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
 .color-pair-card{border:2px solid var(--border);border-radius:12px;padding:1rem;cursor:pointer;transition:border-color .25s,background .25s;text-align:center}
 .color-pair-card:hover{border-color:var(--gold)}
 .color-pair-card.selected{border-color:var(--gold);background:rgba(201,168,76,.07)}
+.color-pair-grid--locked{pointer-events:none}
+.color-pair-grid--locked .color-pair-card:not(.selected){opacity:.3;filter:grayscale(.5)}
+.color-pair-grid--locked .color-pair-card.selected{opacity:1;filter:none}
+.color-locked-notice{margin-top:1.2rem;padding:.85rem 1.1rem;background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.25);border-radius:10px;font-size:.8rem;color:var(--muted);line-height:1.6}
 .cp-swatch{display:flex;height:40px;border-radius:6px;overflow:hidden;margin-bottom:.75rem}
 .cp-swatch-accent,.cp-swatch-secondary{flex:1}
 .cp-name{font-size:.85rem;font-weight:600;color:var(--cream);margin-bottom:.2rem}

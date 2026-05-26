@@ -528,6 +528,35 @@ function buildPreviewC() {
     document.head.appendChild(s);
   }
 
+  // Inject color override from selected color pair
+  const cpair = (typeof getColorPair === 'function') ? getColorPair() : { accent:'#1a2744', secondary:'#c4a43c' };
+  const overrideId = 'tmpl-c-color-override';
+  let overrideEl = document.getElementById(overrideId);
+  if (!overrideEl) { overrideEl = document.createElement('style'); overrideEl.id = overrideId; document.head.appendChild(overrideEl); }
+  overrideEl.textContent = `
+    .tc-cover-band { color: ${cpair.accent}!important; background: #ede8e3!important; }
+    .tc-cover-lower { background: ${cpair.accent}!important; }
+    .tc-ph-page { color: ${cpair.accent}!important; }
+    .tc-section-title { color: ${cpair.accent}!important; }
+    .tc-hr { border-top-color: ${cpair.accent}!important; }
+    .tc-fact-value { color: ${cpair.accent}!important; }
+    .tc-hl-list li { color: ${cpair.accent}!important; }
+    .tc-city-box { background: ${cpair.accent}!important; }
+    .tc-city-box p { color: rgba(255,255,255,0.85)!important; }
+    .tc-contact-firm { color: rgba(255,255,255,0.75)!important; }
+    .tc-contact-line { color: rgba(255,255,255,0.7)!important; }
+    .tc-contact-hr { border-top-color: rgba(255,255,255,0.3)!important; }
+    .tc-cover-type { color: rgba(255,255,255,0.7)!important; }
+    .tc-cover-addr { color: rgba(255,255,255,0.6)!important; }
+    .tc-cover-divider { background: rgba(255,255,255,0.35)!important; }
+    .tc-aus-list li::before { color: ${cpair.accent}!important; }
+    .tc-table th { background: ${cpair.accent}!important; }
+    .tc-stat-box { border-top-color: ${cpair.accent}!important; }
+    .tc-stat-num { color: ${cpair.accent}!important; }
+    .tc-inv-list li::before { color: ${cpair.accent}!important; }
+    .tc-contact-page { background: ${cpair.accent}!important; }
+  `;
+
   function esc(s) {
     if (!s) return '';
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -801,7 +830,7 @@ function buildPreviewC() {
   }
 
   // ── EXTRAS PAGE (optional) ──
-  const cpairC = (typeof getColorPair === 'function') ? getColorPair() : { accent:'#1a2744', secondary:'#c4a43c' };
+  const cpairC = cpair;
   const hasExtrasC = isStepEnabled(14) && (
     (d.extras360Enabled && d.link360) ||
     (d.extrasYTEnabled && d.linkYT) ||
