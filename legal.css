@@ -1,0 +1,31 @@
+:root{
+  --navy:#0d1220;
+  --navy2:#141b30;
+  --gold:#c9a84c;
+  --cream:#f4ecd6;
+  --text:#cfd3dc;
+  --muted:#8b93a7;
+  --border:rgba(255,255,255,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Roboto',sans-serif;background:var(--navy);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased;padding-bottom:4rem}
+a{color:var(--gold);text-decoration:none}
+a:hover{text-decoration:underline}
+.nav{position:sticky;top:0;z-index:10;background:rgba(13,18,32,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;max-width:880px;margin:0 auto}
+.brand{font-family:'Ubuntu',sans-serif;font-weight:700;font-size:1.25rem;color:var(--cream)}
+.brand span{color:var(--gold)}
+.nav-back{font-size:.88rem;color:var(--text)}
+.wrap{max-width:780px;margin:0 auto;padding:3rem 1.5rem}
+h1{font-family:'Ubuntu',sans-serif;font-size:clamp(1.7rem,3.5vw,2.2rem);color:var(--cream);margin-bottom:.5rem;letter-spacing:-.01em}
+.kicker{display:inline-block;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:.8rem}
+.updated{color:var(--muted);font-size:.85rem;margin-bottom:2.5rem}
+h2{font-family:'Ubuntu',sans-serif;color:var(--cream);font-size:1.25rem;margin:2.2rem 0 .8rem;font-weight:700}
+h3{font-family:'Ubuntu',sans-serif;color:var(--cream);font-size:1rem;margin:1.6rem 0 .6rem;font-weight:700}
+p, ul{margin-bottom:1rem;font-size:.95rem}
+ul{padding-left:1.4rem}
+li{margin-bottom:.4rem}
+.todo{background:rgba(201,168,76,.08);border-left:3px solid var(--gold);padding:.8rem 1rem;border-radius:4px;color:var(--cream);font-size:.9rem;margin:1rem 0}
+.todo strong{color:var(--gold)}
+footer{padding:2rem 0;border-top:1px solid var(--border);text-align:center;font-size:.8rem;color:var(--muted);margin-top:3rem}
+footer a{margin:0 .5rem}
