@@ -158,9 +158,11 @@ function buildPreviewA() {
         <div class="expo-page-title">Stadtteil & Mikrolage</div>
         <div class="expo-two-col">
           <div class="expo-body-plain"><p>${d.lage.split('\n').filter(Boolean).map(escHtml).join('</p><p>')}</p></div>
-          <div>${hasLageMedia()
-            ? buildLageMediaHtml(80)
-            : photos.length>3 ? previewImgWrap(photos[3],3,'width:100%;aspect-ratio:'+fmtAr(photos[3])+';border-radius:4px','') : ''
+          <div>${(data.mapEnabled && data.mapLat)
+            ? buildStaticMapHtml(data.mapLat, data.mapLon, 80)
+            : hasLageMedia()
+              ? buildLageMediaHtml(80)
+              : photos.length>3 ? previewImgWrap(photos[3],3,'width:100%;aspect-ratio:'+fmtAr(photos[3])+';border-radius:4px','') : ''
           }</div>
         </div>
       </div>

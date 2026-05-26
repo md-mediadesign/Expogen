@@ -170,9 +170,11 @@ function buildPreviewG() {
           <div style="font-size:.77rem;color:#333;line-height:1.8"><p>${d.lage.split('\n').filter(Boolean).map(esc).join('</p><p style="margin-top:.5rem">')}</p></div>
         </div>
         <div style="width:280px;flex-shrink:0">
-          ${hasLageMedia()
-            ? buildLageMediaHtml(80)
-            : photos.length>3 ? previewImgWrap(photos[3],3,'width:100%;height:100%;border-radius:6px','') : ''
+          ${(data.mapEnabled && data.mapLat)
+            ? buildStaticMapHtml(data.mapLat, data.mapLon, 80)
+            : hasLageMedia()
+              ? buildLageMediaHtml(80)
+              : photos.length>3 ? previewImgWrap(photos[3],3,'width:100%;height:100%;border-radius:6px','') : ''
           }
         </div>
       </div>
