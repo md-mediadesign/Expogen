@@ -50,6 +50,34 @@ header{width:100%;max-width:1180px;margin:0 auto;padding:2rem 2.5rem 0;display:f
 .btn-header-upload:hover{border-color:var(--gold);background:rgba(201,168,76,.08)}
 .btn-header-projects{background:transparent;border:1px solid rgba(201,168,76,.35);border-radius:20px;color:var(--gold);font-family:'Roboto',sans-serif;font-size:.72rem;font-weight:500;letter-spacing:.06em;padding:.35rem 1rem;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:.4rem}
 .btn-header-projects:hover{border-color:var(--gold);background:rgba(201,168,76,.1)}
+.btn-header-credits{background:transparent;border:1px solid rgba(201,168,76,.35);border-radius:20px;color:var(--gold);font-family:'Roboto',sans-serif;font-size:.72rem;font-weight:600;letter-spacing:.06em;padding:.35rem 1rem;cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:.45rem}
+.btn-header-credits:hover{border-color:var(--gold);background:rgba(201,168,76,.1)}
+.btn-header-credits .credit-count{background:var(--gold);color:var(--navy);border-radius:10px;font-size:.65rem;font-weight:800;padding:.05rem .45rem;line-height:1.4}
+.btn-header-credits.no-credits .credit-count{background:rgba(224,85,85,.85);color:#fff}
+
+/* ── Buy Credits Modal ── */
+.buy-overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(6px);z-index:5500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;padding:2rem}
+.buy-overlay.open{opacity:1;pointer-events:all}
+.buy-modal{background:var(--navy2);border:1px solid var(--border);border-radius:18px;padding:2.4rem 2.6rem;max-width:540px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 32px 80px rgba(0,0,0,.7);transform:scale(.96);transition:transform .25s;position:relative}
+.buy-overlay.open .buy-modal{transform:scale(1)}
+.buy-close{position:absolute;top:1rem;right:1.2rem;background:none;border:none;color:var(--muted);font-size:1.6rem;cursor:pointer;line-height:1;transition:color .2s}
+.buy-close:hover{color:var(--gold)}
+.buy-kicker{font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:.55rem}
+.buy-title{font-family:'Ubuntu',sans-serif;font-size:1.45rem;font-weight:700;color:var(--cream);margin-bottom:.45rem;line-height:1.25}
+.buy-desc{font-size:.86rem;color:var(--muted);line-height:1.6;margin-bottom:1.6rem}
+.buy-credit-line{display:flex;align-items:center;gap:.5rem;font-size:.78rem;color:var(--muted);margin-bottom:1.4rem;padding:.55rem .8rem;background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:8px}
+.buy-credit-line strong{color:var(--gold);font-weight:700}
+.buy-packs{display:grid;gap:.75rem;margin-bottom:1.2rem}
+.buy-pack{display:flex;align-items:center;justify-content:space-between;gap:1rem;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:.9rem 1.1rem;cursor:pointer;transition:border-color .2s,background .2s;text-align:left;font-family:inherit;color:inherit}
+.buy-pack:hover{border-color:var(--gold);background:rgba(201,168,76,.05)}
+.buy-pack-info{flex:1;min-width:0}
+.buy-pack-name{font-size:.95rem;font-weight:700;color:var(--cream);display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.buy-pack-recommended{background:var(--gold);color:var(--navy);font-size:.6rem;font-weight:800;letter-spacing:.06em;padding:.1rem .42rem;border-radius:3px;text-transform:uppercase}
+.buy-pack-sub{font-size:.74rem;color:var(--muted);margin-top:.18rem}
+.buy-pack-price{font-size:1.05rem;font-weight:700;color:var(--gold);white-space:nowrap}
+.buy-foot{font-size:.72rem;color:var(--muted);line-height:1.55;text-align:center;margin-top:.6rem}
+.buy-foot a{color:var(--gold);text-decoration:none}
+@media print{.buy-overlay{display:none!important}}
 .header-size-switch{display:inline-flex;border:1px solid rgba(201,168,76,.25);border-radius:20px;overflow:hidden;background:rgba(0,0,0,.25)}
 .header-size-switch-label{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:.35rem .75rem .35rem .9rem;align-self:center;border-right:1px solid rgba(201,168,76,.15);background:rgba(255,255,255,.02)}
 .header-size-btn{background:transparent;border:none;color:var(--muted);font-family:'Ubuntu',sans-serif;font-size:.78rem;font-weight:700;padding:.3rem .85rem;cursor:pointer;transition:all .2s;border-right:1px solid rgba(201,168,76,.12);min-width:34px}
@@ -605,6 +633,32 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
 .swap-picker-item-label{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.65);color:#fff;font-size:.58rem;text-align:center;padding:3px 4px;letter-spacing:.04em}
 #swapPickerEmpty{color:var(--muted);font-size:.85rem;text-align:center;padding:2rem 1rem;line-height:1.7}
 
+/* ── Watermark (Vorschau ohne Credits) ── */
+body.expo-watermark .expo-page,
+body.expo-watermark .tb-page,
+body.expo-watermark .tc-page,
+body.expo-watermark .td-page,
+body.expo-watermark .te-page,
+body.expo-watermark .tf-page,
+body.expo-watermark .tg-page,
+body.expo-watermark .h-page{position:relative}
+body.expo-watermark .expo-page::after,
+body.expo-watermark .tb-page::after,
+body.expo-watermark .tc-page::after,
+body.expo-watermark .td-page::after,
+body.expo-watermark .te-page::after,
+body.expo-watermark .tf-page::after,
+body.expo-watermark .tg-page::after,
+body.expo-watermark .h-page::after{
+  content:"VORSCHAU – expogen.de";
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%) rotate(-32deg);
+  font-family:'Roboto',sans-serif;font-weight:800;letter-spacing:.04em;
+  font-size:64px;color:rgba(0,0,0,.11);
+  pointer-events:none;white-space:nowrap;z-index:9999;
+  text-transform:uppercase;
+}
+
 @media print{
   .preview-img-swap{display:none!important}
   .leaflet-container{position:relative!important}
@@ -625,6 +679,8 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
   .btn-header-reset,
   .btn-header-upload,
   .btn-header-projects,
+  .btn-header-credits,
+  .buy-overlay,
   .header-actions,
   .header-size-switch,
   .confirm-overlay,
@@ -1009,6 +1065,7 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
       <button class="header-size-btn" data-size="M" onclick="switchSize('M')">M</button>
       <button class="header-size-btn" data-size="L" onclick="switchSize('L')">L</button>
     </div>
+    <button class="btn-header-credits" id="btnHeaderCredits" onclick="openBuyModal()" title="Credits für Export ohne Wasserzeichen">💎 Credits <span class="credit-count" id="creditCount">0</span></button>
     <button class="btn-header-projects" onclick="openProjectsModal()" title="Gespeicherte Exposés verwalten">▤ Meine Exposés</button>
     <button class="btn-header-upload" onclick="openUploadModal()" title="Dateien hochladen &amp; automatisch Felder füllen">📁 Dateien hochladen</button>
     <button class="btn-header-reset" onclick="openConfirmAll()">↺ Alles zurücksetzen</button>
@@ -1566,7 +1623,7 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
       </div>
       <div id="preview-output"></div>
       <div class="preview-actions" style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.5rem">
-        <button class="btn btn-next" onclick="window.print()" style="background:var(--gold)">⎙ Als PDF drucken / speichern</button>
+        <button class="btn btn-next" onclick="triggerExport()" style="background:var(--gold)">⎙ Als PDF drucken / speichern</button>
         <button class="btn btn-next" onclick="openMediaModal()" style="background:transparent;border:1px solid var(--gold);color:var(--gold)">✦ Weitere Medien</button>
         <button class="btn btn-back" onclick="openConfirmAll()">↺ Von vorne beginnen</button>
       </div>
@@ -1811,6 +1868,19 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- Buy Credits Modal -->
+<div class="buy-overlay" id="buyOverlay" onclick="if(event.target===this)closeBuyModal()">
+  <div class="buy-modal">
+    <button class="buy-close" onclick="closeBuyModal()">✕</button>
+    <div class="buy-kicker">Credits kaufen</div>
+    <div class="buy-title">Exposés ohne Wasserzeichen exportieren</div>
+    <div class="buy-desc">Jedes Credit schaltet einen sauberen PDF-Export frei. Vorschau und alle Funktionen bleiben kostenlos.</div>
+    <div class="buy-credit-line">Aktuell: <strong id="buyCreditCount">0</strong> Credits verfügbar</div>
+    <div class="buy-packs" id="buyPacksGrid"></div>
+    <div class="buy-foot">Bezahlung über <strong>Stripe</strong> — sichere SSL-Verbindung. Credits werden nach erfolgreicher Zahlung automatisch freigeschaltet.</div>
   </div>
 </div>
 
@@ -4656,6 +4726,126 @@ function swapPhotoForSlot(slotIndex, newIndex) {
   closeSwapPicker();
   renderPhotoGrid();
   buildPreview();
+}
+
+// ══════════════════════════════════════════════════════
+// MONETARISIERUNG: Credit-System + Stripe + Wasserzeichen
+// ══════════════════════════════════════════════════════
+
+// Stripe Payment Links — werden im Stripe Dashboard erstellt und hier eingefügt.
+// Anleitung: stripe.com → Dashboard → Payment Links → "Neuen Payment Link"
+//   - Erfolgs-URL: https://expogen.de/?credits=N  (N = Credits dieses Pakets)
+//   - Diesen URL hier eintragen:
+const STRIPE_PAYMENT_LINKS = {
+  pack1:  'https://buy.stripe.com/test_PLACEHOLDER_PACK1',   // 1 Credit – 4,90 €
+  pack5:  'https://buy.stripe.com/test_PLACEHOLDER_PACK5',   // 5 Credits – 19,90 €
+  pack10: 'https://buy.stripe.com/test_PLACEHOLDER_PACK10',  // 10 Credits – 34,90 €
+  pack25: 'https://buy.stripe.com/test_PLACEHOLDER_PACK25',  // 25 Credits – 69,90 €
+};
+
+const CREDIT_PACKS = [
+  { id:'pack1',  credits:1,  price:'4,90 €',  name:'Einzelexposé',   sub:'Ein einzelner Export ohne Wasserzeichen' },
+  { id:'pack5',  credits:5,  price:'19,90 €', name:'5er-Paket',      sub:'5 Exports — empfohlen für Einzelmakler',     recommended:true },
+  { id:'pack10', credits:10, price:'34,90 €', name:'10er-Paket',     sub:'10 Exports — beste Wahl für regelmäßige Nutzung' },
+  { id:'pack25', credits:25, price:'69,90 €', name:'25er-Paket',     sub:'25 Exports — ideal für Maklerbüros' },
+];
+
+function getCredits() {
+  return parseInt(localStorage.getItem('expogen_credits') || '0', 10) || 0;
+}
+function hasCredits() { return getCredits() > 0; }
+function consumeCredit() {
+  const c = getCredits();
+  if (c <= 0) return false;
+  localStorage.setItem('expogen_credits', String(c - 1));
+  updateCreditUI();
+  return true;
+}
+function addCredits(amount) {
+  const n = Math.max(0, parseInt(amount, 10) || 0);
+  if (!n) return;
+  localStorage.setItem('expogen_credits', String(getCredits() + n));
+  updateCreditUI();
+}
+
+function updateCreditUI() {
+  const c = getCredits();
+  const cnt = document.getElementById('creditCount');
+  const btn = document.getElementById('btnHeaderCredits');
+  const buyCnt = document.getElementById('buyCreditCount');
+  if (cnt) cnt.textContent = String(c);
+  if (btn) btn.classList.toggle('no-credits', c === 0);
+  if (buyCnt) buyCnt.textContent = String(c);
+}
+
+function triggerExport() {
+  const hasC = hasCredits();
+  if (hasC) {
+    consumeCredit();
+    document.body.classList.remove('expo-watermark');
+    setTimeout(() => window.print(), 50);
+  } else {
+    document.body.classList.add('expo-watermark');
+    setTimeout(() => {
+      window.print();
+      // Nach dem Drucken: Watermark entfernen und Kauf-Modal anbieten
+      setTimeout(() => {
+        document.body.classList.remove('expo-watermark');
+        openBuyModal();
+      }, 800);
+    }, 50);
+  }
+}
+
+function openBuyModal() {
+  renderBuyPacks();
+  updateCreditUI();
+  document.getElementById('buyOverlay').classList.add('open');
+}
+function closeBuyModal() {
+  document.getElementById('buyOverlay').classList.remove('open');
+}
+
+function renderBuyPacks() {
+  const grid = document.getElementById('buyPacksGrid');
+  if (!grid) return;
+  grid.innerHTML = CREDIT_PACKS.map(p => {
+    const link = STRIPE_PAYMENT_LINKS[p.id] || '#';
+    const badge = p.recommended ? `<span class="buy-pack-recommended">Empfohlen</span>` : '';
+    return `<a class="buy-pack" href="${link}" target="_blank" rel="noopener">
+      <div class="buy-pack-info">
+        <div class="buy-pack-name">${p.name} ${badge}</div>
+        <div class="buy-pack-sub">${p.sub}</div>
+      </div>
+      <div class="buy-pack-price">${p.price}</div>
+    </a>`;
+  }).join('');
+}
+
+// Success-Handler: liest ?credits=N aus der URL nach Stripe-Redirect und schaltet sie frei.
+(function handleSuccessRedirect(){
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const credits = parseInt(params.get('credits') || '0', 10);
+    if (credits > 0) {
+      addCredits(credits);
+      // Toast/Hinweis
+      setTimeout(() => {
+        alert(`✓ ${credits} Credit${credits === 1 ? '' : 's'} freigeschaltet — viel Erfolg mit deinem Exposé!`);
+      }, 200);
+      // URL bereinigen, damit Reload nicht doppelt addiert
+      const url = new URL(window.location.href);
+      url.searchParams.delete('credits');
+      window.history.replaceState({}, '', url.toString());
+    }
+  } catch(e) {}
+})();
+
+// Initial UI-Update sobald DOM bereit
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', updateCreditUI);
+} else {
+  updateCreditUI();
 }
 </script>
 
