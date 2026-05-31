@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Seite nicht gefunden – Expogen</title>
+<meta name="robots" content="noindex, follow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<style>
+  :root{
+    --navy:#0d1220;
+    --navy2:#141b30;
+    --gold:#c9a84c;
+    --gold2:#e0bc5a;
+    --cream:#f4ecd6;
+    --text:#cfd3dc;
+    --muted:#8b93a7;
+    --border:rgba(255,255,255,.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Roboto',sans-serif;
+    background:radial-gradient(1100px 600px at 70% -10%, rgba(201,168,76,.10), transparent 60%), var(--navy);
+    color:var(--text);
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+  a{color:var(--gold);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .nav{position:sticky;top:0;z-index:10;background:rgba(13,18,32,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;max-width:880px;margin:0 auto}
+  .brand{font-family:'Ubuntu',sans-serif;font-weight:700;font-size:1.25rem;color:var(--cream)}
+  .brand span{color:var(--gold)}
+  .nav-back{font-size:.88rem;color:var(--text)}
+  main{flex:1;display:flex;align-items:center;justify-content:center;padding:3rem 1.5rem}
+  .card{max-width:560px;text-align:center}
+  .code{
+    font-family:'Ubuntu',sans-serif;
+    font-weight:700;
+    font-size:clamp(4.5rem,16vw,8rem);
+    line-height:1;
+    letter-spacing:-.03em;
+    color:var(--cream);
+  }
+  .code span{color:var(--gold)}
+  .kicker{display:inline-block;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:1rem}
+  h1{font-family:'Ubuntu',sans-serif;font-size:clamp(1.6rem,4vw,2.2rem);color:var(--cream);margin:1rem 0 .8rem;letter-spacing:-.01em}
+  p{color:var(--text);font-size:1rem;margin-bottom:2rem;max-width:42ch;margin-left:auto;margin-right:auto}
+  .actions{display:flex;gap:.9rem;justify-content:center;flex-wrap:wrap}
+  .btn{
+    display:inline-block;
+    padding:.85rem 1.6rem;
+    border-radius:10px;
+    font-family:'Ubuntu',sans-serif;
+    font-weight:500;
+    font-size:.95rem;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-primary{
+    background:linear-gradient(135deg,var(--gold2),var(--gold));
+    color:var(--navy);
+    box-shadow:0 8px 24px rgba(201,168,76,.22);
+  }
+  .btn-primary:hover{text-decoration:none;transform:translateY(-2px);box-shadow:0 12px 30px rgba(201,168,76,.30)}
+  .btn-ghost{
+    border:1px solid var(--border);
+    color:var(--cream);
+    background:rgba(255,255,255,.02);
+  }
+  .btn-ghost:hover{text-decoration:none;border-color:rgba(201,168,76,.45);color:var(--gold2)}
+  footer{padding:2rem 0;border-top:1px solid var(--border);text-align:center;font-size:.8rem;color:var(--muted)}
+  footer a{margin:0 .5rem}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="/" class="brand">Expo<span>gen</span></a>
+    <a href="/" class="nav-back">← Zurück</a>
+  </div>
+</header>
+
+<main>
+  <div class="card">
+    <div class="code">4<span>0</span>4</div>
+    <div class="kicker">Fehler</div>
+    <h1>Seite nicht gefunden</h1>
+    <p>Die von Ihnen gesuchte Seite existiert nicht oder wurde verschoben. Kehren Sie zur Startseite zurück oder starten Sie direkt mit der App.</p>
+    <div class="actions">
+      <a href="/" class="btn btn-primary">Zur Startseite</a>
+      <a href="/app" class="btn btn-ghost">Zur App</a>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <a href="/">Startseite</a>·
+  <a href="/datenschutz">Datenschutz</a>·
+  <a href="/impressum">Impressum</a>·
+  <a href="/agb">AGB</a>
+</footer>
+
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

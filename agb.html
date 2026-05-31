@@ -8,22 +8,23 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="legal.css">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
 </head>
 <body>
 
 <header class="nav">
   <div class="nav-inner">
-    <a href="marketing.html" class="brand">Expo<span>gen</span></a>
-    <a href="marketing.html" class="nav-back">← Zurück</a>
+    <a href="/" class="brand">Expo<span>gen</span></a>
+    <a href="/" class="nav-back">← Zurück</a>
   </div>
 </header>
 
 <main class="wrap">
   <div class="kicker">Rechtliches</div>
   <h1>Allgemeine Geschäftsbedingungen</h1>
-  <p class="updated">Stand: <span class="todo"><strong>TODO:</strong> Datum eintragen</span></p>
-
-  <div class="todo"><strong>Hinweis:</strong> Diese AGB sind ein <em>Template für digitale Güter (Credits/Software-as-a-Service-Light)</em>. Vor Launch unbedingt anwaltlich oder per spezialisiertem Generator (e-recht24.de, it-recht-kanzlei.de, Trusted Shops) prüfen lassen.</div>
+  <p class="updated">Stand: Juni 2026</p>
 
   <h2>§ 1 Geltungsbereich</h2>
   <p>(1) Diese AGB gelten für alle Verträge zwischen Marco Delicati, md mediadesign (nachfolgend „Anbieter") und dem Kunden über die Nutzung der Web-Anwendung Expogen sowie den Kauf von Credits zur Nutzung der Exportfunktion.</p>
@@ -40,7 +41,7 @@
   <p>(3) Der Vertragstext wird nicht gespeichert. Die Bestellbestätigung erfolgt per E-Mail durch Stripe.</p>
 
   <h2>§ 4 Preise und Zahlung</h2>
-  <p>(1) Es gelten die auf der Website ausgewiesenen Preise. Alle Preise verstehen sich <span class="todo"><strong>TODO:</strong> entweder „inklusive Umsatzsteuer" ODER „nach § 19 UStG keine USt-Ausweisung (Kleinunternehmer)" — je nach Status</span>.</p>
+  <p>(1) Es gelten die auf der Website ausgewiesenen Preise. Alle Preise sind Endpreise. Gemäß § 19 UStG (Kleinunternehmerregelung) wird keine Umsatzsteuer ausgewiesen.</p>
   <p>(2) Die Zahlung erfolgt ausschließlich über den Zahlungsdienstleister Stripe. Folgende Zahlungsmethoden stehen zur Verfügung: Kreditkarte, SEPA-Lastschrift, Apple Pay, Google Pay (sofern von Stripe für den jeweiligen Markt freigeschaltet).</p>
   <p>(3) Mit Bestätigung der Zahlung durch Stripe werden die Credits unmittelbar im Browser des Kunden gutgeschrieben.</p>
 
@@ -51,10 +52,10 @@
     <li>ausdrücklich zugestimmt hat, dass der Anbieter mit der Ausführung des Vertrages vor Ablauf der Widerrufsfrist beginnt, und</li>
     <li>seine Kenntnis davon bestätigt hat, dass er durch seine Zustimmung mit Beginn der Ausführung des Vertrages sein Widerrufsrecht verliert.</li>
   </ul>
-  <p>(3) Im Checkout muss der Kunde diese Zustimmung aktiv erteilen (Häkchen). <span class="todo"><strong>TODO:</strong> In Stripe Payment Links den entsprechenden Hinweis im Beschreibungstext hinterlegen oder einen Custom-Checkout nutzen.</span></p>
+  <p>(3) Die hierfür erforderliche ausdrückliche Zustimmung sowie die Bestätigung der Kenntnis über das Erlöschen des Widerrufsrechts werden im Stripe-Checkout vor Abschluss des Kaufs eingeholt.</p>
 
   <h2>§ 6 Gültigkeit von Credits</h2>
-  <p>Credits verfallen nicht. Sie verbleiben so lange im Browser-Speicher des Kunden, bis sie verbraucht werden oder bis der Kunde seinen Browser-Speicher selbst löscht. Bei einem Geräte- oder Browserwechsel obliegt es dem Kunden, seine Credits über die in der App vorgesehene Backup-Funktion zu sichern.</p>
+  <p>Credits verfallen nicht. Sie verbleiben so lange im Browser-Speicher des Kunden, bis sie verbraucht werden oder bis der Kunde seinen Browser-Speicher selbst löscht. Bei einem Geräte- oder Browserwechsel kann der Kunde seine Credits über die in der App integrierte Funktion „Credits sichern" (Erzeugung eines Backup-Codes) sichern und auf einem anderen Gerät über „Credits übertragen" wiederherstellen.</p>
 
   <h2>§ 7 Verfügbarkeit / Haftung</h2>
   <p>(1) Der Anbieter ist um eine möglichst unterbrechungsfreie Verfügbarkeit der Anwendung bemüht. Eine Garantie auf ständige Verfügbarkeit besteht jedoch nicht.</p>
@@ -67,7 +68,7 @@
   <p>(2) Der Kunde darf die Anwendung nicht reverse-engineeren, automatisiert massenhaft Exporte ohne Credits erzeugen oder das Wasserzeichen technisch umgehen.</p>
 
   <h2>§ 9 Datenschutz</h2>
-  <p>Hinweise zur Verarbeitung personenbezogener Daten finden sich in der <a href="datenschutz.html">Datenschutzerklärung</a>.</p>
+  <p>Hinweise zur Verarbeitung personenbezogener Daten finden sich in der <a href="/datenschutz">Datenschutzerklärung</a>.</p>
 
   <h2>§ 10 Schlussbestimmungen</h2>
   <p>(1) Es gilt deutsches Recht unter Ausschluss des UN-Kaufrechts.</p>
@@ -76,10 +77,11 @@
 </main>
 
 <footer>
-  <a href="marketing.html">Startseite</a>·
-  <a href="impressum.html">Impressum</a>·
-  <a href="datenschutz.html">Datenschutz</a>
+  <a href="/">Startseite</a>·
+  <a href="/impressum">Impressum</a>·
+  <a href="/datenschutz">Datenschutz</a>
 </footer>
 
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
