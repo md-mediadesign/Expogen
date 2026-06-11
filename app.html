@@ -1909,11 +1909,20 @@ body.expo-watermark .h-page::after{
     <div class="buy-foot">Bezahlung über <strong>Stripe</strong> — sichere SSL-Verbindung. Credits werden nach erfolgreicher Zahlung automatisch freigeschaltet.</div>
     <div class="credit-backup">
       <div class="credit-backup-links">
+        <button type="button" class="credit-backup-link" onclick="toggleCreditBackup('voucher')">Gutschein einlösen</button>
+        <span class="credit-backup-sep">·</span>
         <button type="button" class="credit-backup-link" onclick="toggleCreditBackup('save')">Credits sichern</button>
         <span class="credit-backup-sep">·</span>
         <button type="button" class="credit-backup-link" onclick="toggleCreditBackup('restore')">Credits übertragen</button>
       </div>
       <div class="credit-backup-panel" id="creditBackupPanel" style="display:none">
+        <div id="creditBackupVoucher" style="display:none">
+          <p class="credit-backup-hint">Gutschein-Code eingeben, um Gratis-Credits freizuschalten (Testphase).</p>
+          <input class="credit-backup-area" id="creditVoucherInput" type="text" autocomplete="off" spellcheck="false" placeholder="z. B. EXPOGEN-START" onkeydown="if(event.key==='Enter'){event.preventDefault();redeemVoucher(this.value);}" />
+          <div class="credit-backup-actions">
+            <button type="button" class="credit-backup-btn primary" onclick="redeemVoucher(document.getElementById('creditVoucherInput').value)">Einlösen</button>
+          </div>
+        </div>
         <div id="creditBackupSave" style="display:none">
           <p class="credit-backup-hint">Sicherungs-Code für den Gerätewechsel. Kopieren oder als Datei speichern und auf dem neuen Gerät unter „Credits übertragen" einlösen.</p>
           <textarea class="credit-backup-area" id="creditBackupCode" readonly rows="3"></textarea>
@@ -4936,19 +4945,28 @@ function restoreCredits(code) {
 }
 function toggleCreditBackup(mode) {
   const panel = document.getElementById('creditBackupPanel');
-  const save = document.getElementById('creditBackupSave');
-  const restore = document.getElementById('creditBackupRestore');
   if (!panel) return;
+  const sections = { voucher: 'creditBackupVoucher', save: 'creditBackupSave', restore: 'creditBackupRestore' };
   const wasOpen = panel.style.display !== 'none';
-  const currentMode = save.style.display !== 'none' ? 'save' : (restore.style.display !== 'none' ? 'restore' : null);
+  let currentMode = null;
+  for (const m in sections) {
+    const el = document.getElementById(sections[m]);
+    if (el && el.style.display !== 'none') currentMode = m;
+  }
   if (wasOpen && currentMode === mode) {
     panel.style.display = 'none';
     return;
   }
   panel.style.display = 'block';
-  save.style.display = mode === 'save' ? 'block' : 'none';
-  restore.style.display = mode === 'restore' ? 'block' : 'none';
+  for (const m in sections) {
+    const el = document.getElementById(sections[m]);
+    if (el) el.style.display = m === mode ? 'block' : 'none';
+  }
   if (mode === 'save') backupCredits();
+  if (mode === 'voucher') {
+    const input = document.getElementById('creditVoucherInput');
+    if (input) { input.value = ''; setTimeout(() => input.focus(), 0); }
+  }
 }
 function copyCreditBackup() {
   const code = backupCredits();
@@ -4977,6 +4995,32 @@ function downloadCreditBackup() {
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
   showToast('✓ Sicherungs-Datei gespeichert.');
+}
+
+// ── Gutschein-Codes (Testphase) ─────────────────────────────
+// Code -> Anzahl Credits. Hier frei ergänzen/entfernen. Schreibweise egal (wird in Großbuchstaben geprüft).
+// Hinweis: rein clientseitig, daher nur für Test/Beta gedacht – nicht fälschungssicher.
+const VOUCHER_CODES = {
+  'EXPOGEN-START': 3,
+  'MAKLER-BETA':   5,
+  'ORANGE-INTERN': 10,
+  'PARTNER-2026':  5
+};
+
+function redeemVoucher(input) {
+  const code = (input || '').trim().toUpperCase();
+  if (!code) { showToast('✗ Bitte einen Gutschein-Code eingeben.'); return false; }
+  const amount = VOUCHER_CODES[code];
+  if (!amount) { showToast('✗ Ungültiger Gutschein-Code.'); return false; }
+  const used = (localStorage.getItem('expogen_redeemed_vouchers') || '').split(',').filter(Boolean);
+  if (used.includes(code)) { showToast('✗ Dieser Gutschein wurde auf diesem Gerät bereits eingelöst.'); return false; }
+  addCredits(amount);
+  used.push(code);
+  localStorage.setItem('expogen_redeemed_vouchers', used.join(','));
+  const inputEl = document.getElementById('creditVoucherInput');
+  if (inputEl) inputEl.value = '';
+  showToast(`✓ Gutschein eingelöst — ${amount} Credit${amount === 1 ? '' : 's'} gutgeschrieben.`);
+  return true;
 }
 
 // Success-Handler: liest ?credits=N aus der URL nach Stripe-Redirect und schaltet sie frei.
