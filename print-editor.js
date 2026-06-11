@@ -271,15 +271,48 @@ function _sizePrintIframe() {
 // Bei Resize neu skalieren
 window.addEventListener('resize', () => { if (_printState) _sizePrintIframe(); });
 
+function _injectPrintWatermark(doc) {
+  if (!doc || !doc.body || doc.getElementById('__expogenWmStyle')) return;
+  const svg =
+    "<svg xmlns='http://www.w3.org/2000/svg' width='340' height='220'>" +
+    "<text x='20' y='130' transform='rotate(-30 170 110)' " +
+    "font-family='Arial, Helvetica, sans-serif' font-size='24' font-weight='700' " +
+    "fill='rgba(0,0,0,0.13)'>VORSCHAU · expogen.de</text></svg>";
+  const uri = "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+  const style = doc.createElement('style');
+  style.id = '__expogenWmStyle';
+  style.textContent =
+    '.__expogen-wm{position:fixed;inset:0;z-index:2147483647;pointer-events:none;' +
+    'background-image:url("' + uri + '");background-repeat:repeat;' +
+    '-webkit-print-color-adjust:exact;print-color-adjust:exact}';
+  doc.head.appendChild(style);
+  const el = doc.createElement('div');
+  el.className = '__expogen-wm';
+  doc.body.appendChild(el);
+}
+
 function printFromEditor() {
   const iframe = document.getElementById('printPreviewFrame');
   if (!iframe || !iframe.contentWindow) {
     alert('Vorschau ist nicht bereit. Bitte einen Moment warten.');
     return;
   }
+  const paid = (typeof hasCredits === 'function') && hasCredits();
   try {
-    iframe.contentWindow.focus();
-    iframe.contentWindow.print();
+    if (paid) {
+      if (typeof consumeCredit === 'function') consumeCredit();
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+    } else {
+      _injectPrintWatermark(iframe.contentDocument);
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+      // Nach dem Drucken: saubere Vorschau wiederherstellen + Kauf-Modal anbieten
+      setTimeout(() => {
+        _renderPrintPreview();
+        if (typeof openBuyModal === 'function') openBuyModal();
+      }, 800);
+    }
   } catch (e) {
     console.error('[PrintEditor] Druck fehlgeschlagen:', e);
     alert('Druck fehlgeschlagen. Bitte Browser-Konsole prüfen.');
