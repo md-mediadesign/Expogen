@@ -1918,7 +1918,7 @@ body.expo-watermark .h-page::after{
       <div class="credit-backup-panel" id="creditBackupPanel" style="display:none">
         <div id="creditBackupVoucher" style="display:none">
           <p class="credit-backup-hint">Gutschein-Code eingeben, um Gratis-Credits freizuschalten (Testphase).</p>
-          <input class="credit-backup-area" id="creditVoucherInput" type="text" autocomplete="off" spellcheck="false" placeholder="z. B. EXPOGEN-START" onkeydown="if(event.key==='Enter'){event.preventDefault();redeemVoucher(this.value);}" />
+          <input class="credit-backup-area" id="creditVoucherInput" type="text" autocomplete="off" spellcheck="false" placeholder="z. B. EXPOGEN-TEST" onkeydown="if(event.key==='Enter'){event.preventDefault();redeemVoucher(this.value);}" />
           <div class="credit-backup-actions">
             <button type="button" class="credit-backup-btn primary" onclick="redeemVoucher(document.getElementById('creditVoucherInput').value)">Einlösen</button>
           </div>
@@ -5001,10 +5001,9 @@ function downloadCreditBackup() {
 // Code -> Anzahl Credits. Hier frei ergänzen/entfernen. Schreibweise egal (wird in Großbuchstaben geprüft).
 // Hinweis: rein clientseitig, daher nur für Test/Beta gedacht – nicht fälschungssicher.
 const VOUCHER_CODES = {
-  'EXPOGEN-START': 3,
-  'MAKLER-BETA':   5,
-  'ORANGE-INTERN': 10,
-  'PARTNER-2026':  5
+  'EXPOGEN-TEST':    3,
+  'EXPOGEN-SPECIAL': 10,
+  'PARTNER-2026':    5
 };
 
 function redeemVoucher(input) {
