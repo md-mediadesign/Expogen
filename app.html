@@ -1918,7 +1918,7 @@ body.expo-watermark .h-page::after{
       <div class="credit-backup-panel" id="creditBackupPanel" style="display:none">
         <div id="creditBackupVoucher" style="display:none">
           <p class="credit-backup-hint">Gutschein-Code eingeben, um Gratis-Credits freizuschalten (Testphase).</p>
-          <input class="credit-backup-area" id="creditVoucherInput" type="text" autocomplete="off" spellcheck="false" placeholder="z. B. EXPOGEN-TEST" onkeydown="if(event.key==='Enter'){event.preventDefault();redeemVoucher(this.value);}" />
+          <input class="credit-backup-area" id="creditVoucherInput" type="text" autocomplete="off" spellcheck="false" placeholder="Code eingeben …" onkeydown="if(event.key==='Enter'){event.preventDefault();redeemVoucher(this.value);}" />
           <div class="credit-backup-actions">
             <button type="button" class="credit-backup-btn primary" onclick="redeemVoucher(document.getElementById('creditVoucherInput').value)">Einlösen</button>
           </div>
