@@ -1,0 +1,11 @@
+# Interne Dateien – niemals öffentlich deployen
+.firecrawl/
+Beispiel_PDFs/
+Expogen_Kundenfragebogen.docx
+Expogen_Kundenfragebogen.pdf
+expogen-launch-plan.md
+CLAUDE.md
+start-server.command
+.DS_Store
+.claude/
+.git/
