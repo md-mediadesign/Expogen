@@ -1585,15 +1585,11 @@ body.expo-watermark .h-page::after{
       </div>
     </div>
 
-    <!-- Weitere Medien Modal -->
-    <div class="media-overlay" id="mediaOverlay" onclick="if(event.target===this)closeMediaModal()">
-      <div class="media-modal">
-        <button class="media-close" onclick="closeMediaModal()" aria-label="Schließen">×</button>
-        <div class="media-head">
-          <div class="media-kicker">Marketing-Assets</div>
-          <h3 class="media-title">Weitere Medien erstellen</h3>
-          <p class="media-sub">Generieren Sie aus den eingetragenen Daten zusätzliche Vermarktungs-Materialien.</p>
-        </div>
+    <!-- Step 17: Weitere Medien -->
+    <div class="step-content" data-step="17">
+      <div class="step-num" id="stepNum17"></div>
+      <div class="step-title">Weitere Medien</div>
+      <div class="step-desc">Erstellen Sie aus Ihren eingetragenen Daten zusätzliche Vermarktungs-Materialien — Landing Page, Flyer, Plakat, Bauzaunbanner, Social-Post und Zeitungsanzeige.</div>
         <div id="mediaFileWarning" class="media-warn" style="display:none">
           <div class="media-warn-title">⚠ Bilder können nicht eingebettet werden</div>
           <div class="media-warn-body">Sie haben <code>app.html</code> per Doppelklick geöffnet. Chrome blockiert in diesem Modus das Laden lokaler Bilder. Für eingebettete Bilder bitte über einen lokalen Server öffnen:</div>
@@ -1641,7 +1637,9 @@ body.expo-watermark .h-page::after{
             <div class="media-card-actions"><button class="media-btn primary" onclick="openPrintEditor('zeitung')">Erstellen</button></div>
           </div>
         </div>
-      </div>
+        <div class="preview-actions" style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.5rem">
+          <button class="btn btn-back" onclick="navigateToStep(16)">← Zurück zur Vorschau</button>
+        </div>
     </div>
 
     <!-- Print-Editor (Flyer / Plakat / Banner / Social / Zeitung) -->
@@ -2041,6 +2039,7 @@ const ALL_STEP_DEFS = [
   {id:14,label:'Extras',       minSize:'S', optional:true},
   {id:15,label:'Farben',       minSize:'S'},
   {id:16,label:'Vorschau',     minSize:'S'},
+  {id:17,label:'Weitere Medien',minSize:'S'},
 ];
 const COLOR_PAIRS = [
   { id:1,  name:'Marineblau & Champagner',  desc:'Zeitloser Luxus',   accent:'#0a2342', secondary:'#c9a24b' },
@@ -2421,16 +2420,10 @@ function closeFaModal() {
   // applyVoiceData() already navigated if AI ran; otherwise stay on current step
 }
 function openMediaModal() {
-  const el = document.getElementById('mediaOverlay');
-  if (el) el.classList.add('open');
-  // Warn if opened via file:// – images won't embed in Chrome
-  const warn = document.getElementById('mediaFileWarning');
-  if (warn) warn.style.display = (location.protocol === 'file:') ? 'block' : 'none';
+  // "Weitere Medien" ist jetzt ein eigener Schritt (17) statt eines Modals
+  navigateToStep(17);
 }
-function closeMediaModal() {
-  const el = document.getElementById('mediaOverlay');
-  if (el) el.classList.remove('open');
-}
+function closeMediaModal() { /* Modal entfällt – Schritt 17 ist eine eigene Seite */ }
 function faSetStatus(txt) {
   const el = document.getElementById('faStatus');
   if (el) el.textContent = txt;
@@ -2834,13 +2827,15 @@ function buildStepper() {
 
 function updateStepNums() {
   const active = getActiveStepIds();
-  const total = active.length - 1;
-  active.forEach((id, i) => {
+  const OUTPUT_STEPS = [16, 17];
+  const numbered = active.filter(id => !OUTPUT_STEPS.includes(id));
+  const total = numbered.length;
+  active.forEach((id) => {
     const el = document.getElementById(`stepNum${id}`);
-    if (el) {
-      if (id === 15) el.textContent = 'Vorschau & Export';
-      else el.textContent = `Schritt ${i+1} von ${total}`;
-    }
+    if (!el) return;
+    if (id === 16) el.textContent = 'Vorschau & Export';
+    else if (id === 17) el.textContent = 'Weitere Medien';
+    else el.textContent = `Schritt ${numbered.indexOf(id) + 1} von ${total}`;
   });
 }
 
@@ -3042,6 +3037,7 @@ function showStep(id) {
   if (id === 8 && data.mapEnabled) setTimeout(initLageFormMap, 150);
   if (id === 15) buildPreview();
   if (id === 16) { restoreFormatState(); buildPreview(); }
+  if (id === 17) { const warn = document.getElementById('mediaFileWarning'); if (warn) warn.style.display = (location.protocol === 'file:') ? 'block' : 'none'; }
   updateBurgerLabel();
 }
 
@@ -3051,12 +3047,12 @@ function updateNav() {
   document.getElementById('btnBack').style.visibility = idx === 0 ? 'hidden' : 'visible';
   const btn = document.getElementById('btnNext');
   const sr = document.getElementById('btnStepReset');
-  if (current === 15) {
+  if (current === 16 || current === 17) {
     btn.style.display = 'none';
     if (sr) sr.style.display = 'none';
   } else {
     btn.style.display = '';
-    btn.textContent = (idx === active.length - 2) ? 'Vorschau →' : 'Weiter →';
+    btn.textContent = (active[idx + 1] === 16) ? 'Vorschau →' : 'Weiter →';
     if (sr) sr.style.display = '';
   }
 }
@@ -3779,7 +3775,7 @@ function openConfirmAll() {
   openConfirm('⚠️','Alles zurücksetzen?','Alle Eingaben aus allen Schritten werden gelöscht.',doResetAll,false);
 }
 function openConfirmStep() {
-  if (current===15) return;
+  if (current===16 || current===17) return;
   const label = ALL_STEP_DEFS.find(s=>s.id===current)?.label || `Schritt ${current}`;
   openConfirm('↺',`„${label}" leeren?`,`Nur die Eingaben dieses Schritts werden gelöscht.`,resetCurrentStep,true);
 }
