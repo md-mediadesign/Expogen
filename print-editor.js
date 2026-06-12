@@ -99,7 +99,7 @@ function openPrintEditor(tool) {
     variant: t.config.variants[0].id,
     fields: _printDefaultFields(),
     images: Array.from({ length: slotCount }, (_, i) => allPhotos[i]?.src || firstImg),
-    accent: (typeof getColorPair === 'function' ? getColorPair().accent : '#c9a84c'),
+    accent: (typeof getColorPair === 'function' ? getColorPair().secondary : '#c9a84c'),
     logoSrc: ((typeof data !== 'undefined' && data && data.brandLogoSrc) || null),
   };
 
