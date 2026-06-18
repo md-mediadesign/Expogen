@@ -3088,7 +3088,7 @@ function validateStep(id) {
   if (id === 4 && !val('f-adresse'))    { show('err-adresse');  return false; }
   if (id === 7 && !val('f-beschreibung')) { show('err-beschr'); return false; }
   if (id === 13 && !val('f-name'))      { show('err-name');     return false; }
-  if (id === 14 && data.colorPair == null)    { show('err-colorPair'); return false; }
+  if (id === 15 && data.colorPair == null)    { show('err-colorPair'); return false; }
   return true;
 }
 function clearErrors(){ document.querySelectorAll('.error-msg').forEach(e=>e.classList.remove('show')); }
