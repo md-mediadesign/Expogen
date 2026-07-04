@@ -3488,12 +3488,28 @@ function setupDragDrop() {
 }
 
 async function handlePhotoFiles(files) {
-  const arr = Array.from(files).filter(f => f.type.startsWith('image/')).slice(0, 30 - photos.length);
+  const all = Array.from(files);
+  const images = all.filter(f => f.type.startsWith('image/'));
+  const arr = images.slice(0, 30 - photos.length);
+  const failed = [];
   for (const file of arr) {
     const src = await compressImage(file);
     if (src) { photos.push({ src, caption: '' }); renderPhotoGrid(); }
+    else failed.push(file.name);
   }
   PhotoDB.save('current', photos, grundrisse);
+  reportSkippedImages(all.length - images.length, images.length - arr.length, failed, 30);
+}
+
+function reportSkippedImages(wrongType, overLimit, failed, limit) {
+  const msgs = [];
+  if (failed.length) {
+    const names = failed.slice(0, 3).join(', ') + (failed.length > 3 ? ', …' : '');
+    msgs.push(`${failed.length} Bild${failed.length > 1 ? 'er' : ''} konnte${failed.length > 1 ? 'n' : ''} nicht gelesen werden: ${names}. HEIC-Fotos (iPhone) bitte vorher als JPEG exportieren.`);
+  }
+  if (wrongType) msgs.push(`${wrongType} Datei${wrongType > 1 ? 'en' : ''} übersprungen (kein unterstütztes Bildformat – z. B. HEIC).`);
+  if (overLimit) msgs.push(`${overLimit} Bild${overLimit > 1 ? 'er' : ''} übersprungen – Limit von ${limit} erreicht.`);
+  if (msgs.length) showToast(msgs.join(' '));
 }
 
 // ── Foto-Slot-Hilfsfunktionen ──────────────────────────
@@ -4627,12 +4643,17 @@ function updateStellplatzSummary() {
 // ══════════════════════════════════════════════════════
 
 async function handleGrundrissFiles(files) {
-  const arr = Array.from(files).filter(f => f.type.startsWith('image/')).slice(0, 10 - grundrisse.length);
+  const all = Array.from(files);
+  const images = all.filter(f => f.type.startsWith('image/'));
+  const arr = images.slice(0, 10 - grundrisse.length);
+  const failed = [];
   for (const f of arr) {
     const src = await compressImage(f);
     if (src) { grundrisse.push({ src, caption: '' }); renderGrundrissGrid(); }
+    else failed.push(f.name);
   }
   PhotoDB.save('current', photos, grundrisse);
+  reportSkippedImages(all.length - images.length, images.length - arr.length, failed, 10);
 }
 
 function renderGrundrissGrid() {
