@@ -209,7 +209,7 @@ function buildPreviewA() {
     const numPages = Math.ceil(galleryPhotosA.length / perPage);
     for (let pg = 0; pg < numPages; pg++) {
       const pgPhotos = galleryPhotosA.slice(pg * perPage, (pg + 1) * perPage);
-      const layout = galleryVariant(pg, 5); // 0=Panorama, 1=Portrait-Trio, 2=Editorial, 3=Zickzack, 4=Raster
+      const layout = galleryVariant(pg, 7); // 0=Panorama, 1=Portrait-Trio, 2=Editorial, 3=Zickzack, 4=Raster, 5=Editorial gespiegelt, 6=Mosaik links
       const pageTitle = `Fotogalerie${numPages > 1 ? ` (${pg + 1}/${numPages})` : ''}`;
       const m = '0 2.8rem'; // margin shorthand
       const imgStyle = (s) => `object-fit:cover;object-position:${fmtPos(s)};display:block;width:100%`;
@@ -277,17 +277,63 @@ function buildPreviewA() {
               : `<img src="${row[0].src}" style="${imgStyle(row[0])};aspect-ratio:16/7;margin-bottom:3px" alt="">`).join('')}
           </div>`;
 
-      } else {
+      } else if (layout === 4) {
         // ── Raster: gleich große Bilder in 2 Spalten ──
         galleryContent = `
           <div style="margin:${m}">
             ${chunk(pgPhotos, 2).map(row => flexRow(row, '4/3')).join('')}
           </div>`;
+
+      } else if (layout === 5) {
+        // ── Editorial gespiegelt: 2 gestapelt links + großes Bild rechts ──
+        const big = pgPhotos[0];
+        const r1 = pgPhotos[1];
+        const r2 = pgPhotos[2];
+        let rest = pgPhotos.slice(3);
+        let closer = null;
+        if (rest.length % 3 === 1) { closer = rest[rest.length - 1]; rest = rest.slice(0, -1); }
+        galleryContent = `
+          <div style="margin:${m}">
+            <div style="display:flex;gap:3px;margin-bottom:3px">
+              ${(r1 || r2) ? `<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+                ${r1 ? `<img src="${r1.src}" style="${imgStyle(r1)};flex:1;min-height:0" alt="">` : ''}
+                ${r2 ? `<img src="${r2.src}" style="${imgStyle(r2)};flex:1;min-height:0" alt="">` : ''}
+              </div>` : ''}
+              ${big ? `<img src="${big.src}" style="${imgStyle(big)};flex:1.6;min-width:0;aspect-ratio:4/3" alt="">` : ''}
+            </div>
+            ${chunk(rest, 3).map(row => flexRow(row, '4/3')).join('')}
+            ${closer ? `<img src="${closer.src}" style="${imgStyle(closer)};aspect-ratio:16/6;margin-bottom:3px" alt="">` : ''}
+          </div>`;
+
+      } else {
+        // ── Mosaik links: 1 kleines oben + 2 kleine unten links, großes Bild rechts ──
+        const big = pgPhotos[0];
+        const s1 = pgPhotos[1];
+        const s2 = pgPhotos[2];
+        const s3 = pgPhotos[3];
+        let rest = pgPhotos.slice(4);
+        let closer = null;
+        if (rest.length % 3 === 1) { closer = rest[rest.length - 1]; rest = rest.slice(0, -1); }
+        galleryContent = `
+          <div style="margin:${m}">
+            <div style="display:flex;gap:3px;margin-bottom:3px">
+              ${(s1 || s2 || s3) ? `<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+                ${s1 ? `<img src="${s1.src}" style="${imgStyle(s1)};flex:1;min-height:0" alt="">` : ''}
+                ${(s2 || s3) ? `<div style="flex:1;min-height:0;display:flex;gap:3px">
+                  ${s2 ? `<img src="${s2.src}" style="${imgStyle(s2)};flex:1;min-width:0;height:100%" alt="">` : ''}
+                  ${s3 ? `<img src="${s3.src}" style="${imgStyle(s3)};flex:1;min-width:0;height:100%" alt="">` : ''}
+                </div>` : ''}
+              </div>` : ''}
+              ${big ? `<img src="${big.src}" style="${imgStyle(big)};flex:1.6;min-width:0;aspect-ratio:4/3" alt="">` : ''}
+            </div>
+            ${chunk(rest, 3).map(row => flexRow(row, '4/3')).join('')}
+            ${closer ? `<img src="${closer.src}" style="${imgStyle(closer)};aspect-ratio:16/6;margin-bottom:3px" alt="">` : ''}
+          </div>`;
       }
 
       out.innerHTML += `
       <div class="expo-page expo-inner" style="padding:0">
-        ${galleryLayoutPicker(pg, 5)}
+        ${galleryLayoutPicker(pg, 7)}
         ${pageHeader}
         <div style="padding:0 2.8rem 0">
           <div class="expo-page-badge" style="padding-top:1.5rem">IMPRESSIONEN</div>
