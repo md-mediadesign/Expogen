@@ -299,6 +299,10 @@ input::placeholder,textarea::placeholder{color:rgba(120,130,160,.6)}
 .fmt-btn:hover{border-color:var(--gold);color:var(--gold)}
 .fmt-btn.fmt-active{border-color:var(--gold);background:rgba(201,168,76,.15);color:var(--gold2);font-weight:600}
 .photo-caption-input{font-size:.72rem;padding:.22rem .4rem;border:1px solid rgba(201,168,76,.2);border-radius:4px;background:rgba(255,255,255,.05);color:var(--fg);width:100%;box-sizing:border-box}
+.photo-caption-row{display:flex;gap:.3rem;align-items:stretch}
+.photo-caption-row .photo-caption-input{flex:1;min-width:0}
+.caption-file-btn{flex-shrink:0;font-size:.72rem;padding:.22rem .5rem;border:1px solid rgba(201,168,76,.25);border-radius:4px;background:rgba(255,255,255,.03);color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .2s}
+.caption-file-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.08)}
 .photo-slot-badge{display:inline-block;font-size:.6rem;font-weight:600;letter-spacing:.04em;padding:.12rem .45rem;border-radius:10px;margin-top:.3rem;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .badge-cover{background:rgba(245,197,24,.18);color:#f5c518;border:1px solid rgba(245,197,24,.35)}
 .badge-named{background:rgba(201,168,76,.1);color:var(--gold);border:1px solid rgba(201,168,76,.25)}
@@ -2544,7 +2548,7 @@ async function swOpenFileAnalysis() {
     for (const f of imageFiles) {
       try {
         const dataUrl = await fileToDataURL(f);
-        photos.push({ src: dataUrl, caption: '' });
+        photos.push({ src: dataUrl, caption: '', filename: f.name });
         imagesAdded++;
         faLog(`Bild eingefügt: ${f.name}`, 'done');
       } catch(e) {
@@ -3494,7 +3498,7 @@ async function handlePhotoFiles(files) {
   const failed = [];
   for (const file of arr) {
     const src = await compressImage(file);
-    if (src) { photos.push({ src, caption: '' }); renderPhotoGrid(); }
+    if (src) { photos.push({ src, caption: '', filename: file.name }); renderPhotoGrid(); }
     else failed.push(file.name);
   }
   PhotoDB.save('current', photos, grundrisse);
@@ -3666,11 +3670,28 @@ function renderPhotoGrid() {
       `<button class="focal-dot${focalX===x&&focalY===y?' focal-active':''}" onclick="setFocal(${i},${x},${y})" title="${x===0?'Links':x===100?'Rechts':'Mitte'} ${y===0?'oben':y===100?'unten':'Mitte'}"></button>`
     ).join('')}</div>`;
 
+    const capRow = document.createElement('div');
+    capRow.className = 'photo-caption-row';
     const cap = document.createElement('input');
     cap.className = 'photo-caption-input';
     cap.placeholder = 'Beschreibung (optional)';
     cap.value = p.caption || '';
     cap.oninput = () => { photos[i].caption = cap.value; };
+    capRow.appendChild(cap);
+    if (p.filename) {
+      const nameBtn = document.createElement('button');
+      nameBtn.type = 'button';
+      nameBtn.className = 'caption-file-btn';
+      nameBtn.textContent = '📄 Name';
+      nameBtn.title = `Dateiname als Beschriftung übernehmen: ${p.filename}`;
+      nameBtn.onclick = () => {
+        const clean = filenameToCaption(p.filename);
+        photos[i].caption = clean;
+        cap.value = clean;
+        PhotoDB.save('current', photos, grundrisse);
+      };
+      capRow.appendChild(nameBtn);
+    }
 
     let slotLabel = 'Galerie';
     let badgeClass = 'badge-gallery';
@@ -3689,7 +3710,7 @@ function renderPhotoGrid() {
     item.appendChild(fmtRow);
     item.appendChild(focalRow);
     item.appendChild(badge);
-    item.appendChild(cap);
+    item.appendChild(capRow);
     grid.appendChild(item);
   });
 
@@ -3697,6 +3718,10 @@ function renderPhotoGrid() {
   document.getElementById('dropZone').style.display = photos.length >= 30 ? 'none' : '';
   syncPppDisplay();
   updateSlotLegend();
+}
+
+function filenameToCaption(name) {
+  return name.replace(/\.[^.]+$/, '').replace(/[_]+/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
 function setCover(idx) {
@@ -4649,7 +4674,7 @@ async function handleGrundrissFiles(files) {
   const failed = [];
   for (const f of arr) {
     const src = await compressImage(f);
-    if (src) { grundrisse.push({ src, caption: '' }); renderGrundrissGrid(); }
+    if (src) { grundrisse.push({ src, caption: '', filename: f.name }); renderGrundrissGrid(); }
     else failed.push(f.name);
   }
   PhotoDB.save('current', photos, grundrisse);
@@ -4667,13 +4692,31 @@ function renderGrundrissGrid() {
     thumb.className = 'grundriss-thumb';
     thumb.innerHTML = `<img src="${gr.src}" alt="Grundriss ${i + 1}">
       <button class="del-gr" onclick="removeGrundriss(${i})">×</button>`;
+    const capRow = document.createElement('div');
+    capRow.className = 'photo-caption-row';
     const cap = document.createElement('input');
     cap.className = 'photo-caption-input';
     cap.placeholder = 'Bezeichnung (z. B. Erdgeschoss)';
     cap.value = gr.caption || '';
     cap.oninput = () => { grundrisse[i].caption = cap.value; saveGrundrisse(); if (document.getElementById('preview-output')?.children.length) buildPreview(); };
+    capRow.appendChild(cap);
+    if (gr.filename) {
+      const nameBtn = document.createElement('button');
+      nameBtn.type = 'button';
+      nameBtn.className = 'caption-file-btn';
+      nameBtn.textContent = '📄 Name';
+      nameBtn.title = `Dateiname als Bezeichnung übernehmen: ${gr.filename}`;
+      nameBtn.onclick = () => {
+        const clean = filenameToCaption(gr.filename);
+        grundrisse[i].caption = clean;
+        cap.value = clean;
+        saveGrundrisse();
+        if (document.getElementById('preview-output')?.children.length) buildPreview();
+      };
+      capRow.appendChild(nameBtn);
+    }
     item.appendChild(thumb);
-    item.appendChild(cap);
+    item.appendChild(capRow);
     grid.appendChild(item);
   });
   const countEl = document.getElementById('grundrissCount');
