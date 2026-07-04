@@ -157,6 +157,35 @@ function buildPreviewF() {
   const numPagesF = Math.max(1, Math.ceil(galleryPhotosF.length / perPageF));
   for (let pg = 0; pg < numPagesF; pg++) {
     const pgPhotos = galleryPhotosF.slice(pg * perPageF, (pg + 1) * perPageF);
+    const imgF = p => `<img src="${p.src}" style="width:100%;height:100%;object-fit:cover;object-position:${fmtPos(p)};display:block;border-radius:3px;min-height:0;min-width:0" alt="">`;
+    const grid2F = `<div style="flex:1.5;min-width:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(${Math.max(1, Math.ceil(pgPhotos.length/2))},1fr);gap:6px">${pgPhotos.map(imgF).join('')}</div>`;
+
+    let galleryF = '';
+    if (pgPhotos.length) {
+      const variantF = (pg === 0 || pgPhotos.length < 3) ? 0 : pg % 4;
+      if (variantF === 0) {
+        // 2-spaltiges Raster (auf Seite 1 neben der Lage)
+        galleryF = grid2F;
+      } else if (variantF === 1) {
+        // Großes Bild links + gestapelt rechts
+        const [first, ...rest] = pgPhotos;
+        galleryF = `<div style="flex:1.5;min-width:0;display:flex;gap:6px">
+          <div style="flex:1.4;min-width:0;display:flex">${imgF(first)}</div>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">${rest.map(p=>`<div style="flex:1;min-height:0;display:flex">${imgF(p)}</div>`).join('')}</div>
+        </div>`;
+      } else if (variantF === 2) {
+        // Breites Band oben + Reihe unten
+        const [first, ...rest] = pgPhotos;
+        galleryF = `<div style="flex:1.5;min-width:0;display:flex;flex-direction:column;gap:6px">
+          <div style="flex:1.3;min-height:0;display:flex">${imgF(first)}</div>
+          ${rest.length ? `<div style="flex:1;min-height:0;display:flex;gap:6px">${rest.map(p=>`<div style="flex:1;min-width:0;display:flex">${imgF(p)}</div>`).join('')}</div>` : ''}
+        </div>`;
+      } else {
+        // 3-spaltiges Raster
+        galleryF = `<div style="flex:1.5;min-width:0;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:repeat(${Math.ceil(pgPhotos.length/3)},1fr);gap:6px">${pgPhotos.map(imgF).join('')}</div>`;
+      }
+    }
+
     out.innerHTML += `
     <div class="tl-page" style="display:flex;flex-direction:column">
       <div style="height:48px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 32px;border-bottom:2px solid ${acc}">
@@ -169,10 +198,7 @@ function buildPreviewF() {
           <div style="font-family:'Ubuntu',sans-serif;font-size:.9rem;font-weight:700;color:${acc};margin-bottom:10px;padding-bottom:6px;border-bottom:1.5px solid ${acc}">Lage</div>
           <div style="font-size:.75rem;color:#333;line-height:1.7">${d.lage.split('\n').filter(Boolean).slice(0,5).map(esc).join('<br>')}</div>
         </div>` : ''}
-        ${pgPhotos.length ? `
-        <div style="flex:1.5;min-width:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:6px">
-          ${pgPhotos.map(p=>`<img src="${p.src}" style="width:100%;height:100%;object-fit:cover;object-position:${fmtPos(p)};display:block;border-radius:3px;min-height:0" alt="">`).join('')}
-        </div>` : ''}
+        ${galleryF}
       </div>
     </div>`;
   }

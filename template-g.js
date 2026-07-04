@@ -61,19 +61,35 @@ function buildPreviewG() {
     const numPagesG = Math.ceil(galleryPhotosG.length / perPage);
     for (let pg = 0; pg < numPagesG; pg++) {
       const pgSet = galleryPhotosG.slice(pg * perPage, (pg + 1) * perPage);
-      const [p1, p2, p3, p4, p5] = pgSet;
+      const imgG = p => `<img src="${p.src}" style="width:100%;height:100%;object-fit:cover;object-position:${fmtPos(p)};display:block" alt="">`;
+      // 4 Mosaik-Muster für die ersten 5 Bilder: [grid-column, grid-row]
+      const patternsG = [
+        [['1/3','1/2'],['3/4','1/2'],['1/2','2/3'],['2/3','2/3'],['3/4','2/3']], // breit oben links
+        [['1/2','1/2'],['2/4','1/2'],['1/2','2/3'],['2/3','2/3'],['3/4','2/3']], // breit oben rechts
+        [['1/2','1/3'],['2/3','1/2'],['3/4','1/2'],['2/3','2/3'],['3/4','2/3']], // hohe Spalte links
+        [['1/2','1/2'],['2/3','1/2'],['3/4','1/2'],['1/3','2/3'],['3/4','2/3']], // breit unten links
+      ];
+      const patG = patternsG[pg % patternsG.length];
+      const mosaicSet = pgSet.slice(0, 5);
+      const extraSet = pgSet.slice(5);
+      const extraRows = Math.ceil(extraSet.length / 3);
+      const mosaicG = pgSet.length < 3
+        ? `<div style="flex:1;display:flex;gap:4px;min-height:0">${pgSet.map(p=>`<div style="flex:1;min-width:0;overflow:hidden">${imgG(p)}</div>`).join('')}</div>`
+        : `<div style="flex:2;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:4px;min-height:0">
+            ${mosaicSet.map((p, i)=>`<div style="grid-column:${patG[i][0]};grid-row:${patG[i][1]};overflow:hidden">${imgG(p)}</div>`).join('')}
+          </div>`;
+      const extraG = extraSet.length
+        ? `<div style="flex:${extraRows};display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:repeat(${extraRows},1fr);gap:4px;min-height:0">${extraSet.map(p=>`<div style="overflow:hidden;min-height:0">${imgG(p)}</div>`).join('')}</div>`
+        : '';
       out.innerHTML += `
       <div class="tl-page" style="display:flex;flex-direction:column">
         <div style="height:44px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:${acc}">
           <div style="font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.7);font-weight:600">IMPRESSIONEN${numPagesG > 1 ? ` ${pg+1}/${numPagesG}` : ''}</div>
           <div>${logoHtml(true)}</div>
         </div>
-        <div style="flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:4px;padding:4px;min-height:0">
-          ${p1?`<div style="grid-column:1/3;grid-row:1/2;overflow:hidden"><img src="${p1.src}" style="width:100%;height:100%;object-fit:cover;object-position:${fmtPos(p1)};display:block" alt=""></div>`:''}
-          ${p2?`<div style="grid-column:3/4;grid-row:1/2;overflow:hidden"><img src="${p2.src}" style="width:100%;height:100%;object-fit:cover;object-position:${fmtPos(p2)};display:block" alt=""></div>`:''}
-          ${p3?`<div style="grid-column:1/2;grid-row:2/3;overflow:hidden"><img src="${p3.src}" style="width:100%;height:100%;object-fit:cover;object-position:${fmtPos(p3)};display:block" alt=""></div>`:''}
-          ${p4?`<div style="grid-column:2/3;grid-row:2/3;overflow:hidden"><img src="${p4.src}" style="width:100%;height:100%;object-fit:cover;object-position:${fmtPos(p4)};display:block" alt=""></div>`:''}
-          ${p5?`<div style="grid-column:3/4;grid-row:2/3;overflow:hidden"><img src="${p5.src}" style="width:100%;height:100%;object-fit:cover;object-position:${fmtPos(p5)};display:block" alt=""></div>`:''}
+        <div style="flex:1;display:flex;flex-direction:column;gap:4px;padding:4px;min-height:0">
+          ${mosaicG}
+          ${extraG}
         </div>
       </div>`;
     }

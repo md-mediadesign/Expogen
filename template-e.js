@@ -146,8 +146,32 @@ function buildPreviewE() {
     const numPagesE = Math.ceil(galleryPhotosE.length / perPage);
     for (let pg = 0; pg < numPagesE; pg++) {
       const pgSet = galleryPhotosE.slice(pg * perPage, (pg + 1) * perPage);
+      const imgE = (p, br) => `<img src="${p.src}" style="width:100%;height:100%;object-fit:cover;object-position:${fmtPos(p)};display:block;border-radius:${br || 3}px;min-height:0" alt="">`;
       const mainPhoto = pgSet[0];
       const thumbs = pgSet.slice(1);
+      const mainE = mainPhoto ? `<div style="flex:1.5;min-width:0">${imgE(mainPhoto, 4)}</div>` : '';
+      const thumbGridE = thumbs.length ? `<div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(${Math.ceil(thumbs.length/2)},1fr);gap:6px">${thumbs.map(p=>imgE(p)).join('')}</div>` : '';
+
+      const variantE = pgSet.length < 3 ? 0 : pg % 4;
+      let bodyE = '';
+      if (variantE === 0) {
+        // Hauptbild links, Raster rechts
+        bodyE = mainE + thumbGridE;
+      } else if (variantE === 1) {
+        // Raster links, Hauptbild rechts
+        bodyE = thumbGridE + mainE;
+      } else if (variantE === 2) {
+        // Hauptbild oben, Thumb-Zeile unten
+        const cols = Math.min(thumbs.length, 4);
+        bodyE = `<div style="flex:1;display:flex;flex-direction:column;gap:6px;min-height:0">
+            ${mainPhoto ? `<div style="flex:1.4;min-height:0">${imgE(mainPhoto, 4)}</div>` : ''}
+            ${thumbs.length ? `<div style="flex:1;display:grid;grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${Math.ceil(thumbs.length/cols)},1fr);gap:6px;min-height:0">${thumbs.map(p=>imgE(p)).join('')}</div>` : ''}
+          </div>`;
+      } else {
+        // Gleichmäßiges 3er-Raster
+        bodyE = `<div style="flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:repeat(${Math.ceil(pgSet.length/3)},1fr);gap:6px;min-height:0">${pgSet.map(p=>imgE(p)).join('')}</div>`;
+      }
+
       out.innerHTML += `
       <div class="tl-page" style="display:flex;flex-direction:column">
         <div style="height:48px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:${acc}">
@@ -155,8 +179,7 @@ function buildPreviewE() {
           <div>${d.brandLogoSrc?`<img src="${d.brandLogoSrc}" style="max-height:24px;object-fit:contain;filter:brightness(0) invert(1)">`:''}</div>
         </div>
         <div style="flex:1;display:flex;padding:12px 16px;gap:8px;min-height:0">
-          ${mainPhoto?`<div style="flex:1.5;min-width:0"><img src="${mainPhoto.src}" style="width:100%;height:100%;object-fit:cover;object-position:${fmtPos(mainPhoto)};display:block;border-radius:4px" alt=""></div>`:''}
-          ${thumbs.length?`<div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(${Math.ceil(thumbs.length/2)},1fr);gap:6px">${thumbs.map(p=>`<img src="${p.src}" style="width:100%;height:100%;object-fit:cover;object-position:${fmtPos(p)};display:block;border-radius:3px;min-height:0" alt="">`).join('')}</div>`:''}
+          ${bodyE}
         </div>
       </div>`;
     }

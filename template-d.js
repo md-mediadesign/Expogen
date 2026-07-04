@@ -139,8 +139,30 @@ function buildPreviewD() {
     const numPagesD = Math.ceil(galleryPhotosD.length / perPage);
     for (let pg = 0; pg < numPagesD; pg++) {
       const pgSet = galleryPhotosD.slice(pg * perPage, (pg + 1) * perPage);
-      const rows = [];
-      for (let i = 0; i < pgSet.length; i += 3) rows.push(pgSet.slice(i, i+3));
+      const imgD = p => `<img src="${p.src}" style="flex:1;min-width:0;min-height:0;object-fit:cover;object-position:${fmtPos(p)};display:block;border-radius:3px" alt="">`;
+      const rowD = (row, weight) => `<div style="display:flex;gap:6px;flex:${weight || 1};min-height:0">${row.map(imgD).join('')}</div>`;
+      const chunkD = (arr, size) => { const r = []; for (let i = 0; i < arr.length; i += size) r.push(arr.slice(i, i + size)); return r; };
+
+      const variantD = pgSet.length < 3 ? 0 : pg % 4;
+      let bodyD = '';
+      if (variantD === 0) {
+        // 3er-Reihen
+        bodyD = chunkD(pgSet, 3).map(row => rowD(row)).join('');
+      } else if (variantD === 1) {
+        // Breiter Hero oben, dann 3er-Reihen
+        bodyD = rowD([pgSet[0]], 1.4) + chunkD(pgSet.slice(1), 3).map(row => rowD(row)).join('');
+      } else if (variantD === 2) {
+        // 2er-Reihen
+        bodyD = chunkD(pgSet, 2).map(row => rowD(row)).join('');
+      } else {
+        // Große Spalte links + gestapeltes Raster rechts
+        const [first, ...rest] = pgSet;
+        bodyD = `<div style="display:flex;gap:6px;flex:1;min-height:0">
+            <div style="flex:1.1;min-width:0;display:flex">${imgD(first)}</div>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">${chunkD(rest, 2).map(row => rowD(row)).join('')}</div>
+          </div>`;
+      }
+
       out.innerHTML += `
       <div class="tl-page" style="display:flex;flex-direction:column">
         <div style="height:48px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:${acc}">
@@ -148,7 +170,7 @@ function buildPreviewD() {
           <div>${logoHtml}</div>
         </div>
         <div style="flex:1;padding:20px 24px;display:flex;flex-direction:column;gap:6px;min-height:0">
-          ${rows.map(row=>`<div style="display:flex;gap:6px;flex:1">${row.map(p=>`<img src="${p.src}" style="flex:1;min-width:0;object-fit:cover;object-position:${fmtPos(p)};display:block;border-radius:3px" alt="">`).join('')}</div>`).join('')}
+          ${bodyD}
         </div>
       </div>`;
     }
