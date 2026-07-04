@@ -69,7 +69,7 @@ function buildPreviewG() {
         [['1/2','1/3'],['2/3','1/2'],['3/4','1/2'],['2/3','2/3'],['3/4','2/3']], // hohe Spalte links
         [['1/2','1/2'],['2/3','1/2'],['3/4','1/2'],['1/3','2/3'],['3/4','2/3']], // breit unten links
       ];
-      const patG = patternsG[pg % patternsG.length];
+      const patG = patternsG[galleryVariant(pg, patternsG.length)];
       const mosaicSet = pgSet.slice(0, 5);
       const extraSet = pgSet.slice(5);
       const extraRows = Math.ceil(extraSet.length / 3);
@@ -83,6 +83,7 @@ function buildPreviewG() {
         : '';
       out.innerHTML += `
       <div class="tl-page" style="display:flex;flex-direction:column">
+        ${pgSet.length >= 3 ? galleryLayoutPicker(pg, 4) : ''}
         <div style="height:44px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:${acc}">
           <div style="font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.7);font-weight:600">IMPRESSIONEN${numPagesG > 1 ? ` ${pg+1}/${numPagesG}` : ''}</div>
           <div>${logoHtml(true)}</div>

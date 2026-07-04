@@ -799,7 +799,7 @@ function buildPreviewC() {
     for (let pg = 0; pg < numPagesC; pg++) {
       const pgSet = galleryPhotosC.slice(pg * perPage, (pg + 1) * perPage);
       // Wechselnde Position der breiten Bilder: Anfang → Ende → Mitte → Anfang+Ende
-      const variantC = pg % 4;
+      const variantC = galleryVariant(pg, 4);
       const wideIdx = new Set();
       const n = pgSet.length;
       if (variantC === 0 || n < 4) wideIdx.add(0);
@@ -808,6 +808,7 @@ function buildPreviewC() {
       else { wideIdx.add(0); if (n > 4) wideIdx.add(n - 1); }
       out.innerHTML += `
       <div class="tc-page tc-inner">
+        ${n >= 4 ? galleryLayoutPicker(pg, 4) : ''}
         ${pageHdr(8 + pg)}
         <h2 class="tc-section-title">Impressionen${numPagesC > 1 ? ` (${pg + 1}/${numPagesC})` : ''}</h2>
         <hr class="tc-hr">

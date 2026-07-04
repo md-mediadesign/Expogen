@@ -209,7 +209,7 @@ function buildPreviewA() {
     const numPages = Math.ceil(galleryPhotosA.length / perPage);
     for (let pg = 0; pg < numPages; pg++) {
       const pgPhotos = galleryPhotosA.slice(pg * perPage, (pg + 1) * perPage);
-      const layout = pg % 4; // 0=Panorama, 1=Portrait-Trio, 2=Editorial, 3=Zickzack
+      const layout = galleryVariant(pg, 5); // 0=Panorama, 1=Portrait-Trio, 2=Editorial, 3=Zickzack, 4=Raster
       const pageTitle = `Fotogalerie${numPages > 1 ? ` (${pg + 1}/${numPages})` : ''}`;
       const m = '0 2.8rem'; // margin shorthand
       const imgStyle = (s) => `object-fit:cover;object-position:${fmtPos(s)};display:block;width:100%`;
@@ -264,7 +264,7 @@ function buildPreviewA() {
             ${closer ? `<img src="${closer.src}" style="${imgStyle(closer)};aspect-ratio:16/6;margin-bottom:3px" alt="">` : ''}
           </div>`;
 
-      } else {
+      } else if (layout === 3) {
         // ── Zickzack: asymmetrische 2er-Reihen, Gewichtung wechselt pro Reihe ──
         const rows = chunk(pgPhotos, 2);
         galleryContent = `
@@ -276,10 +276,18 @@ function buildPreviewA() {
               </div>`
               : `<img src="${row[0].src}" style="${imgStyle(row[0])};aspect-ratio:16/7;margin-bottom:3px" alt="">`).join('')}
           </div>`;
+
+      } else {
+        // ── Raster: gleich große Bilder in 2 Spalten ──
+        galleryContent = `
+          <div style="margin:${m}">
+            ${chunk(pgPhotos, 2).map(row => flexRow(row, '4/3')).join('')}
+          </div>`;
       }
 
       out.innerHTML += `
       <div class="expo-page expo-inner" style="padding:0">
+        ${galleryLayoutPicker(pg, 5)}
         ${pageHeader}
         <div style="padding:0 2.8rem 0">
           <div class="expo-page-badge" style="padding-top:1.5rem">IMPRESSIONEN</div>

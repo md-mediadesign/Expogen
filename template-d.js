@@ -143,7 +143,7 @@ function buildPreviewD() {
       const rowD = (row, weight) => `<div style="display:flex;gap:6px;flex:${weight || 1};min-height:0">${row.map(imgD).join('')}</div>`;
       const chunkD = (arr, size) => { const r = []; for (let i = 0; i < arr.length; i += size) r.push(arr.slice(i, i + size)); return r; };
 
-      const variantD = pgSet.length < 3 ? 0 : pg % 4;
+      const variantD = pgSet.length < 3 ? 0 : galleryVariant(pg, 4);
       let bodyD = '';
       if (variantD === 0) {
         // 3er-Reihen
@@ -165,6 +165,7 @@ function buildPreviewD() {
 
       out.innerHTML += `
       <div class="tl-page" style="display:flex;flex-direction:column">
+        ${pgSet.length >= 3 ? galleryLayoutPicker(pg, 4) : ''}
         <div style="height:48px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:${acc}">
           <div style="font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.7);font-weight:600">IMPRESSIONEN${numPagesD > 1 ? ` ${pg+1}/${numPagesD}` : ''}</div>
           <div>${logoHtml}</div>
