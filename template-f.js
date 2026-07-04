@@ -162,7 +162,7 @@ function buildPreviewF() {
 
     let galleryF = '';
     if (pgPhotos.length) {
-      const variantF = (pg === 0 || pgPhotos.length < 3) ? 0 : pg % 4;
+      const variantF = (pg === 0 || pgPhotos.length < 3) ? 0 : galleryVariant(pg, 4);
       if (variantF === 0) {
         // 2-spaltiges Raster (auf Seite 1 neben der Lage)
         galleryF = grid2F;
@@ -188,6 +188,7 @@ function buildPreviewF() {
 
     out.innerHTML += `
     <div class="tl-page" style="display:flex;flex-direction:column">
+      ${pg > 0 && pgPhotos.length >= 3 ? galleryLayoutPicker(pg, 4) : ''}
       <div style="height:48px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 32px;border-bottom:2px solid ${acc}">
         <div style="font-size:.52rem;letter-spacing:.2em;text-transform:uppercase;color:${acc};font-weight:700">${pg === 0 ? 'LAGE & BILDER' : `IMPRESSIONEN ${pg+1}/${numPagesF}`}</div>
         <div>${logoBar(false)}</div>

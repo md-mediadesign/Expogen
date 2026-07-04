@@ -109,6 +109,12 @@ header{width:100%;max-width:1180px;margin:0 auto;padding:2rem 2.5rem 0;display:f
 .expo-toast{position:fixed;left:50%;bottom:2rem;transform:translateX(-50%) translateY(12px);background:var(--navy2);border:1px solid var(--gold);border-radius:12px;color:#fff;font-family:'Roboto',sans-serif;font-size:.86rem;line-height:1.45;letter-spacing:.01em;padding:.85rem 1.4rem;max-width:min(90vw,440px);box-shadow:0 16px 48px rgba(0,0,0,.55);z-index:9999;opacity:0;transition:opacity .3s ease,transform .3s ease;pointer-events:none}
 .expo-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 @media print{.buy-overlay{display:none!important}.expo-toast{display:none!important}}
+.gal-layout-picker{position:absolute;top:8px;right:8px;z-index:60;display:flex;gap:4px;align-items:center;background:rgba(13,18,32,.88);border:1px solid rgba(201,168,76,.4);border-radius:16px;padding:4px 9px;font-family:'Roboto',sans-serif;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.gal-layout-picker .glp-label{font-size:.58rem;letter-spacing:.1em;color:var(--gold);text-transform:uppercase;margin-right:3px;font-weight:600}
+.gal-layout-btn{width:22px;height:22px;border-radius:50%;border:1px solid rgba(201,168,76,.5);background:transparent;color:#e8e0ce;font-size:.66rem;font-weight:600;cursor:pointer;line-height:1;padding:0;transition:all .15s}
+.gal-layout-btn:hover{background:rgba(201,168,76,.25)}
+.gal-layout-btn.active{background:var(--gold);color:#1a2035;border-color:var(--gold)}
+@media print{.gal-layout-picker{display:none!important}}
 .header-size-switch{display:inline-flex;border:1px solid rgba(201,168,76,.25);border-radius:20px;overflow:hidden;background:rgba(0,0,0,.25)}
 .header-size-switch-label{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:.35rem .75rem .35rem .9rem;align-self:center;border-right:1px solid rgba(201,168,76,.15);background:rgba(255,255,255,.02)}
 .header-size-btn{background:transparent;border:none;color:var(--muted);font-family:'Ubuntu',sans-serif;font-size:.78rem;font-weight:700;padding:.3rem .85rem;cursor:pointer;transition:all .2s;border-right:1px solid rgba(201,168,76,.12);min-width:34px}
@@ -3718,6 +3724,32 @@ function renderPhotoGrid() {
   document.getElementById('dropZone').style.display = photos.length >= 30 ? 'none' : '';
   syncPppDisplay();
   updateSlotLegend();
+}
+
+// ── Galerie-Seitenlayout: Auswahl pro Seite (Templates lesen galleryVariant) ──
+function galleryVariant(pg, count) {
+  const ov = data.galleryLayoutOverrides?.[pg];
+  return (ov === undefined || ov === null) ? pg % count : Math.min(ov, count - 1);
+}
+
+function galleryLayoutPicker(pg, count) {
+  const ov = data.galleryLayoutOverrides?.[pg];
+  const auto = ov === undefined || ov === null;
+  let btns = `<button class="gal-layout-btn${auto ? ' active' : ''}" onclick="setGalleryLayout(${pg},null)" title="Automatisch abwechseln">A</button>`;
+  for (let v = 0; v < count; v++) {
+    btns += `<button class="gal-layout-btn${!auto && ov === v ? ' active' : ''}" onclick="setGalleryLayout(${pg},${v})" title="Layout ${v + 1}">${v + 1}</button>`;
+  }
+  return `<div class="gal-layout-picker"><span class="glp-label">Layout</span>${btns}</div>`;
+}
+
+function setGalleryLayout(pg, val) {
+  if (!data.galleryLayoutOverrides) data.galleryLayoutOverrides = {};
+  if (val === null) delete data.galleryLayoutOverrides[pg];
+  else data.galleryLayoutOverrides[pg] = val;
+  saveToStorage();
+  const y = window.scrollY;
+  buildPreview();
+  window.scrollTo(0, y);
 }
 
 function filenameToCaption(name) {

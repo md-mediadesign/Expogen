@@ -1072,7 +1072,7 @@ function buildPreviewB() {
           ${p.caption ? `<div class="tb-gallery-caption">${esc(p.caption)}</div>` : ''}
         </div>`;
 
-      const variant = pagePhotos.length < 3 ? 0 : pgIdx % 4;
+      const variant = pagePhotos.length < 3 ? 0 : galleryVariant(pgIdx, 4);
       let body = '';
       if (variant === 0) {
         // Hero oben + 3er-Raster
@@ -1098,6 +1098,7 @@ function buildPreviewB() {
 
       out.innerHTML += `
       <div class="tb-page">
+        ${pagePhotos.length >= 3 ? galleryLayoutPicker(pgIdx, 4) : ''}
         ${pageHeader}
         <div class="tb-gallery-label">${pageLabel}</div>
         ${body}

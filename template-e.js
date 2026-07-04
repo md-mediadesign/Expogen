@@ -152,7 +152,7 @@ function buildPreviewE() {
       const mainE = mainPhoto ? `<div style="flex:1.5;min-width:0">${imgE(mainPhoto, 4)}</div>` : '';
       const thumbGridE = thumbs.length ? `<div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(${Math.ceil(thumbs.length/2)},1fr);gap:6px">${thumbs.map(p=>imgE(p)).join('')}</div>` : '';
 
-      const variantE = pgSet.length < 3 ? 0 : pg % 4;
+      const variantE = pgSet.length < 3 ? 0 : galleryVariant(pg, 4);
       let bodyE = '';
       if (variantE === 0) {
         // Hauptbild links, Raster rechts
@@ -174,6 +174,7 @@ function buildPreviewE() {
 
       out.innerHTML += `
       <div class="tl-page" style="display:flex;flex-direction:column">
+        ${pgSet.length >= 3 ? galleryLayoutPicker(pg, 4) : ''}
         <div style="height:48px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:${acc}">
           <div style="font-size:.52rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.7);font-weight:600">IMPRESSIONEN${numPagesE > 1 ? ` ${pg+1}/${numPagesE}` : ''}</div>
           <div>${d.brandLogoSrc?`<img src="${d.brandLogoSrc}" style="max-height:24px;object-fit:contain;filter:brightness(0) invert(1)">`:''}</div>
