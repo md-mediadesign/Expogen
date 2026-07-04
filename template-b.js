@@ -1059,23 +1059,48 @@ function buildPreviewB() {
     for (let i = 0; i < galleryPhotosB.length; i += PHOTOS_PER_PAGE) gallPages.push(galleryPhotosB.slice(i, i + PHOTOS_PER_PAGE));
 
     gallPages.forEach((pagePhotos, pgIdx) => {
-      const [p0, ...rest] = pagePhotos;
-      const chunks = [];
-      for (let i = 0; i < rest.length; i += 3) chunks.push(rest.slice(i, i + 3));
       const pageLabel = gallPages.length > 1 ? `IMPRESSIONEN ${pgIdx + 1} / ${gallPages.length}` : 'IMPRESSIONEN';
+      const cellB = (p, hmm) => `<div class="tb-gallery-img-wrap"><img src="${p.src}" style="aspect-ratio:${fmtArB(p)};object-fit:cover;object-position:${fmtPos(p)}${hmm ? `;height:${hmm}mm` : ''}" alt="">${p.caption ? `<div class="tb-gallery-caption">${esc(p.caption)}</div>` : ''}</div>`;
+      const gridRowsB = (arr, hmm) => {
+        const chunks = [];
+        for (let i = 0; i < arr.length; i += 3) chunks.push(arr.slice(i, i + 3));
+        return chunks.map(ch => `<div class="${ch.length === 2 ? 'tb-gallery-grid2' : 'tb-gallery-grid3'}">${ch.map(p => cellB(p, hmm)).join('')}</div>`).join('');
+      };
+      const heroBlockB = (p) => `
+        <div class="tb-gallery-hero-wrap">
+          <div class="tb-gallery-hero"><img src="${p.src}" style="aspect-ratio:${fmtArB(p)};object-fit:cover;object-position:${fmtPos(p)}" alt=""></div>
+          ${p.caption ? `<div class="tb-gallery-caption">${esc(p.caption)}</div>` : ''}
+        </div>`;
+
+      const variant = pagePhotos.length < 3 ? 0 : pgIdx % 4;
+      let body = '';
+      if (variant === 0) {
+        // Hero oben + 3er-Raster
+        const [p0, ...rest] = pagePhotos;
+        body = heroBlockB(p0) + gridRowsB(rest);
+      } else if (variant === 1) {
+        // 3er-Raster oben, Hero als Abschluss
+        const hero = pagePhotos[pagePhotos.length - 1];
+        body = gridRowsB(pagePhotos.slice(0, -1)) + `<div style="height:3px"></div>` + heroBlockB(hero);
+      } else if (variant === 2) {
+        // Duo-Auftakt: 2 mittelgroße Bilder nebeneinander, dann 3er-Raster
+        body = `<div class="tb-gallery-grid2">${pagePhotos.slice(0, 2).map(p => cellB(p, 54)).join('')}</div>` + gridRowsB(pagePhotos.slice(2));
+      } else {
+        // Editorial: hohes Bild links + 2×2-Raster rechts, dann 3er-Raster
+        const [p0, ...r] = pagePhotos;
+        const quad = r.slice(0, 4);
+        body = `
+        <div style="display:flex;gap:3px;padding:3px 2.5rem 0">
+          <div style="flex:1;min-width:0">${cellB(p0, 83)}</div>
+          <div style="flex:1;min-width:0;display:grid;grid-template-columns:1fr 1fr;gap:3px;align-content:start">${quad.map(p => cellB(p, 40)).join('')}</div>
+        </div>` + gridRowsB(r.slice(4));
+      }
 
       out.innerHTML += `
       <div class="tb-page">
         ${pageHeader}
         <div class="tb-gallery-label">${pageLabel}</div>
-        <div class="tb-gallery-hero-wrap">
-          <div class="tb-gallery-hero"><img src="${p0.src}" style="aspect-ratio:${fmtArB(p0)};object-fit:cover;object-position:${fmtPos(p0)}" alt=""></div>
-          ${p0.caption ? `<div class="tb-gallery-caption">${esc(p0.caption)}</div>` : ''}
-        </div>
-        ${chunks.map(ch => ch.length === 3
-          ? `<div class="tb-gallery-grid3">${ch.map(p => `<div class="tb-gallery-img-wrap"><img src="${p.src}" style="aspect-ratio:${fmtArB(p)};object-fit:cover;object-position:${fmtPos(p)}" alt="">${p.caption ? `<div class="tb-gallery-caption">${esc(p.caption)}</div>` : ''}</div>`).join('')}</div>`
-          : `<div class="tb-gallery-grid2">${ch.map(p => `<div class="tb-gallery-img-wrap"><img src="${p.src}" style="aspect-ratio:${fmtArB(p)};object-fit:cover;object-position:${fmtPos(p)}" alt="">${p.caption ? `<div class="tb-gallery-caption">${esc(p.caption)}</div>` : ''}</div>`).join('')}</div>`
-        ).join('')}
+        ${body}
       </div>`;
     });
   }
@@ -1154,6 +1179,9 @@ function buildPreviewB() {
   }
 
   // ── PAGE 10: RÜCKSEITE ────────────────────────────────
+  const addrMatch = (d.adresse || '').match(/^(.*?)\s+(\d+\w*[a-z]?)$/i);
+  const coverStreet = addrMatch ? esc(addrMatch[1].toUpperCase()) : esc((d.titel || 'Ihre Immobilie').toUpperCase());
+  const coverNum = addrMatch ? addrMatch[2] : '';
   const backLogoHtml = d.brandLogoSrc
     ? `<img src="${d.brandLogoSrc}" alt="">`
     : '';

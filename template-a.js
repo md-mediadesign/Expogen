@@ -209,44 +209,48 @@ function buildPreviewA() {
     const numPages = Math.ceil(galleryPhotosA.length / perPage);
     for (let pg = 0; pg < numPages; pg++) {
       const pgPhotos = galleryPhotosA.slice(pg * perPage, (pg + 1) * perPage);
-      const layout = pg % 3; // 0=Hero, 1=Triptychon, 2=Editorial
+      const layout = pg % 4; // 0=Panorama, 1=Portrait-Trio, 2=Editorial, 3=Zickzack
       const pageTitle = `Fotogalerie${numPages > 1 ? ` (${pg + 1}/${numPages})` : ''}`;
       const m = '0 2.8rem'; // margin shorthand
       const imgStyle = (s) => `object-fit:cover;object-position:${fmtPos(s)};display:block;width:100%`;
+      const flexRow = (row, ar) => `<div style="display:flex;gap:3px;margin-bottom:3px">${row.map(s =>
+        `<img src="${s.src}" style="${imgStyle(s)};flex:1;min-width:0;aspect-ratio:${ar || fmtAr(s)}" alt="">`).join('')}</div>`;
+      const chunk = (arr, n) => { const r = []; for (let i = 0; i < arr.length; i += n) r.push(arr.slice(i, i + n)); return r; };
 
       let galleryContent = '';
 
       if (layout === 0) {
-        // ── Hero: 1 breites Bild oben, dann 2-spaltig ──
+        // ── Panorama: 1 breites Bild oben, dann abwechselnd 2er-/3er-Reihen ──
         const hero = pgPhotos[0];
         const rest = pgPhotos.slice(1);
-        const rows2 = [];
-        for (let i = 0; i < rest.length; i += 2) rows2.push(rest.slice(i, i + 2));
+        const rows = [];
+        let i = 0, take = 2;
+        while (i < rest.length) { rows.push(rest.slice(i, i + take)); i += take; take = take === 2 ? 3 : 2; }
         galleryContent = `
           <div style="margin:${m}">
             ${hero ? `<img src="${hero.src}" style="${imgStyle(hero)};aspect-ratio:16/7;margin-bottom:3px" alt="">` : ''}
-            ${rows2.map(row => `<div style="display:flex;gap:3px;margin-bottom:3px">${row.map(s =>
-              `<img src="${s.src}" style="${imgStyle(s)};flex:1;min-width:0;aspect-ratio:${fmtAr(s)}" alt="">`).join('')}</div>`).join('')}
+            ${rows.map(row => flexRow(row, row.length === 3 ? '4/3' : null)).join('')}
           </div>`;
 
       } else if (layout === 1) {
-        // ── Triptychon: 3 gleiche Spalten ──
-        const rows3 = [];
-        for (let i = 0; i < pgPhotos.length; i += 3) rows3.push(pgPhotos.slice(i, i + 3));
+        // ── Portrait-Trio: 3 hochformatige Spalten als Auftakt, dann 3er-Reihen ──
+        const trio = pgPhotos.slice(0, 3);
+        const rest = pgPhotos.slice(3);
         galleryContent = `
-          <div style="margin:${m};display:flex;flex-direction:column;gap:3px">
-            ${rows3.map(row => `<div style="display:flex;gap:3px">${row.map(s =>
-              `<img src="${s.src}" style="${imgStyle(s)};flex:1;min-width:0;aspect-ratio:4/3" alt="">`).join('')}</div>`).join('')}
+          <div style="margin:${m}">
+            <div style="display:flex;gap:3px;margin-bottom:3px">${trio.map(s =>
+              `<img src="${s.src}" style="${imgStyle(s)};flex:1;min-width:0;aspect-ratio:3/4" alt="">`).join('')}</div>
+            ${chunk(rest, 3).map(row => flexRow(row, '4/3')).join('')}
           </div>`;
 
-      } else {
-        // ── Editorial: 1 großes links (60%) + 2 gestapelt rechts, dann 2-spaltig ──
+      } else if (layout === 2) {
+        // ── Editorial: 1 großes links (60%) + 2 gestapelt rechts, dann 3er-Reihen + Panorama-Abschluss ──
         const big = pgPhotos[0];
         const r1 = pgPhotos[1];
         const r2 = pgPhotos[2];
-        const rest = pgPhotos.slice(3);
-        const rows2 = [];
-        for (let i = 0; i < rest.length; i += 2) rows2.push(rest.slice(i, i + 2));
+        let rest = pgPhotos.slice(3);
+        let closer = null;
+        if (rest.length % 3 === 1) { closer = rest[rest.length - 1]; rest = rest.slice(0, -1); }
         galleryContent = `
           <div style="margin:${m}">
             <div style="display:flex;gap:3px;margin-bottom:3px">
@@ -256,8 +260,21 @@ function buildPreviewA() {
                 ${r2 ? `<img src="${r2.src}" style="${imgStyle(r2)};flex:1;min-height:0" alt="">` : ''}
               </div>` : ''}
             </div>
-            ${rows2.map(row => `<div style="display:flex;gap:3px;margin-bottom:3px">${row.map(s =>
-              `<img src="${s.src}" style="${imgStyle(s)};flex:1;min-width:0;aspect-ratio:${fmtAr(s)}" alt="">`).join('')}</div>`).join('')}
+            ${chunk(rest, 3).map(row => flexRow(row, '4/3')).join('')}
+            ${closer ? `<img src="${closer.src}" style="${imgStyle(closer)};aspect-ratio:16/6;margin-bottom:3px" alt="">` : ''}
+          </div>`;
+
+      } else {
+        // ── Zickzack: asymmetrische 2er-Reihen, Gewichtung wechselt pro Reihe ──
+        const rows = chunk(pgPhotos, 2);
+        galleryContent = `
+          <div style="margin:${m}">
+            ${rows.map((row, ri) => row.length === 2 ? `
+              <div style="display:flex;gap:3px;margin-bottom:3px">
+                <img src="${row[0].src}" style="${imgStyle(row[0])};flex:${ri % 2 ? 1 : 1.7};min-width:0;aspect-ratio:auto;height:52mm" alt="">
+                <img src="${row[1].src}" style="${imgStyle(row[1])};flex:${ri % 2 ? 1.7 : 1};min-width:0;aspect-ratio:auto;height:52mm" alt="">
+              </div>`
+              : `<img src="${row[0].src}" style="${imgStyle(row[0])};aspect-ratio:16/7;margin-bottom:3px" alt="">`).join('')}
           </div>`;
       }
 

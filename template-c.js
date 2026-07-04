@@ -798,6 +798,14 @@ function buildPreviewC() {
     const numPagesC = Math.ceil(galleryPhotosC.length / perPage);
     for (let pg = 0; pg < numPagesC; pg++) {
       const pgSet = galleryPhotosC.slice(pg * perPage, (pg + 1) * perPage);
+      // Wechselnde Position der breiten Bilder: Anfang → Ende → Mitte → Anfang+Ende
+      const variantC = pg % 4;
+      const wideIdx = new Set();
+      const n = pgSet.length;
+      if (variantC === 0 || n < 4) wideIdx.add(0);
+      else if (variantC === 1) wideIdx.add(n - 1);
+      else if (variantC === 2) wideIdx.add(3);
+      else { wideIdx.add(0); if (n > 4) wideIdx.add(n - 1); }
       out.innerHTML += `
       <div class="tc-page tc-inner">
         ${pageHdr(8 + pg)}
@@ -805,7 +813,7 @@ function buildPreviewC() {
         <hr class="tc-hr">
         <div class="tc-gallery">
           ${pgSet.map((p, i) => `
-          <div class="tc-gallery-item${i === 0 ? ' tc-wide' : ''}">
+          <div class="tc-gallery-item${wideIdx.has(i) ? ' tc-wide' : ''}">
             <img src="${p.src}" style="aspect-ratio:${fmtArC(p)};object-fit:cover;object-position:${fmtPos(p)}" alt="">
           </div>`).join('')}
         </div>
