@@ -5088,19 +5088,24 @@ function downloadCreditBackup() {
 const VOUCHER_CODES = {
   'EXPOGEN-TEST':    3,
   'EXPOGEN-SPECIAL': 10,
-  'PARTNER-2026':    5
+  'PARTNER-2026':    5,
+  'MD-K7R4-9Q2M':    { amount: 100, reusable: true }
 };
 
 function redeemVoucher(input) {
   const code = (input || '').trim().toUpperCase();
   if (!code) { showToast('✗ Bitte einen Gutschein-Code eingeben.'); return false; }
-  const amount = VOUCHER_CODES[code];
-  if (!amount) { showToast('✗ Ungültiger Gutschein-Code.'); return false; }
+  const entry = VOUCHER_CODES[code];
+  if (!entry) { showToast('✗ Ungültiger Gutschein-Code.'); return false; }
+  const amount = typeof entry === 'object' ? entry.amount : entry;
+  const reusable = typeof entry === 'object' && entry.reusable;
   const used = (localStorage.getItem('expogen_redeemed_vouchers') || '').split(',').filter(Boolean);
-  if (used.includes(code)) { showToast('✗ Dieser Gutschein wurde auf diesem Gerät bereits eingelöst.'); return false; }
+  if (!reusable && used.includes(code)) { showToast('✗ Dieser Gutschein wurde auf diesem Gerät bereits eingelöst.'); return false; }
   addCredits(amount);
-  used.push(code);
-  localStorage.setItem('expogen_redeemed_vouchers', used.join(','));
+  if (!reusable) {
+    used.push(code);
+    localStorage.setItem('expogen_redeemed_vouchers', used.join(','));
+  }
   const inputEl = document.getElementById('creditVoucherInput');
   if (inputEl) inputEl.value = '';
   showToast(`✓ Gutschein eingelöst — ${amount} Credit${amount === 1 ? '' : 's'} gutgeschrieben.`);
