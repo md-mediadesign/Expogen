@@ -229,6 +229,7 @@ function buildPreviewD() {
           <div>${logoHtml}</div>
         </div>
         ${grBody}
+        ${d.grundrissHinweis ? `<div style="flex-shrink:0;padding:0 32px 16px;font-size:.72rem;font-style:italic;color:#555;line-height:1.5;border-top:1px solid #eee;margin:0 32px 0;padding:10px 0 16px">ℹ ${esc(d.grundrissHinweis)}</div>` : ''}
       </div>`;
     });
   }
