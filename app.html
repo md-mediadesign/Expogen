@@ -1543,6 +1543,28 @@ body.expo-watermark .h-page::after{
           <textarea id="f-agbText" rows="8" placeholder="Klicken Sie auf „Hinweistexte generieren" – oder schreiben Sie hier direkt …"></textarea>
         </div>
       </div>
+
+      <!-- Eck-Banner -->
+      <div class="extras-block" id="extrasBlockBanner" style="margin-top:1.2rem">
+        <div class="extras-block-header" onclick="toggleExtrasBlock('Banner')">
+          <div class="extras-block-header-left">
+            <span class="extras-block-icon">🏷️</span>
+            <div>
+              <div class="extras-block-title">Eck-Banner auf dem Cover</div>
+              <div class="extras-block-desc">Schräges Band oben rechts auf der Titelseite, z. B. „provisionsfrei"</div>
+            </div>
+          </div>
+          <label class="extras-toggle" onclick="event.stopPropagation()">
+            <input type="checkbox" id="toggle-Banner" onchange="toggleExtrasBlock('Banner', this.checked)">
+            <span class="extras-toggle-slider"></span>
+          </label>
+        </div>
+        <div class="extras-block-body" id="extrasBodyBanner" style="display:none">
+          <label>Banner-Text</label>
+          <input type="text" id="f-bannerText" placeholder="provisionsfrei" maxlength="24">
+          <div class="extras-qr-hint" style="margin-top:.2rem">Kurz halten – der Text läuft schräg über die obere rechte Ecke der Titelseite.</div>
+        </div>
+      </div>
     </div>
 
     <!-- Step 15: Farbschema -->
@@ -3121,7 +3143,7 @@ function collectStep(id) {
   if (id===11){ collectEinheiten(); }
   if (id===12){ data.investment=val('f-investment'); data.investHighlights=[...document.querySelectorAll('.inv-input')].map(i=>i.value.trim()).filter(Boolean); }
   if (id===13){ data.name=val('f-name'); data.tel=val('f-tel'); data.email=val('f-email'); data.firma=val('f-firma'); data.kontaktAdresse=val('f-kontaktAdresse'); }
-  if (id===14){ data.link360=val('f-link360'); data.linkYT=val('f-linkYT'); data.sonstigerText=val('f-sonstigerText'); data.agbText=val('f-agbText'); data.extras360Enabled=document.getElementById('toggle-360')?.checked||false; data.extrasYTEnabled=document.getElementById('toggle-YT')?.checked||false; data.extrasSonstigesEnabled=document.getElementById('toggle-Sonstiges')?.checked||false; data.extrasAgbEnabled=document.getElementById('toggle-Agb')?.checked||false; }
+  if (id===14){ data.link360=val('f-link360'); data.linkYT=val('f-linkYT'); data.sonstigerText=val('f-sonstigerText'); data.agbText=val('f-agbText'); data.extras360Enabled=document.getElementById('toggle-360')?.checked||false; data.extrasYTEnabled=document.getElementById('toggle-YT')?.checked||false; data.extrasSonstigesEnabled=document.getElementById('toggle-Sonstiges')?.checked||false; data.extrasAgbEnabled=document.getElementById('toggle-Agb')?.checked||false; data.bannerEnabled=document.getElementById('toggle-Banner')?.checked||false; data.bannerText=val('f-bannerText'); }
 }
 
 function collectEinheiten() {
@@ -3891,9 +3913,9 @@ function resetCurrentStep() {
     case 11: document.getElementById('einheitenBody').innerHTML=''; data.einheiten=[]; initEinheiten(); break;
     case 12: setVal('f-investment',''); document.getElementById('investList').innerHTML=''; data.investHighlights=[]; initInvestList(); break;
     case 13: ['f-name','f-tel','f-email','f-firma','f-kontaktAdresse'].forEach(id=>setVal(id,'')); data.brokerPhotoSrc=null; const bp=document.getElementById('f-brokerPhoto'); if(bp) bp.value=''; renderBrokerPhotoPreview(); break;
-    case 14: setVal('f-link360',''); setVal('f-linkYT',''); setVal('f-sonstigerText',''); setVal('f-agbText','');
+    case 14: setVal('f-link360',''); setVal('f-linkYT',''); setVal('f-sonstigerText',''); setVal('f-agbText',''); setVal('f-bannerText','');
       ['360','YT','Sonstiges','Agb'].forEach(k=>{ const cb=document.getElementById('toggle-'+k); if(cb){cb.checked=false;} const b=document.getElementById('extrasBody'+k); if(b) b.style.display='none'; const bl=document.getElementById('extrasBlock'+k); if(bl) bl.classList.remove('active'); const qr=document.getElementById('qrPreview'+k); if(qr) qr.innerHTML='<span style="color:rgba(120,130,160,.4);font-size:.65rem;text-align:center;padding:.3rem">QR erscheint nach Link-Eingabe</span>'; });
-      delete data.link360; delete data.linkYT; delete data.sonstigerText; delete data.agbText; delete data.extras360Enabled; delete data.extrasYTEnabled; delete data.extrasSonstigesEnabled; delete data.extrasAgbEnabled;
+      delete data.link360; delete data.linkYT; delete data.sonstigerText; delete data.agbText; delete data.extras360Enabled; delete data.extrasYTEnabled; delete data.extrasSonstigesEnabled; delete data.extrasAgbEnabled; delete data.bannerEnabled; delete data.bannerText;
       hinweisManualOverrides={}; hinweisModeSelected='kurz'; setHinweisMode('kurz');
       const hbar=document.getElementById('hinweisResultBar'); if(hbar) hbar.style.display='none'; break;
     case 15: delete data.colorPair; resetColorPairSelection(); break;
@@ -4179,7 +4201,7 @@ async function loadFromStorage() {
       if(data.size){ const c=document.querySelector(`.groesse-card[data-size="${data.size}"]`); if(c) c.classList.add('selected'); }
       if(data.type){ const c=document.querySelector(`.type-card[data-type="${data.type}"]`); if(c) c.classList.add('selected'); }
       if(data.colorPair===0){ const cs=document.getElementById('customColorSection'); if(cs) cs.classList.add('active'); if(data.customAccent){const el=document.getElementById('customAccent');if(el)el.value=data.customAccent; const hex=document.getElementById('customAccentHex');if(hex)hex.value=data.customAccent;} if(data.customSecondary){const el=document.getElementById('customSecondary');if(el)el.value=data.customSecondary; const hex=document.getElementById('customSecondaryHex');if(hex)hex.value=data.customSecondary;} } else if(data.colorPair){ const c=document.querySelector(`.color-pair-card[data-pair="${data.colorPair}"]`); if(c) c.classList.add('selected'); }
-      const fields=['brandFirma','titel','untertitel','adresse','preis','preisDetail','baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','energiestandard','heizung','heizungsart','energieausweis','energieklasse','energiekennwert','energieausweisTyp','kaeuferp','weitereKosten','beschreibung','lage','stadtbeschr','ausstattung','investment','name','tel','email','firma','kontaktAdresse','link360','linkYT','sonstigerText','agbText'];
+      const fields=['brandFirma','titel','untertitel','adresse','preis','preisDetail','baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','energiestandard','heizung','heizungsart','energieausweis','energieklasse','energiekennwert','energieausweisTyp','kaeuferp','weitereKosten','beschreibung','lage','stadtbeschr','ausstattung','investment','name','tel','email','firma','kontaktAdresse','link360','linkYT','sonstigerText','agbText','bannerText'];
       fields.forEach(k=>{ if(data[k]) setVal('f-'+k, data[k]); });
       updateStellplatzSummary();
       if(data.highlights?.length){ document.getElementById('highlightList').innerHTML=''; data.highlights.forEach(h=>addHighlight(h)); }
@@ -4190,7 +4212,7 @@ async function loadFromStorage() {
       if(data.brokerPhotoSrc){ renderBrokerPhotoPreview(); }
       if(data.mapEnabled){ const cb=document.getElementById('f-mapEnabled'); if(cb){ cb.checked=true; document.getElementById('lageMapWrap').style.display=''; } }
       if(data.mapImageSrc){ const cb=document.getElementById('f-mapEnabled'); if(cb){ cb.checked=true; data.mapEnabled=true; document.getElementById('lageMapWrap').style.display=''; } renderMapImagePreview(); }
-      [['360','extras360Enabled'],['YT','extrasYTEnabled'],['Sonstiges','extrasSonstigesEnabled'],['Agb','extrasAgbEnabled']].forEach(([k,dk])=>{ if(data[dk]){ const cb=document.getElementById('toggle-'+k); if(cb){ cb.checked=true; const b=document.getElementById('extrasBody'+k); if(b) b.style.display=''; const bl=document.getElementById('extrasBlock'+k); if(bl) bl.classList.add('active'); if(k==='360'&&data.link360) updateQr('360'); if(k==='YT'&&data.linkYT) updateQr('YT'); } } });
+      [['360','extras360Enabled'],['YT','extrasYTEnabled'],['Sonstiges','extrasSonstigesEnabled'],['Agb','extrasAgbEnabled'],['Banner','bannerEnabled']].forEach(([k,dk])=>{ if(data[dk]){ const cb=document.getElementById('toggle-'+k); if(cb){ cb.checked=true; const b=document.getElementById('extrasBody'+k); if(b) b.style.display=''; const bl=document.getElementById('extrasBlock'+k); if(bl) bl.classList.add('active'); if(k==='360'&&data.link360) updateQr('360'); if(k==='YT'&&data.linkYT) updateQr('YT'); } } });
       if(data.photosPerPage) { setVal('f-photosPerPage', data.photosPerPage); syncPppDisplay(); }
       if(!data.kaeuferp){ const def=localStorage.getItem('expogen_std_default_provision'); if(def){ setVal('f-kaeuferp',def); data.kaeuferp=def; } }
     }
