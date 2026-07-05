@@ -139,7 +139,10 @@ function buildPreviewD() {
     const numPagesD = Math.ceil(galleryPhotosD.length / perPage);
     for (let pg = 0; pg < numPagesD; pg++) {
       const pgSet = galleryPhotosD.slice(pg * perPage, (pg + 1) * perPage);
-      const imgD = p => `<img src="${p.src}" style="flex:1;min-width:0;min-height:0;object-fit:cover;object-position:${fmtPos(p)};display:block;border-radius:3px" alt="">`;
+      const imgD = p => `<div style="flex:1;min-width:0;min-height:0;position:relative;overflow:hidden;border-radius:3px;display:flex">
+        <img src="${p.src}" style="width:100%;height:100%;object-fit:cover;object-position:${fmtPos(p)};display:block" alt="">
+        ${p.caption ? `<div style="position:absolute;left:0;right:0;bottom:0;padding:12px 10px 6px;font-size:.55rem;font-weight:500;letter-spacing:.05em;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.55));text-shadow:0 1px 2px rgba(0,0,0,.6)">${esc(p.caption)}</div>` : ''}
+      </div>`;
       const rowD = (row, weight) => `<div style="display:flex;gap:6px;flex:${weight || 1};min-height:0">${row.map(imgD).join('')}</div>`;
       const chunkD = (arr, size) => { const r = []; for (let i = 0; i < arr.length; i += size) r.push(arr.slice(i, i + size)); return r; };
 
