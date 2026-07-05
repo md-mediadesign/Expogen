@@ -57,8 +57,8 @@ function buildPreviewD() {
     <div style="position:absolute;bottom:48px;left:44px;z-index:5;max-width:50%">
       <div style="font-size:.55rem;letter-spacing:.22em;text-transform:uppercase;color:${sec};font-weight:700;margin-bottom:10px">IMMOBILIEN-EXPOSÉ</div>
       <div style="font-family:'Ubuntu',sans-serif;font-size:1.9rem;font-weight:700;color:#fff;line-height:1.15;margin-bottom:10px;text-shadow:0 2px 12px rgba(0,0,0,.4)">${esc(d.titel||'Ohne Titel')}</div>
-      ${d.untertitel?`<div style="font-size:.95rem;color:rgba(255,255,255,.85);margin-bottom:5px">${esc(d.untertitel)}</div>`:''}
-      <div style="font-size:.85rem;color:rgba(255,255,255,.7)">${esc(d.adresse||'')}</div>
+      ${d.untertitel?`<div style="font-size:.95rem;color:#dde1e9;margin-bottom:5px">${esc(d.untertitel)}</div>`:''}
+      <div style="font-size:.85rem;color:#c0c7d4">${esc(d.adresse||'')}</div>
       ${d.preis?`<div style="margin-top:14px;font-size:1.15rem;font-weight:700;color:${sec}">${esc(d.preis)}</div>`:''}
     </div>
   </div>`;

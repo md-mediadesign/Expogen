@@ -706,6 +706,10 @@ body.expo-watermark .h-page::after{
   .leaflet-pane,.leaflet-tile-pane{position:absolute!important}
   .expogen-map{overflow:visible!important}
 
+  /* Keine Textschatten im PDF – Chromium exportiert sie als Transparenz-Masken,
+     die Acrobat als graue Kästen hinter dem Text rendert */
+  #preview-output *{text-shadow:none!important}
+
   /* Farben & Hintergründe erzwingen */
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
 
