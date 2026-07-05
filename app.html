@@ -1258,6 +1258,8 @@ body.expo-watermark .h-page::after{
         </div>
         <input type="file" id="grundrissInput" accept="image/*" multiple style="display:none" onchange="handleGrundrissFiles(this.files)">
         <div class="grundriss-grid" id="grundrissGrid"></div>
+        <label style="margin-top:1.2rem;display:block">Hinweis zu den Grundrissen (optional)</label>
+        <textarea id="f-grundrissHinweis" rows="2" placeholder="z. B. Die Raumbezeichnungen entsprechen dem Originalplan – der Speicher wird heute als Schlafzimmer genutzt."></textarea>
       </div>
     </div>
 
@@ -3134,7 +3136,7 @@ function val(id){ const e=document.getElementById(id); return e?e.value.trim():'
 function collectStep(id) {
   if (id===3){ data.brandFirma=val('f-brandFirma'); }
   if (id===4){ data.titel=val('f-titel'); data.untertitel=val('f-untertitel'); data.adresse=val('f-adresse'); data.preis=val('f-preis'); data.preisDetail=val('f-preisDetail'); }
-  if (id===5){ data.photosPerPage = parseInt(document.getElementById('f-photosPerPage')?.value) || 7; }
+  if (id===5){ data.photosPerPage = parseInt(document.getElementById('f-photosPerPage')?.value) || 7; data.grundrissHinweis=val('f-grundrissHinweis'); }
   if (id===6){ ['baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','energiestandard','heizung','heizungsart','energieausweis','energieklasse','energiekennwert','energieausweisTyp','kaeuferp','weitereKosten'].forEach(k=>{ data[k]=val('f-'+k); }); }
   if (id===7){ data.beschreibung=val('f-beschreibung'); data.highlights=[...document.querySelectorAll('.hl-input')].map(i=>i.value.trim()).filter(Boolean); }
   if (id===8){ data.lage=val('f-lage'); data.mapEnabled=document.getElementById('f-mapEnabled')?.checked||false; }
@@ -3912,7 +3914,7 @@ function resetCurrentStep() {
     case 2: delete data.type; document.querySelectorAll('.type-card').forEach(c=>c.classList.remove('selected')); buildStepper(); break;
     case 3: setVal('f-brandFirma',''); data.brandFirma=''; data.brandLogoSrc=null; document.getElementById('logoPreviewImg').style.display='none'; document.getElementById('logoPlaceholder').style.display=''; break;
     case 4: ['f-titel','f-untertitel','f-adresse','f-preis','f-preisDetail'].forEach(id=>setVal(id,'')); break;
-    case 5: photos=[]; grundrisse=[]; renderPhotoGrid(); renderGrundrissGrid(); PhotoDB.save('current', [], []); break;
+    case 5: photos=[]; grundrisse=[]; renderPhotoGrid(); renderGrundrissGrid(); PhotoDB.save('current', [], []); setVal('f-grundrissHinweis',''); delete data.grundrissHinweis; break;
     case 6: ['baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','energiestandard','heizung','heizungsart','energieausweis','energieklasse','energiekennwert','energieausweisTyp','kaeuferp','weitereKosten'].forEach(k=>{setVal('f-'+k,''); delete data[k];}); document.querySelectorAll('.stellplatz-typ').forEach(cb=>cb.checked=false); setVal('f-stellplaetze-anz',''); setVal('f-stellplaetze-kosten',''); data.stellplaetzeTyp=''; data.stellplaetzeAnz=''; data.stellplaetzeKosten=''; break;
     case 7: setVal('f-beschreibung',''); document.getElementById('highlightList').innerHTML=''; data.highlights=[]; initHighlights(); break;
     case 8: setVal('f-lage',''); delete data.lage; data.mapImageSrc=null; data.mapEnabled=false; data.mapLat=null; data.mapLon=null; const me=document.getElementById('f-mapEnabled'); if(me) me.checked=false; const lw=document.getElementById('lageMapWrap'); if(lw) lw.style.display='none'; renderMapImagePreview(); const ls=document.getElementById('lageMapStatus'); if(ls){ls.style.display='none';ls.innerHTML='';} break;
@@ -4209,7 +4211,7 @@ async function loadFromStorage() {
       if(data.size){ const c=document.querySelector(`.groesse-card[data-size="${data.size}"]`); if(c) c.classList.add('selected'); }
       if(data.type){ const c=document.querySelector(`.type-card[data-type="${data.type}"]`); if(c) c.classList.add('selected'); }
       if(data.colorPair===0){ const cs=document.getElementById('customColorSection'); if(cs) cs.classList.add('active'); if(data.customAccent){const el=document.getElementById('customAccent');if(el)el.value=data.customAccent; const hex=document.getElementById('customAccentHex');if(hex)hex.value=data.customAccent;} if(data.customSecondary){const el=document.getElementById('customSecondary');if(el)el.value=data.customSecondary; const hex=document.getElementById('customSecondaryHex');if(hex)hex.value=data.customSecondary;} } else if(data.colorPair){ const c=document.querySelector(`.color-pair-card[data-pair="${data.colorPair}"]`); if(c) c.classList.add('selected'); }
-      const fields=['brandFirma','titel','untertitel','adresse','preis','preisDetail','baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','energiestandard','heizung','heizungsart','energieausweis','energieklasse','energiekennwert','energieausweisTyp','kaeuferp','weitereKosten','beschreibung','lage','stadtbeschr','ausstattung','investment','name','tel','email','firma','kontaktAdresse','link360','linkYT','sonstigerText','agbText','bannerText'];
+      const fields=['brandFirma','titel','untertitel','adresse','preis','preisDetail','baujahr','zustand','verfuegbar','hausgeld','denkmal','einheitenAnz','wohnflaeche','gesamtflaeche','zimmer','energiestandard','heizung','heizungsart','energieausweis','energieklasse','energiekennwert','energieausweisTyp','kaeuferp','weitereKosten','beschreibung','lage','stadtbeschr','ausstattung','investment','name','tel','email','firma','kontaktAdresse','link360','linkYT','sonstigerText','agbText','bannerText','grundrissHinweis'];
       fields.forEach(k=>{ if(data[k]) setVal('f-'+k, data[k]); });
       updateStellplatzSummary();
       if(data.highlights?.length){ document.getElementById('highlightList').innerHTML=''; data.highlights.forEach(h=>addHighlight(h)); }
