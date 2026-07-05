@@ -46,8 +46,13 @@ function buildPreviewD() {
     <div style="position:absolute;inset:0;background-image:${coverBg};background-size:cover;background-position:${coverBgPosD};opacity:.75"></div>
     <!-- Diagonal overlay bottom-left -->
     <div style="position:absolute;bottom:0;left:0;width:55%;height:100%;clip-path:polygon(0 30%,0 100%,100% 100%);background:${acc};opacity:.93"></div>
-    <!-- Logo top right -->
-    <div style="position:absolute;top:24px;right:32px;z-index:5">${logoHtml}</div>
+    <!-- Logo top right (weicht bei aktivem Banner nach links aus) -->
+    <div style="position:absolute;top:24px;${d.bannerEnabled && d.bannerText ? 'left:44px' : 'right:32px'};z-index:5">${logoHtml}</div>
+    ${d.bannerEnabled && d.bannerText ? `
+    <!-- Eck-Banner oben rechts -->
+    <div style="position:absolute;top:0;right:0;width:220px;height:220px;overflow:hidden;z-index:6;pointer-events:none">
+      <div style="position:absolute;top:52px;right:-64px;transform:rotate(45deg);width:280px;background:${sec};color:${acc};font-family:'Ubuntu',sans-serif;font-weight:700;font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;text-align:center;padding:9px 0;box-shadow:0 2px 12px rgba(0,0,0,.35);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(d.bannerText)}</div>
+    </div>` : ''}
     <!-- Content bottom-left -->
     <div style="position:absolute;bottom:48px;left:44px;z-index:5;max-width:50%">
       <div style="font-size:.55rem;letter-spacing:.22em;text-transform:uppercase;color:${sec};font-weight:700;margin-bottom:10px">IMMOBILIEN-EXPOSÉ</div>
