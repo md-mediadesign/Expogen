@@ -177,6 +177,30 @@ function buildPreviewD() {
     }
   }
 
+  // ── GRUNDRISSE (wenn vorhanden, max. 3 pro Seite) ──
+  if (typeof grundrisse !== 'undefined' && grundrisse.length > 0) {
+    const grPages = [];
+    for (let i = 0; i < grundrisse.length; i += 3) grPages.push(grundrisse.slice(i, i + 3));
+    grPages.forEach((grSet, gp) => {
+      out.innerHTML += `
+      <div class="tl-page" style="display:flex;flex-direction:column">
+        <div style="height:48px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:${acc}">
+          <div style="font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.7);font-weight:600">GRUNDRISSE${grPages.length > 1 ? ` ${gp + 1}/${grPages.length}` : ''}</div>
+          <div>${logoHtml}</div>
+        </div>
+        <div style="flex:1;display:flex;gap:24px;padding:24px 32px;min-height:0">
+          ${grSet.map(gr => `
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+            <div style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:#fafafa;border:1px solid #eee;border-radius:4px;padding:10px">
+              <img src="${gr.src}" style="max-width:100%;max-height:100%;object-fit:contain;display:block" alt="Grundriss">
+            </div>
+            ${gr.caption ? `<div style="font-family:'Ubuntu',sans-serif;font-size:.72rem;font-weight:700;color:${acc};text-align:center;margin-top:10px">${esc(gr.caption)}</div>` : ''}
+          </div>`).join('')}
+        </div>
+      </div>`;
+    });
+  }
+
   // ── PAGE 5: LAGE (M+L) ──
   if ((size==='M'||size==='L') && d.lage && isStepEnabled(8)) {
     out.innerHTML += `
