@@ -3774,6 +3774,14 @@ function setGalleryLayout(pg, val) {
   window.scrollTo(0, y);
 }
 
+function setGrundrissLayout(val) {
+  data.grundrissLayout = val;
+  saveToStorage();
+  const y = window.scrollY;
+  buildPreview();
+  window.scrollTo(0, y);
+}
+
 function filenameToCaption(name) {
   return name.replace(/\.[^.]+$/, '').replace(/[_]+/g, ' ').replace(/\s+/g, ' ').trim();
 }

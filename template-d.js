@@ -185,26 +185,50 @@ function buildPreviewD() {
     }
   }
 
-  // ── GRUNDRISSE (wenn vorhanden, max. 3 pro Seite) ──
+  // ── GRUNDRISSE (Anordnung wählbar: 0=Raster 2×2, 1=nebeneinander, 2=einzeln) ──
   if (typeof grundrisse !== 'undefined' && grundrisse.length > 0) {
+    const grMode = d.grundrissLayout ?? 0;
+    const grPerPage = grMode === 2 ? 1 : grMode === 1 ? 3 : 4;
     const grPages = [];
-    for (let i = 0; i < grundrisse.length; i += 3) grPages.push(grundrisse.slice(i, i + 3));
+    for (let i = 0; i < grundrisse.length; i += grPerPage) grPages.push(grundrisse.slice(i, i + grPerPage));
+
+    const grPicker = `<div class="gal-layout-picker"><span class="glp-label">Anordnung</span>${[
+      ['1', 'Raster – bis 4 pro Seite'],
+      ['2', 'Nebeneinander – bis 3 pro Seite'],
+      ['3', 'Einzeln – ein Grundriss pro Seite'],
+    ].map(([n, t], i) => `<button class="gal-layout-btn${grMode === i ? ' active' : ''}" onclick="setGrundrissLayout(${i})" title="${t}">${n}</button>`).join('')}</div>`;
+
+    const grItem = (gr, capSize) => `
+          <div style="min-width:0;min-height:0;display:flex;flex-direction:column">
+            <div style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:#fafafa;border:1px solid #eee;border-radius:4px;padding:10px">
+              <img src="${gr.src}" style="max-width:100%;max-height:100%;object-fit:contain;display:block" alt="Grundriss">
+            </div>
+            ${gr.caption ? `<div style="font-family:'Ubuntu',sans-serif;font-size:${capSize || '.72rem'};font-weight:700;color:${acc};text-align:center;margin-top:10px">${esc(gr.caption)}</div>` : ''}
+          </div>`;
+
     grPages.forEach((grSet, gp) => {
+      let grBody = '';
+      if (grMode === 1) {
+        grBody = `<div style="flex:1;display:flex;gap:24px;padding:24px 32px;min-height:0">
+          ${grSet.map(gr => `<div style="flex:1;min-width:0;display:flex;flex-direction:column">${grItem(gr)}</div>`).join('')}
+        </div>`;
+      } else if (grMode === 2) {
+        grBody = `<div style="flex:1;display:flex;padding:24px 40px;min-height:0">
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column">${grItem(grSet[0], '.85rem')}</div>
+        </div>`;
+      } else {
+        grBody = `<div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:16px;padding:20px 28px;min-height:0">
+          ${grSet.map(gr => grItem(gr)).join('')}
+        </div>`;
+      }
       out.innerHTML += `
       <div class="tl-page" style="display:flex;flex-direction:column">
+        ${gp === 0 ? grPicker : ''}
         <div style="height:48px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:${acc}">
           <div style="font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.7);font-weight:600">GRUNDRISSE${grPages.length > 1 ? ` ${gp + 1}/${grPages.length}` : ''}</div>
           <div>${logoHtml}</div>
         </div>
-        <div style="flex:1;display:flex;gap:24px;padding:24px 32px;min-height:0">
-          ${grSet.map(gr => `
-          <div style="flex:1;min-width:0;display:flex;flex-direction:column">
-            <div style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:#fafafa;border:1px solid #eee;border-radius:4px;padding:10px">
-              <img src="${gr.src}" style="max-width:100%;max-height:100%;object-fit:contain;display:block" alt="Grundriss">
-            </div>
-            ${gr.caption ? `<div style="font-family:'Ubuntu',sans-serif;font-size:.72rem;font-weight:700;color:${acc};text-align:center;margin-top:10px">${esc(gr.caption)}</div>` : ''}
-          </div>`).join('')}
-        </div>
+        ${grBody}
       </div>`;
     });
   }
