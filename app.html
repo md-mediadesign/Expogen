@@ -101,6 +101,10 @@ header{width:100%;max-width:1180px;margin:0 auto;padding:2rem 2.5rem 0;display:f
 .credit-backup-btn:hover{border-color:var(--gold);background:rgba(201,168,76,.08)}
 .credit-backup-btn.primary{background:var(--gold);border-color:var(--gold);color:var(--navy);font-weight:600}
 .credit-backup-btn.primary:hover{background:var(--gold2);border-color:var(--gold2)}
+.redeem-btn{width:100%;padding:.85rem 1rem;font-size:.9rem}
+.redeem-btn:disabled{opacity:.6;cursor:wait}
+.redeem-error{font-size:.8rem;color:#e8a0a0;line-height:1.55;margin-top:1rem}
+.redeem-error a{color:var(--gold)}
 .app-legal-footer{max-width:1180px;margin:1rem auto 2.5rem;padding:1.3rem 2.5rem 0;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:.4rem 1rem;font-size:.75rem;color:var(--muted)}
 .app-legal-footer a{color:var(--muted);text-decoration:none}
 .app-legal-footer a:hover{color:var(--gold);text-decoration:underline}
@@ -1884,7 +1888,7 @@ body.expo-watermark .h-page::after{
     <div class="buy-desc">Jedes Credit schaltet einen sauberen PDF-Export frei. Vorschau und alle Funktionen bleiben kostenlos.</div>
     <div class="buy-credit-line">Aktuell: <strong id="buyCreditCount">0</strong> Credits verfügbar</div>
     <div class="buy-packs" id="buyPacksGrid"></div>
-    <div class="buy-foot">Bezahlung über <strong>Stripe</strong> — sichere SSL-Verbindung. Credits werden nach erfolgreicher Zahlung automatisch freigeschaltet.<br>Mit dem Kauf akzeptierst du unsere <a href="/agb" target="_blank" rel="noopener">AGB</a> &amp; <a href="/datenschutz" target="_blank" rel="noopener">Datenschutzerklärung</a>.</div>
+    <div class="buy-foot">Bezahlung über <strong>Stripe</strong> — sichere SSL-Verbindung. Nach der Zahlung schaltest du deine Credits mit einem Klick frei.<br>Mit dem Kauf akzeptierst du unsere <a href="/agb" target="_blank" rel="noopener">AGB</a> &amp; <a href="/datenschutz" target="_blank" rel="noopener">Datenschutzerklärung</a>.</div>
     <div class="credit-backup">
       <div class="credit-backup-links">
         <button type="button" class="credit-backup-link" onclick="toggleCreditBackup('voucher')">Gutschein einlösen</button>
@@ -1918,6 +1922,17 @@ body.expo-watermark .h-page::after{
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<div class="buy-overlay" id="redeemOverlay">
+  <div class="buy-modal">
+    <button class="buy-close" onclick="closeRedeemModal()">✕</button>
+    <div class="buy-kicker">Kauf freischalten</div>
+    <div class="buy-title">Danke für deinen Kauf!</div>
+    <div class="buy-desc">Mit einem Klick werden die Credits deiner Zahlung in diesem Browser gutgeschrieben. Jede Zahlung lässt sich nur einmal einlösen — öffne diesen Link daher in dem Browser, in dem du dein Exposé erstellst.</div>
+    <button type="button" class="credit-backup-btn primary redeem-btn" id="redeemBtn" onclick="redeemPurchase()">Credits jetzt freischalten</button>
+    <div class="redeem-error" id="redeemError" hidden></div>
   </div>
 </div>
 
@@ -4878,7 +4893,8 @@ function swapPhotoForSlot(slotIndex, newIndex) {
 
 // Stripe Payment Links — werden im Stripe Dashboard erstellt und hier eingefügt.
 // Anleitung: stripe.com → Dashboard → Payment Links → "Neuen Payment Link"
-//   - Erfolgs-URL: https://expogen.de/app?credits=N  (N = Credits dieses Pakets)
+//   - Erfolgs-URL: https://expogen.de/app?kauf={CHECKOUT_SESSION_ID}
+//   - Neues Paket zusätzlich in CREDITS_BY_AMOUNT (api/redeem.js) eintragen
 //   - Diesen URL hier eintragen:
 const STRIPE_PAYMENT_LINKS = {
   pack1:  'https://buy.stripe.com/7sY8wH3TGaKlfdXdtL1Fe01',  // 1 Credit – 4,90 €
@@ -5112,30 +5128,78 @@ function redeemVoucher(input) {
   return true;
 }
 
-// Success-Handler: liest ?credits=N aus der URL nach Stripe-Redirect und schaltet sie frei.
-(function handleSuccessRedirect(){
-  try {
-    const params = new URLSearchParams(window.location.search);
-    const credits = parseInt(params.get('credits') || '0', 10);
-    if (credits > 0) {
-      addCredits(credits);
-      // Toast/Hinweis
-      setTimeout(() => {
-        showToast(`✓ ${credits} Credit${credits === 1 ? '' : 's'} freigeschaltet — viel Erfolg mit deinem Exposé!`);
-      }, 200);
-      // URL bereinigen, damit Reload nicht doppelt addiert
-      const url = new URL(window.location.href);
-      url.searchParams.delete('credits');
-      window.history.replaceState({}, '', url.toString());
-    }
-  } catch(e) {}
-})();
+// Kauf-Freischaltung: ?kauf=<Stripe-ID> (cs_… aus der Payment-Link-Rückleitung, pi_… vom Support).
+// /api/redeem prüft die Zahlung bei Stripe und löst sie nur einmal ein. Der Klick ist Absicht:
+// Link-Scanner in Mailprogrammen sollen eine Freischaltung nicht beim Vorab-Öffnen verbrauchen.
+const REDEEM_ERRORS = {
+  redeemed: 'Diese Zahlung wurde bereits freigeschaltet. Die Credits liegen in dem Browser, in dem sie eingelöst wurden. Fragen? <a href="mailto:contact@expogen.de">contact@expogen.de</a>',
+  unpaid:   'Die Zahlung ist noch nicht abgeschlossen. Bitte in einer Minute erneut versuchen.',
+  refunded: 'Diese Zahlung wurde erstattet und kann nicht mehr eingelöst werden.',
+  invalid:  'Dieser Freischalt-Link ist ungültig. Bitte schreib uns an <a href="mailto:contact@expogen.de">contact@expogen.de</a>.',
+  default:  'Die Freischaltung ist gerade nicht möglich. Bitte erneut versuchen oder an <a href="mailto:contact@expogen.de">contact@expogen.de</a> schreiben.'
+};
+const REDEEM_FINAL_ERRORS = ['redeemed', 'refunded', 'invalid'];
 
-// Initial UI-Update sobald DOM bereit
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', updateCreditUI);
-} else {
+function getPurchaseId() {
+  return new URLSearchParams(window.location.search).get('kauf') || '';
+}
+function clearPurchaseId() {
+  const url = new URL(window.location.href);
+  url.searchParams.delete('kauf');
+  window.history.replaceState({}, '', url.toString());
+}
+function openRedeemModal() {
+  document.getElementById('redeemOverlay').classList.add('open');
+}
+function closeRedeemModal() {
+  document.getElementById('redeemOverlay').classList.remove('open');
+}
+async function redeemPurchase() {
+  const btn = document.getElementById('redeemBtn');
+  const errorBox = document.getElementById('redeemError');
+  btn.disabled = true;
+  btn.textContent = 'Zahlung wird geprüft …';
+  errorBox.hidden = true;
+  let error = 'default';
+  try {
+    const res = await fetch('/api/redeem', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: getPurchaseId() })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data.credits > 0) {
+      addCredits(data.credits);
+      clearPurchaseId();
+      closeRedeemModal();
+      showToast(`✓ ${data.credits} Credit${data.credits === 1 ? '' : 's'} freigeschaltet — viel Erfolg mit deinem Exposé!`);
+      return;
+    }
+    if (REDEEM_ERRORS[data.error]) error = data.error;
+  } catch (e) {}
+  errorBox.innerHTML = REDEEM_ERRORS[error];
+  errorBox.hidden = false;
+  if (REDEEM_FINAL_ERRORS.includes(error)) {
+    clearPurchaseId();
+    btn.hidden = true;
+  } else {
+    btn.disabled = false;
+    btn.textContent = 'Erneut versuchen';
+  }
+}
+
+window.addEventListener('storage', e => {
+  if (e.key === 'expogen_credits') updateCreditUI();
+});
+
+function initCreditUI() {
   updateCreditUI();
+  if (getPurchaseId()) openRedeemModal();
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initCreditUI);
+} else {
+  initCreditUI();
 }
 </script>
 
